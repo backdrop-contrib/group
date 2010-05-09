@@ -1,0 +1,198 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Enable access control for private and public groups and group content.
+ */
+
+/**
+ * The access realm of group member.
+ */
+define('GROUP_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
+
+/**
+ * Group public access field.
+ */
+define('GROUP_ACCESS_FIELD', 'group_access');
+
+/**
+ * Group public access field.
+ */
+define('GROUP_CONTENT_ACCESS_FIELD', 'group_content_access');
+
+/**
+ * Define group content access by it's group defaults.
+ */
+define('GROUP_CONTENT_ACCESS_GROUP_DEFAULT', 0);
+
+/**
+ * Define group content access public regardless of its group definition.
+ */
+define('GROUP_CONTENT_ACCESS_PUBLIC', 1);
+
+/**
+ * Define group content access private regardless of its group definition.
+ */
+define('GROUP_CONTENT_ACCESS_PRIVATE', 2);
+
+
+/**
+ * Implementation of hook_node_grants().
+ */
+function group_access_node_grants($account, $op) {
+  $grants = array();
+  if ($op == 'view') {
+    foreach (group_get_entity_groups('user', $account) as $gid => $value) {
+      $grants[GROUP_ACCESS_AUTHENTICATED_REALM][] = $gid;
+    }
+  }
+
+  return $grants;
+}
+
+
+/**
+ * Implementation of hook_node_access_records.
+ */
+function group_access_node_access_records($node) {
+  $grants = array();
+
+  $access = FALSE;
+  if (!empty($node->{GROUP_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
+    // Group or group content that is explicitly set to be unpublic.
+    $access = TRUE;
+  }
+  elseif (isset($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
+    switch ($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
+      case GROUP_CONTENT_ACCESS_GROUP_DEFAULT:
+        if ($field = field_info_field(GROUP_ACCESS_FIELD)) {
+          // Access should be determined by its groups. If group content belongs
+          // to several groups, and one of them is private, then the group
+          // content will private as-well.
+          $gids = group_get_entity_groups('node', $node);
+
+          $groups = group_load_multiple($gids);
+
+          // Get all groups under their entity.
+          $list = array();
+          foreach ($groups as $group) {
+            $list[$group->entity_type][$group->etid] = $group->etid;
+          }
+
+          foreach ($list as $entity_type => $entity_gids) {
+            // Get the entity types ID.
+            $conditions = array(
+              // TODO: document variable.
+              array('group_access_value', variable_get('group_access_group_defaults_fallback', 0)),
+              array('entity_id', $entity_gids),
+              // Use the "magic" column type to get the etid.
+              array('type', $entity_type),
+            );
+
+            $result = field_attach_query($field['id'], $conditions);
+
+            // There are no public groups.
+            if (empty($result)) {
+              $access = TRUE;
+            }
+          }
+        }
+        break;
+
+      case GROUP_CONTENT_ACCESS_PUBLIC:
+        // Do nothing.
+        break;
+
+      case GROUP_CONTENT_ACCESS_PRIVATE:
+        $access = TRUE;
+        break;
+
+    }
+  }
+
+  if ($access) {
+    $grants[] = array (
+      'realm' => GROUP_ACCESS_AUTHENTICATED_REALM,
+      'gid' => $node->nid,
+      'grant_view' => 1,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+    );
+  }
+  return $grants;
+}
+
+/**
+ * Implement group_fields_info().
+ */
+function group_access_group_fields_info() {
+  $allowed_values = array(
+    '0|Public - accessible to all site users',
+    '1|Private - accessible only to group members',
+  );
+  $items[GROUP_ACCESS_FIELD] = array(
+    'type' => array('group'),
+    'description' => t('Add organic groups access field to group types.'),
+    'field' => array(
+      'field_name' => GROUP_ACCESS_FIELD,
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
+      'label' => t('group visibility'),
+      'required' => TRUE,
+      // Default to public.
+      'default_value' => array(0 => array('value' => 0)),
+      'widget_type' => 'options_buttons',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+      ),
+    ),
+  );
+
+  $allowed_values = array(
+    '0|Use group defaults',
+    '1|Public - accessible to all site users',
+    '2|Private - accessible only to group members',
+
+  );
+  $items[GROUP_CONTENT_ACCESS_FIELD] = array(
+    'type' => array('group content'),
+    'description' => t('Add organic groups access field to group-content types, that may override the group settings.'),
+    'field' => array(
+      'field_name' => GROUP_CONTENT_ACCESS_FIELD,
+      'type' => 'list_number',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
+      'label' => t('group content visibility'),
+      'required' => TRUE,
+      // Make the group type default.
+      'default_value' => array(0 => array('value' => 0)),
+      'widget_type' => 'options_select',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+      ),
+    ),
+  );
+
+  return $items;
+}

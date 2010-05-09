@@ -1,0 +1,11 @@
+name = Group UI
+description = "Group UI."
+package = "Group"
+dependencies[] = group
+core = 7.x
+version = VERSION
+files[] = group_ui.module
+files[] = group_ui.admin.inc
+files[] = group_ui.pages.inc
+files[] = group_ui.test
+configure = admin/config/group
