@@ -6,3 +6,39 @@
  * control around those groups.
  */
 
+/**
+ * Implements hook_form_alter().
+ */
+function group_form_alter(&$form, &$form_state, $form_id) {
+  global $user;
+
+  if ($form_id == 'node_type_form') {
+    // Add group settings.
+    $form['group'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Group settings'),
+      '#description' => t('If a content type is a group type, then other content may be posted inside the group. In addition, groups have associated members. If a content type is group content, then it can be posted inside a group and will be subject to the permissions settings on the group.'),
+      '#collabsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#group' => 'additional_settings',
+    );
+
+    $form['group']['is_group'] = array(
+      '#type' => 'radios',
+      '#title' => t('Group'),
+      '#options' => array(
+        0 => t('Not a group type'),
+        1 => t('Group type'),
+      ),
+    );
+
+    $form['group']['is_group_content'] = array(
+      '#type' => 'radios',
+      '#title' => t('Group content'),
+      '#options' => array(
+        0 => t('Not a group content type'),
+        1 => t('Group content type'),
+      ),
+    );
+  }
+}
