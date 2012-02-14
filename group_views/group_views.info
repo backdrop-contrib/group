@@ -1,7 +1,0 @@
-name = Group Views integration
-description = "Use Views to search and display Group."
-package = "Group"
-dependencies[] = group
-dependencies[] = views
-core = 7.x
-files[] = group_views.module

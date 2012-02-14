@@ -1,8 +1,0 @@
-name = Group register
-description = "Allow subscribing to groups during the user registration."
-package = "Group"
-dependencies[] = group
-core = 7.x
-version = VERSION
-files[] = group_register.module
-files[] = group_register.install
