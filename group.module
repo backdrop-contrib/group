@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * @file
+ * Provides a way to organize your content into Groups and define access
+ * control around those groups.
+ */
+
