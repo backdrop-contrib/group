@@ -12,8 +12,8 @@
 function group_form_alter(&$form, &$form_state, $form_id) {
   global $user;
 
+  // Add group settings to the node type configuration form.
   if ($form_id == 'node_type_form') {
-    // Add group settings.
     $form['group'] = array(
       '#type' => 'fieldset',
       '#title' => t('Group settings'),
