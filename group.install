@@ -5,6 +5,20 @@
  */
 
 /**
+ * Implements hook_install().
+ */
+function group_install() {
+  variable_set('group_admin_theme', '1');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function group_uninstall() {
+  variable_del('group_admin_theme');
+}
+
+/**
  * Implements hook_schema().
  */
 function group_schema() {
