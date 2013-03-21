@@ -110,38 +110,42 @@ function group_entity_info_alter(&$entity_info) {
  */
 function group_permission() {
   $permissions = array(
+    'bypass group access' => array(
+      'description' => t('View, edit and delete all groups regardless of permission restrictions.'),
+      'restrict access' => TRUE,
+    ),
     'administer group types' => array(
       'title' => t('Administer group types'),
-      'description' => t('Allows users to configure group types and their fields.'),
       'restrict access' => TRUE,
+    ),
+    'administer groups' => array(
+      'title' => t('Administer groups'),
+      'restrict access' => TRUE,
+    ),
+    'access group overview' => array(
+      'title' => t('Access the group overview page'),
     ),
     'create groups' => array(
       'title' => t('Create groups'),
-      'description' => t('Allows users to create groups.'),
     ),
     'view groups' => array(
       'title' => t('View groups'),
-      'description' => t('Allows users to view groups.'),
     ),
     'edit any groups' => array(
       'title' => t('Edit any groups'),
-      'description' => t('Allows users to edit any groups.'),
       'restrict access' => TRUE,
     ),
     // @todo See todo in group_access.
     //'edit own groups' => array(
     //  'title' => t('Edit own groups'),
-    //  'description' => t('Allows users to edit their own groups.'),
     //),
     'delete any groups' => array(
       'title' => t('Delete any groups'),
-      'description' => t('Allows users to delete any groups.'),
       'restrict access' => TRUE,
     ),
     // @todo See todo in group_access.
     //'delete own groups' => array(
     //  'title' => t('Delete own groups'),
-    //  'description' => t('Allows users to delete their own groups.'),
     //),
   );
 
