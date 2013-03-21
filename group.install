@@ -1,0 +1,215 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the Group project.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function group_schema() {
+  // Cannot name table 'group' as this is a keyword in SQL.
+  $schema['groups'] = array(
+    'description' => 'Stores group entities.',
+    'fields' => array(
+      'gid' => array(
+        'description' => 'Primary Key: Unique group item ID.',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'type' => array(
+        'description' => 'The {group_type}.name for the group.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'title' => array(
+        'description' => 'The title of this group, always treated as non-markup plain text.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'type' => array('type'),
+    ),
+    'foreign keys' => array(
+      'group_type' => array(
+        'table' => 'group_type',
+        'columns' => array('type' => 'name'),
+      ),
+    ),
+    'primary key' => array('gid'),
+  );
+
+  $schema['group_type'] = array(
+    'description' => 'Stores group type entities.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Primary Key: Unique group type ID.',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'The machine-readable name of this group type.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The human-readable name of this group type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'weight' => array(
+        'description' => 'The weight of this group type in relation to others.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'The exportable status of the entity.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => ENTITY_CUSTOM,
+      ),
+      'module' => array(
+        'description' => 'The name of the providing module if the entity has been defined in code.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['group_user'] = array(
+    'description' => 'Stores information about the link between groups and users.',
+    'fields' => array(
+      'gid' => array(
+        'description' => 'The {groups}.gid for the link.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The {users}.uid for the link.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'rid' => array(
+        'description' => 'The {group_role}.rid for the link.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+    ),
+    'foreign keys' => array(
+      'group' => array(
+        'table' => 'groups',
+        'columns' => array('gid' => 'gid'),
+      ),
+      'group_user' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+      'group_role' => array(
+        'table' => 'group_role',
+        'columns' => array('rid' => 'rid'),
+      ),
+    ),
+    'primary key' => array('gid', 'uid'),
+  );
+
+  $schema['group_entity'] = array(
+    'description' => 'Stores information about the link between groups and entities.',
+    'fields' => array(
+      'gid' => array(
+        'description' => 'The {groups}.gid for the group the entity is linked to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'entity_id' => array(
+        'description' => 'The id of the entity to link to the group.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'entity_type' => array(
+        'description' => 'The type of the entity to link to the group.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bundle' => array(
+        'description' => 'The bundle of the entity to link to the group.',
+        'type' => 'varchar',
+        'length' => 128,
+        'default' => '',
+      ),
+    ),
+    'foreign keys' => array(
+      'group' => array(
+        'table' => 'groups',
+        'columns' => array('gid' => 'gid'),
+      ),
+    ),
+    'primary key' => array('gid', 'entity_id', 'entity_type'),
+  );
+
+  // @todo entity
+  $schema['group_role'] = array(
+    'description' => 'Stores available roles a user can have in a group.',
+    'fields' => array(
+      'rid' => array(
+        'description' => 'The id of this role.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'group_type' => array(
+        'description' => 'The {group_type}.name this role can be assigned to.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        'description' => 'A human-readable name for this role.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      )
+    ),
+    'unique keys' => array(
+      'name' => array('group_type', 'name'),
+    ),
+    'foreign keys' => array(
+      'group_type' => array(
+        'table' => 'group_type',
+        'columns' => array('group_type' => 'name'),
+      ),
+    ),
+    'primary key' => array('rid'),
+  );
+
+  return $schema;
+}

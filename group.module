@@ -1,0 +1,201 @@
+<?php
+/**
+ * @file
+ * Main module code for the Group project.
+ */
+
+/**
+ * Load our helper functions without polluting the .module file.
+ */
+ctools_include('entity', 'group', 'helpers');
+ctools_include('group', 'group', 'helpers');
+
+/**
+ * Implements hook_hook_info().
+ *
+ * Makes sure this module automatically finds exported Group
+ * entities in files using the module.group.inc name pattern.
+ */
+function group_hook_info() {
+  $hooks['default_group_type'] = array(
+    'group' => 'group',
+  );
+
+  return $hooks;
+}
+
+/**
+ * Implements hook_entity_info().
+ *
+ * Defines the entities this module needs to function.
+ */
+function group_entity_info() {
+  $info['group'] = array(
+    'label' => t('Group'),
+    'plural label' => t('Groups'),
+    'description' => t('Groups people and content with roles and permissions.'),
+    'entity class' => 'Group',
+    'controller class' => 'GroupController',
+    'base table' => 'groups',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'gid',
+      'bundle' => 'type',
+      'label' => 'title',
+    ),
+    'access callback' => 'group_access',
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'bundles' => array(),
+    'bundle keys' => array(
+      'bundle' => 'name',
+    ),
+    'module' => 'group',
+    'admin ui' => array(
+      'path' => 'admin/content/group',
+      'file' => 'forms/group.inc',
+      'controller class' => 'GroupUIController',
+    ),
+  );
+
+  $info['group_type'] = array(
+    'label' => t('Group type'),
+    'plural label' => t('Group types'),
+    'description' => t('Define different group types.'),
+    'entity class' => 'GroupType',
+    'controller class' => 'GroupTypeController',
+    'base table' => 'group_type',
+    'fieldable' => FALSE,
+    'bundle of' => 'group',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'name' => 'name',
+      'label' => 'label',
+    ),
+    'access callback' => 'group_type_access',
+    'module' => 'group',
+    'admin ui' => array(
+      'path' => 'admin/structure/group_type',
+      'file' => 'admin/group_type.inc',
+      //@todo Do we need this?
+      //'controller class' => 'GroupTypeUIController',
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * Informs Drupal that our group types are bundles for groups.
+ */
+function group_entity_info_alter(&$entity_info) {
+  foreach (group_types() as $type => $info) {
+    $entity_info['group']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/group_type/manage/%group_type',
+        'real path' => 'admin/structure/group_type/manage/' . $type,
+        'bundle argument' => 4,
+        'access arguments' => array('administer group types'),
+      ),
+    );
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function group_permission() {
+  $permissions = array(
+    'administer group types' => array(
+      'title' => t('Administer group types'),
+      'description' => t('Allows users to configure group types and their fields.'),
+      'restrict access' => TRUE,
+    ),
+    'create groups' => array(
+      'title' => t('Create groups'),
+      'description' => t('Allows users to create groups.'),
+    ),
+    'view groups' => array(
+      'title' => t('View groups'),
+      'description' => t('Allows users to view groups.'),
+    ),
+    'edit any groups' => array(
+      'title' => t('Edit any groups'),
+      'description' => t('Allows users to edit any groups.'),
+      'restrict access' => TRUE,
+    ),
+    // @todo See todo in group_access.
+    //'edit own groups' => array(
+    //  'title' => t('Edit own groups'),
+    //  'description' => t('Allows users to edit their own groups.'),
+    //),
+    'delete any groups' => array(
+      'title' => t('Delete any groups'),
+      'description' => t('Allows users to delete any groups.'),
+      'restrict access' => TRUE,
+    ),
+    // @todo See todo in group_access.
+    //'delete own groups' => array(
+    //  'title' => t('Delete own groups'),
+    //  'description' => t('Allows users to delete their own groups.'),
+    //),
+  );
+
+  return $permissions;
+}
+
+/**
+ * Entity API access callback for groups.
+ */
+function group_access($op, $group, $account = NULL, $entity_type = NULL) {
+  switch ($op) {
+    case 'create':
+      return user_access('administer groups', $account)
+        || user_access('create groups', $account);
+    case 'view':
+      return user_access('administer groups', $account)
+        || user_access('view groups', $account);
+    case 'update':
+      return user_access('administer groups', $account)
+        || user_access('edit any groups', $account);
+        // @todo: should use $group->isAdmin($uid).
+        //|| (user_access('edit own groups', $account) && ($group->uid == $account->uid));
+    case 'delete':
+      return user_access('administer groups', $account)
+        || user_access('delete any groups', $account);
+        // @todo: should use $group->isAdmin($uid).
+        //|| (user_access('delete own groups', $account) && ($group->uid == $account->uid));
+  }
+}
+
+/**
+ * Entity API access callback for group types.
+ */
+function group_type_access($op, $group, $account = NULL, $entity_type = NULL) {
+  return user_access('administer group types', $account);
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ *
+ * Adds a local task to admin/content/group.
+ */
+function group_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link to 'admin/content/group/add' on 'admin/content/group' page.
+  // We can't set this in GroupUIController::hook_menu() because it would
+  // fetch the children of 'admin/content' in group_add_page().
+  if ($root_path == 'admin/content/group') {
+    $item = menu_get_item('group/add');
+
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}

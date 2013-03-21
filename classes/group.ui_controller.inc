@@ -1,0 +1,86 @@
+<?php
+/**
+ * @file
+ * Defines the Entity API UI class for groups.
+ */
+
+/**
+ * UI class for groups.
+ */
+class GroupUIController extends EntityDefaultUIController {
+
+  /**
+   * Class constructor.
+   */
+  public function __construct($entity_type, $entity_info) {
+    parent::__construct($entity_type, $entity_info);
+  }
+
+  /**
+   * Provides definitions for implementing hook_menu().
+   */
+  public function hook_menu() {
+    $items = parent::hook_menu();
+
+    // Only inherit the top level path.
+    $items = array(
+      $this->path => $items[$this->path],
+    );
+
+    // Make this a tab of the Content page.
+    $items[$this->path]['type'] = MENU_LOCAL_TASK;
+
+    $items['group/add'] = array(
+      'title' => 'Add group',
+      'page callback' => 'group_add_page',
+      'access callback' => '_node_add_access',
+      'access callback' => TRUE,
+      'file' => 'pages/group.inc',
+      'file path' => drupal_get_path('module', 'group'),
+    );
+
+    foreach (group_types() as $name => $type) {
+      $entity = entity_create($this->entityType, array());
+      $entity->type = $name;
+
+      $items["group/add/$name"] = array(
+        'title' => $type->label,
+        'title callback' => 'check_plain',
+        'description' => "Create $type->label",
+        'page callback' => 'entity_ui_get_form',
+        'page arguments' => array($this->entityType, $entity, 'add'),
+        'access callback' => 'entity_access',
+        'access arguments' => array('create', $this->entityType),
+        'file' => 'admin/group.inc',
+        'file path' => drupal_get_path('module', 'group'),
+      );
+    }
+
+    return $items;
+  }
+
+  /**
+   * Builds the group overview form.
+   */
+  public function overviewForm($form, &$form_state) {
+    ctools_include('group', 'group', 'admin');
+
+    if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
+      $groups = array_filter($form_state['values']['groups']);
+      return group_multiple_delete_confirm($form, $form_state, $groups);
+    }
+
+    $form['filter'] = group_filter_form();
+    $form['admin'] = group_admin_groups();
+
+    return $form;
+  }
+
+  /**
+   * Overview form submit callback.
+   */
+  public function overviewFormSubmit($form, &$form_state) {
+    ctools_include('group', 'group', 'admin');
+    group_filter_form_submit($form, $form_state);
+  }
+}

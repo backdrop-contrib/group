@@ -1,0 +1,74 @@
+<?php
+/**
+ * @file
+ * Group type editing UI.
+ */
+
+/**
+ * Generates the model type editing form.
+ */
+function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
+  if ($op == 'clone') {
+    $group_type->label .= ' (cloned)';
+  }
+
+  $form['label'] = array(
+    '#title' => t('Label'),
+    '#type' => 'textfield',
+    '#default_value' => $group_type->label,
+    '#description' => t('The human-readable name of this group type.'),
+    '#required' => TRUE,
+    '#size' => 30,
+  );
+
+  $form['name'] = array(
+    '#type' => 'machine_name',
+    '#default_value' => $group_type->name,
+    '#maxlength' => 32,
+    '#disabled' => $group_type->isLocked() || $op == 'edit',
+    '#machine_name' => array(
+      'exists' => 'group_types',
+      'source' => array('label'),
+      'label' => t('Machine name'),
+      'replace_pattern' => '[^a-z0-9_]+',
+      'replace' => '_',
+    ),
+    '#element_validate' => array('form_validate_machine_name', 'entity_ui_validate_machine_name'),
+    '#description' => t('A unique machine-readable name for this group type. It must only contain lowercase letters, numbers, and underscores.'),
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save group type'),
+    '#weight' => 40,
+  );
+
+  if (!$group_type->isLocked() && $op == 'edit') {
+    $form['actions']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete group type'),
+      '#weight' => 45,
+      '#limit_validation_errors' => array(),
+      '#submit' => array('group_type_form_submit_delete'),
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Form API submit callback for the type form.
+ */
+function group_type_form_submit(&$form, &$form_state) {
+  $group_type = entity_ui_form_submit_build_entity($form, $form_state);
+  $group_type->save();
+  $form_state['redirect'] = 'admin/structure/group_type';
+}
+
+/**
+ * Form API submit callback for the delete button.
+ */
+function group_type_form_submit_delete(&$form, &$form_state) {
+  $form_state['redirect'] = 'admin/structure/group_type/manage/' . $form_state['group_type']->name . '/delete';
+}

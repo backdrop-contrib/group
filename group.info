@@ -1,0 +1,13 @@
+name = Group
+description = Allows you to group users and content
+core = 7.x
+package = Group
+
+dependencies[] = ctools
+dependencies[] = entity
+
+files[] = classes/group.inc
+files[] = classes/group.controller.inc
+files[] = classes/group.ui_controller.inc
+files[] = classes/group_type.inc
+files[] = classes/group_type.controller.inc
