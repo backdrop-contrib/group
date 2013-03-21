@@ -1,8 +1,0 @@
-name = Group
-description = Provides a way to organize your content into Groups and define access control around those groups.
-core = 7.x
-dependencies[] = user_reference
-dependencies[] = node_reference
-dependencies[] = nodeaccess_nodereference
-dependencies[] = nodeaccess_userreference
-dependencies[] = nodereference_url
