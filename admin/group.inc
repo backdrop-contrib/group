@@ -173,7 +173,7 @@ function group_multiple_delete_confirm($form, &$form_state, $groups) {
     ? t('Are you sure you want to delete this group?')
     : t('Are you sure you want to delete these groups?');
 
-  return confirm_form($form, $question, 'admin/content/group', NULL, t('Delete'));
+  return confirm_form($form, $question, 'admin/group', NULL, t('Delete'));
 }
 
 /**
@@ -190,7 +190,7 @@ function group_multiple_delete_confirm_submit($form, &$form_state) {
     drupal_set_message(format_plural($count, 'Deleted 1 group.', 'Deleted @count groups.'));
   }
 
-  $form_state['redirect'] = 'admin/content/group';
+  $form_state['redirect'] = 'admin/group';
 }
 
 /**

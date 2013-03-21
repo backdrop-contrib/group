@@ -20,15 +20,15 @@ class GroupUIController extends EntityDefaultUIController {
    * Provides definitions for implementing hook_menu().
    */
   public function hook_menu() {
-    $items = parent::hook_menu();
-
-    // Only inherit the top level path.
-    $items = array(
-      $this->path => $items[$this->path],
+    // Make this an entry in the Management menu.
+    $items[$this->path] = array(
+      'title' => 'Groups',
+      'description' => 'Find and manage groups.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('group_overview_form', 'group'),
+      'access arguments' => array('access group overview'),
+      'weight' => -9,
     );
-
-    // Make this a tab of the Content page.
-    $items[$this->path]['type'] = MENU_LOCAL_TASK;
 
     $items['group/add'] = array(
       'title' => 'Add group',
