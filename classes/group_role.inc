@@ -14,7 +14,7 @@ class GroupRole extends Entity {
    *
    * @var int
    */
-  public $id;
+  public $rid;
 
   /**
    * The group type this role is attached to.

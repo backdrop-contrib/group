@@ -14,7 +14,7 @@ class GroupType extends Entity {
    *
    * @var int
    */
-  public $id;
+  public $tid;
 
   /**
    * The machine-readable name of the group type.
