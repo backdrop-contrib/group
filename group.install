@@ -106,6 +106,67 @@ function group_schema() {
     'primary key' => array('tid'),
   );
 
+  $schema['group_role'] = array(
+    'description' => 'Stores group role entities.',
+    'fields' => array(
+      'rid' => array(
+        'description' => 'Primary Key: Unique group role ID.',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'type' => array(
+        'description' => 'The {group_type}.name for the group.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        'description' => 'The machine-readable name of this group role.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The human-readable name of this group role.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'weight' => array(
+        'description' => 'The weight of this group role in relation to others.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'The exportable status of the entity.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => ENTITY_CUSTOM,
+      ),
+      'module' => array(
+        'description' => 'The name of the providing module if the entity has been defined in code.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+    'foreign keys' => array(
+      'group_type' => array(
+        'table' => 'group_type',
+        'columns' => array('type' => 'name'),
+      ),
+    ),
+    'primary key' => array('rid'),
+  );
+
   $schema['group_user'] = array(
     'description' => 'Stores information about the link between groups and users.',
     'fields' => array(
@@ -186,43 +247,6 @@ function group_schema() {
       ),
     ),
     'primary key' => array('gid', 'entity_id', 'entity_type'),
-  );
-
-  // @todo entity
-  $schema['group_role'] = array(
-    'description' => 'Stores available roles a user can have in a group.',
-    'fields' => array(
-      'rid' => array(
-        'description' => 'The id of this role.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'group_type' => array(
-        'description' => 'The {group_type}.name this role can be assigned to.',
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'name' => array(
-        'description' => 'A human-readable name for this role.',
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-      )
-    ),
-    'unique keys' => array(
-      'name' => array('group_type', 'name'),
-    ),
-    'foreign keys' => array(
-      'group_type' => array(
-        'table' => 'group_type',
-        'columns' => array('group_type' => 'name'),
-      ),
-    ),
-    'primary key' => array('rid'),
   );
 
   return $schema;

@@ -8,6 +8,7 @@
  * Load our helper functions without polluting the .module file.
  */
 ctools_include('entity.group', 'group', 'helpers');
+ctools_include('entity.group_role', 'group', 'helpers');
 ctools_include('entity.group_type', 'group', 'helpers');
 ctools_include('group', 'group', 'helpers');
 
@@ -79,8 +80,32 @@ function group_entity_info() {
     'admin ui' => array(
       'path' => 'admin/structure/group_type',
       'file' => 'admin/group_type.inc',
-      //@todo Do we need this?
       //'controller class' => 'GroupTypeUIController',
+    ),
+  );
+
+  // @todo bundles?
+  $info['group_role'] = array(
+    'label' => t('Group role'),
+    'plural label' => t('Group roles'),
+    'description' => t('Define different group roles.'),
+    'entity class' => 'GroupRole',
+    'controller class' => 'GroupRoleController',
+    'base table' => 'group_role',
+    'fieldable' => FALSE,
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'rid',
+      'name' => 'name',
+      'label' => 'label',
+    ),
+    // Roles are bound to group types.
+    'access callback' => 'group_type_access',
+    'module' => 'group',
+    'admin ui' => array(
+      'path' => 'admin/structure/group_role',
+      'file' => 'admin/group_role.inc',
+      //'controller class' => 'GroupRoleUIController',
     ),
   );
 
