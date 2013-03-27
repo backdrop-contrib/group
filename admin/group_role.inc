@@ -12,9 +12,23 @@ function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
     $group_role->label .= ' (cloned)';
   }
 
+  /*
   $form['type'] = array(
     '#type' => 'value',
-    '#value' => $group->type,
+    '#value' => $group_role->type,
+  );
+  */
+
+  $group_types = array();
+  foreach (group_types() as $name => $group_type) {
+    $group_types[$name] = $group_type->label;
+  }
+
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Group type'),
+    '#options' => $group_types,
+    '#default_value' => $group_role->type,
   );
 
   $form['label'] = array(
