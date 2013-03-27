@@ -59,20 +59,20 @@ class Group extends Entity {
    * Get all members of a group.
    *
    * @return array
-   *   An array of arrays for every possible role, each containing
+   *   An array of arrays for every possible role name, each containing
    *   the uids of the users having that role for this group.
    */
   public function getMembers() {
     $query = db_select('group_user', 'gu');
     $query->condition('gu.gid', $this->gid);
     $query->addField('gu', 'uid');
-    $query->addField('gu', 'rid');
+    $query->addField('gu', 'role');
 
-    // Prepopulate $members with empty arrays for every rid.
+    // Prepopulate $members with empty arrays for every role name.
     $members = array_fill_keys(array_keys($this->getRoles()), array());
 
-    foreach ($query->execute()->fetchAllKeyed() as $uid => $rid) {
-      $members[$rid][$uid] = $uid;
+    foreach ($query->execute()->fetchAllKeyed() as $uid => $role) {
+      $members[$role][$uid] = $uid;
     }
 
     return $members;
@@ -82,7 +82,7 @@ class Group extends Entity {
    * Get all members of a group, including subgroup members.
    *
    * @return array
-   *   An array of arrays for every possible role, each containing
+   *   An array of arrays for every possible role name, each containing
    *   the uids of the users having that role for this group or any
    *   of its subgroups.
    */
@@ -96,19 +96,19 @@ class Group extends Entity {
     // Gather all members of each child group and add them to
     // the members of this group.
     foreach ($subgroups as $group) {
-      foreach ($group->getMembersRecursive() as $rid => $uids) {
+      foreach ($group->getMembersRecursive() as $role => $uids) {
         // Skip empty rids.
         if (empty($uids)) {
           continue;
         }
 
         // Prevent PHP notices when this role wasn't set yet.
-        if (!isset($members[$rid])) {
-          $members[$rid] = array();
+        if (!isset($members[$role])) {
+          $members[$role] = array();
         }
 
         // Return only unique ids for each role.
-        $members[$rid] += array_combine($uids, $uids);
+        $members[$role] += array_combine($uids, $uids);
       }
     }
 
@@ -210,17 +210,17 @@ class Group extends Entity {
    *
    * @param int $uid
    *   The uid of the given user.
-   * @param int $rid
-   *   The id of the role.
+   * @param string $role
+   *   The machine name of the group role.
    *
    * @return bool
    *   Whether the user has the specified role.
    */
-  public function userHasRole($uid, $rid) {
+  public function userHasRole($uid, $role) {
     $query = db_select('group_user', 'gu');
     $query->condition('gu.gid', $this->gid);
     $query->condition('gu.uid', $uid);
-    $query->condition('gu.rid', $rid);
+    $query->condition('gu.role', $role);
 
     return !!$query->countQuery()->execute()->fetchfield();
   }
@@ -230,18 +230,19 @@ class Group extends Entity {
    *
    * @param int $user
    *   The id of the user.
-   * @param int $rid
-   *   The id of the role.
+   * @param string $role
+   *   The machine name of the group role.
    *
-   * @TODO: Potentially refresh caches.
+   * @todo: Potentially refresh caches.
+   * @todo: Verify the role is valid for this group type.
    */
-  public function addMember($uid, $rid) {
+  public function addMember($uid, $role) {
     $query = db_insert('group_user');
     $query->fields(
       array(
         'gid' => $this->gid,
         'uid' => $uid,
-        'rid' => $rid,
+        'role' => $role,
       )
     );
 
@@ -254,8 +255,7 @@ class Group extends Entity {
    * @param int $uid
    *   The id of the user.
    *
-   * @TODO: Potentially refresh caches.
-   * @TODO: Check/Warnings in case of institution manager, ...
+   * @todo: Potentially refresh caches.
    */
   public function removeMember($uid) {
     $query = db_delete('group_user');

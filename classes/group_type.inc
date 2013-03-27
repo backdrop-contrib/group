@@ -71,7 +71,7 @@ class GroupType extends Entity {
    * Retrieves all possible roles for this group type.
    *
    * @return array
-   *   A list of group_role entities, keyed by their rids.
+   *   A list of group_role entities, keyed by their machine name.
    */
   public function getRoles() {
     $query = new EntityFieldQuery();
@@ -80,8 +80,13 @@ class GroupType extends Entity {
     $query->propertyCondition('type', $this->name);
     $result = $query->execute();
 
-    return (isset($result['group_role']))
-      ? $result['group_role']
-      : array();
+    $roles = array();
+    if (!empty($result['group_role'])) {
+      foreach ($result['group_role'] as $group_role) {
+        $roles[$group_role->name] = $group_role;
+      }
+    }
+
+    return $roles;
   }
 }

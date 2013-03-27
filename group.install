@@ -184,12 +184,12 @@ function group_schema() {
         'default' => 0,
         'not null' => TRUE,
       ),
-      'rid' => array(
-        'description' => 'The {group_role}.rid for the link.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'default' => 0,
+      'role' => array(
+        'description' => 'The {group_role}.name for the link.',
+        'type' => 'varchar',
+        'length' => 32,
         'not null' => TRUE,
+        'default' => '',
       ),
     ),
     'foreign keys' => array(
@@ -203,7 +203,7 @@ function group_schema() {
       ),
       'group_role' => array(
         'table' => 'group_role',
-        'columns' => array('rid' => 'rid'),
+        'columns' => array('role' => 'name'),
       ),
     ),
     'primary key' => array('gid', 'uid'),
