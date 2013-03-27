@@ -70,7 +70,7 @@ function group_entity_info() {
     'bundle of' => 'group',
     'exportable' => TRUE,
     'entity keys' => array(
-      'id' => 'id',
+      'id' => 'tid',
       'name' => 'name',
       'label' => 'label',
     ),

@@ -61,7 +61,7 @@ function group_schema() {
   $schema['group_type'] = array(
     'description' => 'Stores group type entities.',
     'fields' => array(
-      'id' => array(
+      'tid' => array(
         'description' => 'Primary Key: Unique group type ID.',
         'type' => 'serial',
         'not null' => TRUE,
@@ -103,7 +103,7 @@ function group_schema() {
     'unique keys' => array(
       'name' => array('name'),
     ),
-    'primary key' => array('id'),
+    'primary key' => array('tid'),
   );
 
   $schema['group_user'] = array(

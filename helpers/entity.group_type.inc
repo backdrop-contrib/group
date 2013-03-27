@@ -39,6 +39,6 @@ function group_type_delete($type) {
 /**
  * Delete multiple group types.
  */
-function group_type_delete_multiple($ids) {
-  entity_delete_multiple('group_type', $ids);
+function group_type_delete_multiple($tids) {
+  entity_delete_multiple('group_type', $tids);
 }
