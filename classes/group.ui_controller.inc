@@ -51,7 +51,7 @@ class GroupUIController extends EntityDefaultUIController {
         'page arguments' => array($this->entityType, $entity, 'add'),
         'access callback' => 'entity_access',
         'access arguments' => array('create', $this->entityType),
-        'file' => 'admin/group.inc',
+        'file' => 'forms/group.inc',
         'file path' => drupal_get_path('module', 'group'),
       );
     }
