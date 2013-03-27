@@ -7,7 +7,8 @@
 /**
  * Load our helper functions without polluting the .module file.
  */
-ctools_include('entity', 'group', 'helpers');
+ctools_include('entity.group', 'group', 'helpers');
+ctools_include('entity.group_type', 'group', 'helpers');
 ctools_include('group', 'group', 'helpers');
 
 /**
