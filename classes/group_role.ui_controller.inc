@@ -28,16 +28,16 @@ class GroupRoleUIController extends EntityDefaultUIController {
     $items["$this->path/manage/%entity_object/permissions"] = array(
       'title' => 'Permissions',
       'description' => 'Edit role permissions',
-      // @todo
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('group_permission_form', 4),
+      // @todo Proper access callback.
       'access callback' => TRUE,
-      //'page callback' => 'entity_ui_get_form',
-      //'page arguments' => array($this->entityType, $entity, 'add'),
       //'access callback' => 'entity_access',
       //'access arguments' => array('create', $this->entityType),
-      //'file' => 'forms/group.inc',
-      //'file path' => drupal_get_path('module', 'group'),
+      'file' => 'admin/group_role.inc',
+      'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
-      'weight' => 0,
+      'weight' => 5,
     );
 
     return $items;
