@@ -137,6 +137,7 @@ function group_entity_info_alter(&$entity_info) {
 function group_permission() {
   $permissions = array(
     'bypass group access' => array(
+      'title' => t('Bypass group access control'),
       'description' => t('View, edit and delete all groups regardless of permission restrictions.'),
       'restrict access' => TRUE,
     ),
