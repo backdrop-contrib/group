@@ -103,9 +103,9 @@ function group_entity_info() {
     'access callback' => 'group_type_access',
     'module' => 'group',
     'admin ui' => array(
-      'path' => 'admin/structure/group_role',
+      'path' => 'admin/group/role',
       'file' => 'admin/group_role.inc',
-      //'controller class' => 'GroupRoleUIController',
+      'controller class' => 'GroupRoleUIController',
     ),
   );
 

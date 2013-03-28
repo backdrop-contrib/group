@@ -12,13 +12,6 @@ function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
     $group_role->label .= ' (cloned)';
   }
 
-  /*
-  $form['type'] = array(
-    '#type' => 'value',
-    '#value' => $group_role->type,
-  );
-  */
-
   $group_types = array();
   foreach (group_types() as $name => $group_type) {
     $group_types[$name] = $group_type->label;
@@ -82,12 +75,15 @@ function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
 function group_role_form_submit(&$form, &$form_state) {
   $group_role = entity_ui_form_submit_build_entity($form, $form_state);
   $group_role->save();
-  $form_state['redirect'] = 'admin/structure/group_role';
+
+  $form_state['redirect'] = 'admin/group/role';
 }
 
 /**
  * Form API submit callback for the delete button.
  */
 function group_role_form_submit_delete(&$form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/group_role/manage/' . $form_state['group_role']->name . '/delete';
+  $group_role = $form_state['group_role']->name;
+
+  $form_state['redirect'] = "admin/group/role/manage/$group_role/delete";
 }

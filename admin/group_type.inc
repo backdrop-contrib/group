@@ -63,6 +63,7 @@ function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
 function group_type_form_submit(&$form, &$form_state) {
   $group_type = entity_ui_form_submit_build_entity($form, $form_state);
   $group_type->save();
+
   $form_state['redirect'] = 'admin/group/type';
 }
 
@@ -70,5 +71,7 @@ function group_type_form_submit(&$form, &$form_state) {
  * Form API submit callback for the delete button.
  */
 function group_type_form_submit_delete(&$form, &$form_state) {
-  $form_state['redirect'] = 'admin/group/type/manage/' . $form_state['group_type']->name . '/delete';
+  $group_type = $form_state['group_type']->name;
+
+  $form_state['redirect'] = "admin/group/type/manage/$group_type/delete";
 }
