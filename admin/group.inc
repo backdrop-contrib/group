@@ -221,11 +221,11 @@ function group_admin_groups() {
   $results = $query->execute();
 
   $gids = isset($results['group'])
-    ? array_keys($results[$this->entityType])
+    ? array_keys($results['group'])
     : array();
 
-  $groups = $gids
-    ? entity_load($this->entityType, $ids)
+  $groups = ($gids)
+    ? group_load_multiple($gids)
     : array();
 
   ksort($groups);
@@ -236,7 +236,9 @@ function group_admin_groups() {
 
   $options = array();
   foreach ($groups as $group) {
-    $options[] = $group->title;
+    $options[] = array(
+      'title' => $group->title,
+    );
   }
 
   $render = array(
