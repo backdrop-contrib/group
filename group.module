@@ -78,9 +78,9 @@ function group_entity_info() {
     'access callback' => 'group_type_access',
     'module' => 'group',
     'admin ui' => array(
-      'path' => 'admin/structure/group_type',
+      'path' => 'admin/group/type',
       'file' => 'admin/group_type.inc',
-      //'controller class' => 'GroupTypeUIController',
+      'controller class' => 'GroupTypeUIController',
     ),
   );
 
@@ -122,8 +122,8 @@ function group_entity_info_alter(&$entity_info) {
     $entity_info['group']['bundles'][$type] = array(
       'label' => $info->label,
       'admin' => array(
-        'path' => 'admin/structure/group_type/manage/%group_type',
-        'real path' => 'admin/structure/group_type/manage/' . $type,
+        'path' => 'admin/group/type/manage/%group_type',
+        'real path' => 'admin/group/type/manage/' . $type,
         'bundle argument' => 4,
         'access arguments' => array('administer group types'),
       ),

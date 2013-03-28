@@ -30,6 +30,13 @@ class GroupUIController extends EntityDefaultUIController {
       'weight' => -9,
     );
 
+    // Make this an entry in the Management menu.
+    $items["$this->path/groups"] = array(
+      'title' => 'Groups',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+
     $items['group/add'] = array(
       'title' => 'Add group',
       'page callback' => 'group_add_page',

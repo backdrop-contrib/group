@@ -13,3 +13,4 @@ files[] = classes/group_role.inc
 files[] = classes/group_role.controller.inc
 files[] = classes/group_type.inc
 files[] = classes/group_type.controller.inc
+files[] = classes/group_type.ui_controller.inc
