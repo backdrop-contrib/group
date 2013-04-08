@@ -30,10 +30,9 @@ class GroupRoleUIController extends EntityDefaultUIController {
       'description' => 'Edit role permissions',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_permission_form', 4),
-      // @todo Proper access callback.
-      'access callback' => TRUE,
-      //'access callback' => 'entity_access',
-      //'access arguments' => array('create', $this->entityType),
+      //@todo Check this.
+      'access callback' => 'user_access',
+      'access arguments' => array('administer group types'),
       'file' => 'admin/group_role.inc',
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
@@ -42,6 +41,8 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
     return $items;
   }
+
+  //@todo Show a table of roles per group type.
 
   /**
    * Returns the operation count for calculating colspans.
