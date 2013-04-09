@@ -37,6 +37,29 @@ class GroupUIController extends EntityDefaultUIController {
       'weight' => -10,
     );
 
+    $items['group/autocomplete'] = array(
+      'title' => 'Group autocomplete',
+      'page callback' => 'group_autocomplete',
+      'access callback' => 'user_access',
+      'access arguments' => array('view groups'),
+      'file' => 'pages/group.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_CALLBACK,
+    );
+
+    $items['group/autocomplete/type/%entity_object'] = array(
+      'title' => 'Group type specific autocomplete',
+      'title callback' => 'check_plain',
+      'page callback' => 'group_autocomplete_by_type',
+      'page arguments' => array(3),
+      'load arguments' => array('group_type'),
+      'access callback' => 'user_access',
+      'access arguments' => array('view groups'),
+      'file' => 'pages/group.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_CALLBACK,
+    );
+
     $items['group/add'] = array(
       'title' => 'Add group',
       'page callback' => 'group_add_page',
