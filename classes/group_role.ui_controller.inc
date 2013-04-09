@@ -30,6 +30,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
       'description' => 'Edit role permissions',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_permission_form', 4),
+      'load arguments' => array($this->entityType),
       //@todo Check this.
       'access callback' => 'user_access',
       'access arguments' => array('administer group types'),
