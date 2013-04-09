@@ -23,3 +23,23 @@ function group_get_entity_parents($entity_type, $entity_id) {
 
   return group_load_multiple($query->execute()->fetchCol());
 }
+
+/**
+ * Retrieves the group id from an autocomplete result.
+ *
+ * @param string $result
+ *   The result returned by a group autocomplete field.
+ *
+ * @return int|false
+ *   The group id (gid) of the result or FALSE on failure.
+ *
+ * @see group_autocomplete()
+ * @see group_autocomplete_by_type()
+ */
+function group_autocomplete_result_gid($result) {
+  if (preg_match('/(\d+)\)$/', $result, $matches)) {
+    return $matches[1];
+  }
+
+  return FALSE;
+}
