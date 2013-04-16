@@ -5,21 +5,36 @@
  */
 
 /**
- * Gets an array of all group types, keyed by the name.
+ * Load group types.
  *
- * @param $name
- *   If set, the type with the given name is returned.
+ * @param array $names
+ *   (optional) An array of machine names to filter on.
+ *
+ * @return GroupType|array
+ *   Returns a single GroupType object when $names contains only one name.
+ *   When an array of multiple names or FALSE is provided, the return value
+ *   becomes an array of GroupType objects, keyed by their corresponding
+ *   machine names.
+ *
+ * @see entity_load_multiple_by_name()
  */
-function group_types($name = NULL) {
-  $types = entity_load_multiple_by_name('group_type', isset($name) ? array($name) : FALSE);
-  return isset($name) ? reset($types) : $types;
+function group_types($names = FALSE) {
+  $types = entity_load_multiple_by_name('group_type', $names);
+  return (is_array($names) && count($names) == 1) ? reset($types) : $types;
 }
 
 /**
- * Load a group type.
+ * Load a group type by name.
  */
-function group_type_load($type) {
-  return group_types($type);
+function group_type_load($name) {
+  return group_types(array($name));
+}
+
+/**
+ * Load multiple group types by id.
+ */
+function group_type_load_multiple($tids = FALSE, $reset = FALSE) {
+  return entity_load('group_type', $tids, array(), $reset);
 }
 
 /**
