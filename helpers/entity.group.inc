@@ -13,10 +13,10 @@ function group_load($gid, $reset = FALSE) {
 }
 
 /**
- * Load multiple groups based on certain conditions.
+ * Load multiple groups.
  */
-function group_load_multiple($gids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('group', $gids, $conditions, $reset);
+function group_load_multiple($gids = FALSE, $reset = FALSE) {
+  return entity_load('group', $gids, array(), $reset);
 }
 
 /**
