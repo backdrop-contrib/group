@@ -132,10 +132,31 @@ function group_entity_info_alter(&$entity_info) {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function group_menu() {
+  $items['admin/config/people/group'] = array(
+    'title' => 'Group settings',
+    'description' => 'Configure the Group module.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('group_config_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('configure group module'),
+    'file' => 'admin/group.config.inc',
+  );
+
+  return $items;
+}
+
+/**
  * Implements hook_permission().
  */
 function group_permission() {
   $permissions = array(
+    'configure group module' => array(
+      'title' => t('Configure Group module'),
+      'restrict access' => TRUE,
+    ),
     'bypass group access' => array(
       'title' => t('Bypass group access control'),
       'description' => t('View, edit and delete all groups regardless of permission restrictions'),
