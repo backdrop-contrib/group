@@ -36,7 +36,6 @@ function group_autocomplete($search = '') {
  *   A JSONified array of matches.
  *
  * @todo Individual group access check.
- * @todo Make GID suffix optional through the UI.
  */
 function group_autocomplete_by_type($type, $search = '') {
   $matches = array();
@@ -52,8 +51,16 @@ function group_autocomplete_by_type($type, $search = '') {
       $query->condition('type', $type->name);
     }
 
+    // Retrieve the suffix configuration.
+    $suffix = variable_get('group_autocomplete_suffix');
+
+    // Get the right suffix configuration key.
+    $s_key = !empty($type) ? $type->name : 'general';
+
     foreach ($query->execute()->fetchAllKeyed() as $gid => $title) {
-      $match = check_plain($title) . " (GID: $gid)";
+      $title = check_plain($title);
+      $match = empty($suffix[$s_key]) ? $title : "$title (GID: $gid)";
+
       $matches[$match] = $match;
     }
   }
