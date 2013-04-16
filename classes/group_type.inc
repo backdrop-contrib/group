@@ -71,22 +71,15 @@ class GroupType extends Entity {
    * Retrieves all possible roles for this group type.
    *
    * @return array
-   *   A list of group_role entities, keyed by their machine name.
+   *   A list of group_role entities.
+   *
+   * @see group_roles()
    */
   public function getRoles() {
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'group_role');
-    $query->entityCondition('bundle', 'group_role');
-    $query->propertyCondition('type', $this->name);
-    $result = $query->execute();
+    $query = db_select('group_role', 'gr');
+    $query->condition('type', $this->name);
+    $query->addField('gr', 'name');
 
-    $roles = array();
-    if (!empty($result['group_role'])) {
-      foreach ($result['group_role'] as $group_role) {
-        $roles[$group_role->name] = $group_role;
-      }
-    }
-
-    return $roles;
+    return group_roles($query->execute()->fetchCol());
   }
 }

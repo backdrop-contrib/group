@@ -49,7 +49,9 @@ class Group extends Entity {
    * Retrieves all possible roles for this group.
    *
    * @return array
-   *   A list of roles names, keyed by their ids.
+   *   A list of group_role entities.
+   *
+   * @see GroupType::getRoles()
    */
   public function getRoles() {
     return group_type_load($this->type)->getRoles();
