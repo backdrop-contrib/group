@@ -62,12 +62,13 @@ function group_filter_form() {
     unset($filters[$type]);
   }
 
-  // @todo Remove 'and where' when no filters remains.
-  $form['filters']['status'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('clearfix')),
-    '#prefix' => ($i ? '<div class="additional-filters">' . t('and where') . '</div>' : ''),
-  );
+  if (count($filters)) {
+    $form['filters']['status'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('clearfix')),
+      '#prefix' => ($i ? '<div class="additional-filters">' . t('and where') . '</div>' : ''),
+    );
+  }
 
   $form['filters']['status']['filters'] = array(
     '#type' => 'container',
@@ -88,10 +89,12 @@ function group_filter_form() {
     '#attributes' => array('class' => array('container-inline')),
   );
 
-  $form['filters']['status']['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => count($session) ? t('Refine') : t('Filter'),
-  );
+  if (count($filters)) {
+    $form['filters']['status']['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => count($session) ? t('Refine') : t('Filter'),
+    );
+  }
 
   if (count($session)) {
     $form['filters']['status']['actions']['undo'] = array(
