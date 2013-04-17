@@ -197,47 +197,64 @@ function group_multiple_delete_confirm_submit($form, &$form_state) {
  * Builds the group administration overview.
  *
  * @todo Copy node_admin_nodes().
+ * @todo Dynamic pager amount.
+ * @todo Individual group access check.
  */
 function group_admin_groups() {
-  $session = isset($_SESSION['group_overview_filter'])
+  $options = array();
+  $header = array(
+    'title' => array(
+      'data' => t('Group name'),
+      'field' => 'title',
+      'sort' => 'asc',
+    ),
+    'type' => array(
+      'data' => t('Group type'),
+      'field' => 'type',
+    ),
+    'members' => array(
+      'data' => t('Members'),
+      'field' => 'members',
+    ),
+  );
+
+  // We do not use an EntityFieldQuery because it does not support joins.
+  $query = db_select('groups', 'g')
+    ->extend('PagerDefault')
+    ->extend('TableSort');
+
+  // Add what we need from {groups} to the result set.
+  $query->addField('g', 'title');
+  $query->addField('g', 'type');
+
+  // Add the member count to the result set.
+  $query->leftJoin('group_user', 'gu', 'g.gid=gu.gid');
+  $query->addExpression('COUNT(distinct gu.uid)', 'members');
+
+  // Group on gid to ensure the member count is correct.
+  $query->groupBy(
+    $query->addField('g', 'gid')
+  );
+
+  // Retrieve all active filters and add them to the query.
+  $filters = isset($_SESSION['group_overview_filter'])
     ? $_SESSION['group_overview_filter']
     : array();
 
-  $query = new EntityFieldQuery();
-  $query->entityCondition('entity_type', 'group');
-
-  // Add all the filters to the query.
-  foreach ($session as $property => $value) {
-    $query->propertyCondition($property, $value);
+  foreach ($filters as $property => $value) {
+    $query->condition($property, $value);
   }
 
-  // @todo work this out.
-  /*
-  if ($this->overviewPagerLimit) {
-    $query->pager($this->overviewPagerLimit);
-  }
-  */
+  // Add the pager and tablesort functionality.
+  $query->limit(20);
+  $query->orderByHeader($header);
 
-  $results = $query->execute();
-
-  $gids = isset($results['group'])
-    ? array_keys($results['group'])
-    : array();
-
-  $groups = ($gids)
-    ? group_load_multiple($gids)
-    : array();
-
-  ksort($groups);
-
-  $header = array(
-    'title' => t('Group name'),
-  );
-
-  $options = array();
-  foreach ($groups as $group) {
+  // Add the records to the table.
+  foreach ($query->execute() as $record) {
     $options[] = array(
-      'title' => $group->title,
+      'title' => $record->title,
+      'type' => group_type_load($record->type)->label,
+      'members' => $record->members,
     );
   }
 
