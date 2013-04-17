@@ -180,8 +180,9 @@ class Group extends Entity {
    *   Whether or not to flatten the result array.
    *
    * @return array
-   *   A list of all child entities, keyed by type and bundle. When $flat
-   *   is set to TRUE, the return value is one big array of entities.
+   *   An array of child entities, keyed by their type, bundle and entity id.
+   *   When $flat is set to TRUE, the return value is one big array of
+   *   entities, which are keyed numerically and not by their entity id!
    *
    * @todo Statically cache the result.
    */
@@ -205,11 +206,12 @@ class Group extends Entity {
     // Actually load the retrieved entities.
     foreach ($entities['full'] as $type => $bundles) {
       foreach ($bundles as $bundle => $ids) {
+        $entities['full'][$type][$bundle] = entity_load($type, $ids);
+
         // We run the entity_load() result through array_values() to prevent
-        // people from making the false assumption that we always return the
+        // people from making the false assumption that we still return the
         // entity ids as array keys.
-        $entities['full'][$type][$bundle] = array_values(entity_load($type, $ids));
-        $entities['flat'] = array_merge($entities['flat'], $entities['full'][$type][$bundle]);
+        $entities['flat'] = array_merge($entities['flat'], array_values($entities['full'][$type][$bundle]));
       }
     }
 
