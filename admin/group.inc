@@ -224,17 +224,16 @@ function group_admin_groups() {
     ->extend('TableSort');
 
   // Add what we need from {groups} to the result set.
-  $query->addField('g', 'title');
+  $query->addField('g', 'gid');
   $query->addField('g', 'type');
+  $query->addField('g', 'title');
 
   // Add the member count to the result set.
   $query->leftJoin('group_user', 'gu', 'g.gid=gu.gid');
   $query->addExpression('COUNT(distinct gu.uid)', 'members');
 
-  // Group on gid to ensure the member count is correct.
-  $query->groupBy(
-    $query->addField('g', 'gid')
-  );
+  // Group by gid to ensure the member count is correct.
+  $query->groupBy('g.gid');
 
   // Retrieve all active filters and add them to the query.
   $filters = isset($_SESSION['group_overview_filter'])
@@ -252,7 +251,7 @@ function group_admin_groups() {
   // Add the records to the table.
   foreach ($query->execute() as $record) {
     $options[] = array(
-      'title' => $record->title,
+      'title' => l($record->title, "group/$record->gid"),
       'type' => group_type_load($record->type)->label,
       'members' => $record->members,
     );
@@ -262,7 +261,7 @@ function group_admin_groups() {
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
-    '#empty' => t('No groups available.'),
+    '#empty' => t('No groups available'),
   );
 
   return $render;
