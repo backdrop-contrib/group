@@ -134,6 +134,46 @@ class Group extends Entity {
   }
 
   /**
+   * Get the amount of members in a group.
+   *
+   * If you want to know the amount of members with a specific role inside a
+   * group, use count() on a subarray of the Group::getMembers() return value.
+   *
+   * @return int
+   *   The total amount of group members.
+   */
+  public function getMemberCount() {
+    $query = db_select('group_user', 'gu');
+    $query->condition('gu.gid', $this->gid);
+    $query->addField('gu', 'uid');
+    $query->distinct();
+
+    return $query->countQuery()->execute()->fetchField();
+  }
+
+  /**
+   * Get the amount of members in a group, including subgroup members.
+   *
+   * If you want to know the amount of members with a specific role inside a
+   * group and its subgroups, use count() on a subarray of the
+   * Group::getMembersRecursive() return value.
+   *
+   * @return int
+   *   The total amount of group members.
+   */
+  public function getMemberCountRecursive() {
+    // Retrieve the gids of the group's subgroups and add the group's gid.
+    $gids = array_merge(array($this->gid), array_keys($this->getSubgroups()));
+
+    $query = db_select('group_user', 'gu');
+    $query->condition('gu.gid', $gids, 'IN');
+    $query->addField('gu', 'uid');
+    $query->distinct();
+
+    return $query->countQuery()->execute()->fetchField();
+  }
+
+  /**
    * Get all child entities.
    *
    * @param bool $flat
