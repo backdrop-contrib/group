@@ -10,24 +10,21 @@
  * @param array $names
  *   (optional) An array of machine names to filter on.
  *
- * @return GroupType|array
- *   Returns a single GroupType object when $names contains only one name.
- *   When an array of multiple names or FALSE is provided, the return value
- *   becomes an array of GroupType objects, keyed by their corresponding
- *   machine names.
+ * @return array
+ *   An array of GroupType objects, keyed by their machine names.
  *
  * @see entity_load_multiple_by_name()
  */
 function group_types($names = FALSE) {
-  $types = entity_load_multiple_by_name('group_type', $names);
-  return (is_array($names) && count($names) == 1) ? reset($types) : $types;
+  return entity_load_multiple_by_name('group_type', $names);
 }
 
 /**
  * Load a group type by name.
  */
 function group_type_load($name) {
-  return group_types(array($name));
+  $types = group_types(array($name));
+  return reset($types);
 }
 
 /**

@@ -10,24 +10,21 @@
  * @param array $names
  *   (optional) An array of machine names to filter on.
  *
- * @return GroupRole|array
- *   Returns a single GroupRole object when $names contains only one name.
- *   When an array of multiple names or FALSE is provided, the return value
- *   becomes an array of GroupRole objects, keyed by their corresponding
- *   machine names.
+ * @return array
+ *   An array of GroupRole objects, keyed by their machine names.
  *
  * @see entity_load_multiple_by_name()
  */
 function group_roles($names = FALSE) {
-  $roles = entity_load_multiple_by_name('group_role', $names);
-  return (is_array($names) && count($names) == 1) ? reset($roles) : $roles;
+  return entity_load_multiple_by_name('group_role', $names);
 }
 
 /**
  * Load a group role by name.
  */
 function group_role_load($name) {
-  return group_roles(array($name));
+  $roles = group_roles(array($name));
+  return reset($roles);
 }
 
 /**
