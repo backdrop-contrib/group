@@ -108,9 +108,6 @@ function group_filter_form() {
     );
   }
 
-  // @todo figure this out.
-  //drupal_add_js('misc/form.js');
-
   return $form;
 }
 
