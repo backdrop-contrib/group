@@ -86,6 +86,17 @@ class GroupUIController extends EntityDefaultUIController {
       );
     }
 
+    $items['group/%group/delete'] = array(
+      'title' => 'Delete',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('group_operation_form', 'group', 1, 'delete'),
+      'access callback' => 'group_access',
+      'access arguments' => array('delete', 1),
+      'weight' => 1,
+      'type' => MENU_LOCAL_TASK,
+      //'context' => MENU_CONTEXT_INLINE,
+    );
+
     return $items;
   }
 
@@ -112,5 +123,36 @@ class GroupUIController extends EntityDefaultUIController {
   public function overviewFormSubmit($form, &$form_state) {
     ctools_include('group', 'group', 'admin');
     group_filter_form_submit($form, $form_state);
+  }
+
+  /**
+   * Builds the operation form.
+   *
+   * Overrides the default to only allow the deletion of groups.
+   */
+  public function operationForm($form, &$form_state, $group, $op) {
+    if ($op == 'delete') {
+      $confirm_question = t('Are you sure you want to delete %title?', array('%title' => $group->title));
+      return confirm_form($form, $confirm_question, "group/$group->gid");
+    }
+
+    drupal_not_found();
+    exit;
+  }
+
+  /**
+   * Applies an operation to the given entity.
+   *
+   * Overrides the default to only allow the deletion of groups.
+   */
+  public function applyOperation($op, $group) {
+    if ($op == 'delete') {
+      entity_delete('group', $id);
+      watchdog('group', 'Deleted %title.', array('%title' => $group->title));
+
+      return t('Deleted %title.', array('%title' => $group->title));
+    }
+
+    return FALSE;
   }
 }
