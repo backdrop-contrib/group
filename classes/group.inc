@@ -46,6 +46,25 @@ class Group extends Entity {
   }
 
   /**
+   * Retrieves all subgroups for this group.
+   *
+   * This retrieves all descendant subgroups, not just child groups.
+   *
+   * @return array
+   *   A list of group entities.
+   */
+  public function getSubgroups() {
+    // Get a list of direct child groups.
+    $subgroups = $this->getEntitiesOfType('group');
+
+    foreach ($subgroups as $group) {
+      $subgroups += $group->getSubgroups();
+    }
+
+    return $subgroups;
+  }
+
+  /**
    * Retrieves all possible roles for this group.
    *
    * @return array
@@ -92,21 +111,18 @@ class Group extends Entity {
     // Start of by gathering all members of this group.
     $members = $this->getMembers();
 
-    // Then get a list of direct child groups.
-    $subgroups = $this->getEntitiesOfType('group');
-
-    // Gather all members of each child group and add them to
-    // the members of this group.
-    foreach ($subgroups as $group) {
-      foreach ($group->getMembersRecursive() as $role => $uids) {
-        // Skip empty rids.
-        if (empty($uids)) {
-          continue;
-        }
-
+    // Gather all members of each of this group's subgroups
+    // and add them to the members of this group.
+    foreach ($this->getSubgroups() as $subgroup) {
+      foreach ($subgroup->getMembers() as $role => $uids) {
         // Prevent PHP notices when this role wasn't set yet.
         if (!isset($members[$role])) {
           $members[$role] = array();
+        }
+
+        // Skip empty group roles.
+        if (empty($uids)) {
+          continue;
         }
 
         // Return only unique ids for each role.
