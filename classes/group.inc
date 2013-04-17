@@ -229,37 +229,33 @@ class Group extends Entity {
    *   (optional) The bundle of the entity type.
    *
    * @return array
-   *   A flat list of child entities of a certain
-   *   type and optionally bundle.
+   *   An array of child entities of a certain type and optionally bundle,
+   *   keyed by their entity id.
    */
   public function getEntitiesOfType($entity_type, $bundle = NULL) {
-    // We can reuse the cached result of getEntities().
-    $entities = $this->getEntities();
+    // We can reuse the cached result of Group::getEntities().
+    $children = $this->getEntities();
 
     // Fetch the child entities of the requested type or
     // initialize an empty array when none were found.
-    $entities = isset($entities[$entity_type])
-      ? $entities[$entity_type]
-      : array();
+    $children = isset($children[$entity_type]) ? $children[$entity_type] : array();
 
     if (isset($bundle)) {
       // Fetch the child entities of the requested bundle or
       // initialize an empty array when none were found.
-      $entities = isset($entities[$bundle])
-        ? $entities[$bundle]
-        : array();
+      $entities = isset($children[$bundle]) ? $children[$bundle] : array();
     }
 
-    // To maintain a consistent return value, we flatten the
+    // To maintain a consistent return value, we combine the
     // entity's bundle arrays if no bundle was specified.
     else {
-      $flattened = array();
+      $combined = array();
 
-      foreach ($entities as $bundle => $ids) {
-        $flattened = array_merge($flattened, $ids);
+      foreach ($children as $bundle => $entities) {
+        $combined += $entities;
       }
 
-      $entities = $flattened;
+      $entities = $combined;
     }
 
     return $entities;
