@@ -41,8 +41,7 @@ class Group extends Entity {
    * Specifies the default uri, which is picked up by uri() by default.
    */
   protected function defaultURI() {
-    //@todo Add type to the path.
-    return array('path' => 'group/' . $this->identifier());
+    return array('path' => 'group/' . $this->gid);
   }
 
   /**
