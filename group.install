@@ -208,7 +208,7 @@ function group_schema() {
         'columns' => array('role' => 'name'),
       ),
     ),
-    'primary key' => array('gid', 'uid'),
+    'primary key' => array('gid', 'uid', 'role'),
   );
 
   $schema['group_entity'] = array(
