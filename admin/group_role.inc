@@ -47,7 +47,7 @@ function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
     '#maxlength' => 32,
     '#disabled' => $group_role->isLocked() || $op == 'edit',
     '#machine_name' => array(
-      'exists' => 'group_roles',
+      'exists' => 'group_role_load',
       'source' => array('label'),
       'label' => t('Machine name'),
       'replace_pattern' => '[^a-z0-9_]+',
