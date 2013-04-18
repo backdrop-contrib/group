@@ -20,23 +20,39 @@ function group_load_multiple($gids = FALSE, $reset = FALSE) {
 }
 
 /**
- * Load all groups of a given type.
+ * Load all groups with a given property value.
  *
- * @param string $type
- *   The machine name of the GroupType you wish to filter on.
+ * @param string $property
+ *   The property name you wish to filter on.
+ * @param string $value
+ *   The property value you wish to filter on.
  *
  * @return array
  *   An array of Group entities, keyed by their group ids.
  */
-function group_load_by_type($type) {
+function group_load_by_property($property, $value) {
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'group');
-  $query->entityCondition('bundle', $type);
+  $query->propertyCondition($property, $value);
   $result = $query->execute();
 
   return isset($result['group'])
     ? group_load_multiple(array_keys($result['group']))
     : array();
+}
+
+/**
+ * Load all groups with a given name.
+ */
+function group_load_by_name($name) {
+  return group_load_by_property('title', $name);
+}
+
+/**
+ * Load all groups of a given type.
+ */
+function group_load_by_type($type) {
+  return group_load_by_property('type', $type);
 }
 
 /**
