@@ -5,18 +5,18 @@
  */
 
 /**
+ * Load multiple groups.
+ */
+function group_load_multiple($gids = FALSE, $reset = FALSE) {
+  return entity_load('group', $gids, array(), $reset);
+}
+
+/**
  * Load a group.
  */
 function group_load($gid, $reset = FALSE) {
   $groups = group_load_multiple(array($gid), array(), $reset);
   return reset($groups);
-}
-
-/**
- * Load multiple groups.
- */
-function group_load_multiple($gids = FALSE, $reset = FALSE) {
-  return entity_load('group', $gids, array(), $reset);
 }
 
 /**
