@@ -20,6 +20,26 @@ function group_load_multiple($gids = FALSE, $reset = FALSE) {
 }
 
 /**
+ * Load all groups of a given type.
+ *
+ * @param string $type
+ *   The machine name of the GroupType you wish to filter on.
+ *
+ * @return array
+ *   An array of Group entities, keyed by their group ids.
+ */
+function group_load_by_type($type) {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'group');
+  $query->entityCondition('bundle', $type);
+  $result = $query->execute();
+
+  return isset($result['group'])
+    ? group_load_multiple(array_keys($result['group']))
+    : array();
+}
+
+/**
  * Save a group.
  */
 function group_save($group) {
