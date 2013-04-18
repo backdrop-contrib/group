@@ -27,7 +27,7 @@ function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
     '#maxlength' => 32,
     '#disabled' => $group_type->isLocked() || $op == 'edit',
     '#machine_name' => array(
-      'exists' => 'group_types',
+      'exists' => 'group_type_load',
       'source' => array('label'),
       'label' => t('Machine name'),
       'replace_pattern' => '[^a-z0-9_]+',
