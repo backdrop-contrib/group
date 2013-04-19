@@ -37,7 +37,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
       'file' => 'admin/group_type.inc',
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
-      'weight' => 5,
+      'weight' => 0,
     );
 
     return $items;
