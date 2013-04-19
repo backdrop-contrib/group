@@ -173,6 +173,35 @@ function group_schema() {
     'primary key' => array('rid'),
   );
 
+  $schema['group_permission'] = array(
+    'description' => 'Stores the permissions assigned to group roles.',
+    'fields' => array(
+      'rid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Foreign Key: {group_role}.rid.',
+      ),
+      'permission' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'A single permission granted to the role identified by rid.',
+      ),
+    ),
+    'primary key' => array('rid', 'permission'),
+    'indexes' => array(
+      'permission' => array('permission'),
+    ),
+    'foreign keys' => array(
+      'group_role' => array(
+        'table' => 'group_role',
+        'columns' => array('rid' => 'rid'),
+      ),
+    ),
+  );
+
   $schema['group_user'] = array(
     'description' => 'Stores information about the link between groups and users.',
     'fields' => array(
