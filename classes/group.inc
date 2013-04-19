@@ -372,7 +372,7 @@ class Group extends Entity {
    *   The uid of the user to retrieve the roles for.
    *
    * @return array
-   *   An array of role names.
+   *   An array of GroupRole objects, keyed by their machine name.
    *
    * @todo Cache this?
    */
@@ -382,7 +382,7 @@ class Group extends Entity {
     $query->condition('gu.gid', $this->gid);
     $query->condition('gu.uid', $uid);
 
-    return $query->execute()->fetchCol();
+    return group_roles($query->execute()->fetchCol());
   }
 
   /**
