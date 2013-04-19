@@ -31,6 +31,7 @@ function group_schema() {
       'gid' => array(
         'description' => 'Primary Key: Unique group item ID.',
         'type' => 'serial',
+        'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'type' => array(
@@ -66,6 +67,7 @@ function group_schema() {
       'tid' => array(
         'description' => 'Primary Key: Unique group type ID.',
         'type' => 'serial',
+        'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'name' => array(
@@ -92,6 +94,7 @@ function group_schema() {
         'description' => 'The exportable status of the entity.',
         'type' => 'int',
         'size' => 'tiny',
+        'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => ENTITY_CUSTOM,
       ),
@@ -114,6 +117,7 @@ function group_schema() {
       'rid' => array(
         'description' => 'Primary Key: Unique group role ID.',
         'type' => 'serial',
+        'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'type' => array(
@@ -175,15 +179,15 @@ function group_schema() {
       'gid' => array(
         'description' => 'The {groups}.gid for the link.',
         'type' => 'int',
-        'unsigned' => TRUE,
         'default' => 0,
+        'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'uid' => array(
         'description' => 'The {users}.uid for the link.',
         'type' => 'int',
-        'unsigned' => TRUE,
         'default' => 0,
+        'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'role' => array(
@@ -217,15 +221,15 @@ function group_schema() {
       'gid' => array(
         'description' => 'The {groups}.gid for the group the entity is linked to.',
         'type' => 'int',
-        'unsigned' => TRUE,
         'default' => 0,
+        'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'entity_id' => array(
         'description' => 'The id of the entity to link to the group.',
         'type' => 'int',
-        'unsigned' => TRUE,
         'default' => 0,
+        'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'entity_type' => array(
