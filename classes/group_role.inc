@@ -66,7 +66,7 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Returns whether the group role is locked.
+   * Return whether a group role is locked.
    */
   public function isLocked() {
     return isset($this->status)
@@ -75,7 +75,7 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Retrieve all permissions for this role.
+   * Retrieve all permissions for a group role.
    *
    * @return array
    *   An array of group permission names.
@@ -102,7 +102,7 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Clear the permission cache for this role only.
+   * Clear the permission cache for a group role.
    */
   public function clearPermissionCache() {
     $cache = &drupal_static('GroupRole::getPermissions', array());
@@ -110,7 +110,7 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Grant permissions to this role.
+   * Grant permissions to a role.
    *
    * @param array $permissions
    *   A list of permission names to grant.
@@ -133,7 +133,7 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Revoke permissions from this role.
+   * Revoke permissions from a role.
    *
    * @param array $permissions
    *   A list of permission names to revoke.
@@ -148,7 +148,7 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Change permissions for this role.
+   * Change permissions for a role.
    *
    * This function may be used to grant and revoke multiple permissions at once.
    * For example, when a form exposes checkboxes to configure permissions for a

@@ -59,7 +59,7 @@ class GroupType extends Entity {
   }
 
   /**
-   * Returns whether the group type is locked.
+   * Returns whether a group type is locked.
    */
   public function isLocked() {
     return isset($this->status)
@@ -68,10 +68,10 @@ class GroupType extends Entity {
   }
 
   /**
-   * Retrieves all possible roles for this group type.
+   * Retrieve all possible roles for a group type.
    *
    * @return array
-   *   A list of group_role entities.
+   *   A list of GroupRole entities.
    *
    * @see group_roles()
    */

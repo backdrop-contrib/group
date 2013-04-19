@@ -17,7 +17,18 @@ class GroupTypeController extends EntityAPIControllerExportable {
   }
 
   /**
-   * Creates a group type.
+   * Delete a group type.
+   *
+   * @see EntityAPIController::delete()
+   */
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
+    //@todo Clean up before deletion.
+
+    parent::delete($ids, $transaction);
+  }
+
+  /**
+   * Create a group type.
    *
    * We first set up the values that are specific to the group type schema
    * but then also run the EntityAPIControllerExportable counterpart.

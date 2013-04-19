@@ -17,7 +17,7 @@ class GroupController extends EntityAPIController {
   }
 
   /**
-   * Deletes a group.
+   * Delete a group.
    *
    * @see EntityAPIController::delete()
    */
@@ -28,7 +28,7 @@ class GroupController extends EntityAPIController {
   }
 
   /**
-   * Creates a group.
+   * Create a group.
    *
    * We first set up the values that are specific to the group schema
    * but then also run the EntityAPIController counterpart.

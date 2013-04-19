@@ -17,7 +17,18 @@ class GroupRoleController extends EntityAPIControllerExportable {
   }
 
   /**
-   * Creates a group role.
+   * Delete a group role.
+   *
+   * @see EntityAPIController::delete()
+   */
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
+    //@todo Clean up before deletion.
+
+    parent::delete($ids, $transaction);
+  }
+
+  /**
+   * Create a group role.
    *
    * We first set up the values that are specific to the group role schema
    * but then also run the EntityAPIControllerExportable counterpart.
