@@ -87,6 +87,21 @@ class Group extends Entity {
   }
 
   /**
+   * Remove an entity from a group.
+   *
+   * @param int $entity_id
+   *   The id of the entity.
+   * @param string $entity_type
+   *   The type of the entity.
+   */
+  public function removeEntity($entity_id, $entity_type) {
+    $query = db_delete('group_entity');
+    $query->condition('entity_id', $entity_id);
+    $query->condition('entity_type', $entity_type);
+    $query->execute();
+  }
+
+  /**
    * Get all child entities.
    *
    * @param bool $flat
@@ -182,6 +197,16 @@ class Group extends Entity {
    */
   public function addSubgroup($group) {
     $this->addEntity($group->gid, 'group', $group->type);
+  }
+
+  /**
+   * Remove a subgroup from a group.
+   *
+   * @param Group $group
+   *   The subgroup to remove from the group.
+   */
+  public function removeSubgroup($group) {
+    $this->removeEntity($group->gid, 'group');
   }
 
   /**
