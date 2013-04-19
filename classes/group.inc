@@ -67,6 +67,12 @@ class Group extends Entity {
    *   The bundle of the entity.
    */
   public function addEntity($entity_id, $entity_type, $bundle) {
+    // @todo Update this if Group::addMember() changes.
+    if ($entity_type = 'user') {
+      $this->addMember($entity_id, NULL);
+      return;
+    }
+
     $query = db_insert('group_entity');
     $query->fields(
       array(
