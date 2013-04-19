@@ -169,6 +169,16 @@ class Group extends Entity {
   }
 
   /**
+   * Add a subgroup to a group.
+   *
+   * @param Group $group
+   *   The subgroup to attach to the group.
+   */
+  public function addSubgroup($group) {
+    $this->addEntity($group->gid, 'group', $group->type);
+  }
+
+  /**
    * Retrieve all subgroups for a group.
    *
    * This retrieves all descendant subgroups, not just child groups.
