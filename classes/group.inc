@@ -321,7 +321,7 @@ class Group extends Entity {
   }
 
   /**
-   * Add this group as a parent of an entity.
+   * Add an entity to a group.
    *
    * @param int $entity_id
    *   The id of the entity.
@@ -330,7 +330,7 @@ class Group extends Entity {
    * @param string $bundle
    *   The bundle of the entity.
    */
-  public function addAsParent($entity_id, $entity_type, $bundle) {
+  public function addEntity($entity_id, $entity_type, $bundle) {
     $query = db_insert('group_entity');
     $query->fields(
       array(
