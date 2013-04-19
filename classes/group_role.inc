@@ -75,10 +75,10 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Retrieve all permissions defined for this role.
+   * Retrieve all permissions for this role.
    *
    * @return array
-   *   An array of known permission names.
+   *   An array of group permission names.
    */
   public function getPermissions() {
     $cache = &drupal_static('GroupRole::getPermissions', array());
