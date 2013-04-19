@@ -5,14 +5,6 @@
  */
 
 /**
- * Builds the role permission page.
- */
-function group_permission_form($form, &$form_state, $group_role) {
-
-  return $form;
-}
-
-/**
  * Generates the model type editing form.
  */
 function group_role_form($form, &$form_state, $group_role, $op = 'edit') {

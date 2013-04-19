@@ -5,6 +5,95 @@
  */
 
 /**
+ * Builds the role permission page.
+ *
+ * @param GroupType $type
+ *   The group type to show the permissions page for.
+ * @param GroupRole $role
+ *   (optional) A single group role to show the page for.
+ */
+function group_permission_form($form, &$form_state, $type, $role = NULL) {
+  // Retrieve role names for columns.
+  $roles = isset($role) ? array($role) : $type->getRoles();
+
+  // Fetch permissions for all roles or the one selected role.
+  $role_permissions = array();
+  foreach ($roles as $role) {
+    $role_permissions[$role->name] = $role->getPermissions();
+  }
+
+  // Render role/permission overview:
+  $options = array();
+  $module_info = system_get_info('module');
+  $hide_descriptions = system_admin_compact_mode();
+
+  // Get a list of all the modules implementing a hook_group_permission() and
+  // sort by display name.
+  $modules = array();
+  foreach (module_implements('group_permission') as $module) {
+    $modules[$module] = $module_info[$module]['name'];
+  }
+  asort($modules);
+
+  foreach ($modules as $module => $display_name) {
+    if ($permissions = module_invoke($module, 'group_permission')) {
+      $form['permission'][] = array(
+        '#markup' => $module_info[$module]['name'],
+        '#id' => $module,
+      );
+
+      foreach ($permissions as $perm => $perm_item) {
+        // Fill in default values for the permission.
+        $perm_item += array(
+          'description' => '',
+          'restrict access' => FALSE,
+          'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+        );
+
+        $options[$perm] = '';
+        $form['permission'][$perm] = array(
+          '#type' => 'item',
+          '#markup' => $perm_item['title'],
+          '#description' => theme('user_permission_description', array('permission_item' => $perm_item, 'hide' => $hide_descriptions)),
+        );
+
+        foreach ($roles as $name => $role) {
+          // Builds arrays for checked boxes for each role
+          if (in_array($perm, $role_permissions[$name])) {
+            $status[$name][] = $perm;
+          }
+        }
+      }
+    }
+  }
+
+  // Have to build checkboxes here after checkbox arrays are built
+  foreach ($roles as $name => $role) {
+    $form['checkboxes'][$name] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => isset($status[$name]) ? $status[$name] : array(),
+      '#attributes' => array('class' => array('rid-' . $name)),
+    );
+
+    $form['roles'][$name] = array(
+      '#markup' => check_plain($role->label),
+      '#tree' => TRUE,
+    );
+  }
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save permissions'),
+  );
+
+  $form['#attached']['js'][] = drupal_get_path('module', 'user') . '/user.permissions.js';
+
+  return $form;
+}
+
+/**
  * Generates the model type editing form.
  */
 function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
