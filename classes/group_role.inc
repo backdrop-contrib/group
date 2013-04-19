@@ -84,18 +84,18 @@ class GroupRole extends Entity {
     $cache = &drupal_static('GroupRole::getPermissions', array());
 
     // Check if the permissions have been fetched before.
-    if (isset($cache[$this->rid])) {
-      $permissions = $cache[$this->rid];
+    if (isset($cache[$this->name])) {
+      $permissions = $cache[$this->name];
     }
 
     // Otherwise, retrieve the permissions from the database.
     else {
       $query = db_select('group_permission', 'gp');
-      $query->addField('g', 'permission');
-      $query->condition('g.rid', $this->rid);
+      $query->addField('gp', 'permission');
+      $query->condition('gp.role', $this->name);
 
       $permissions = $query->execute()->fetchCol();
-      $cache[$this->rid] = $permissions;
+      $cache[$this->name] = $permissions;
     }
 
     return $permissions;
@@ -106,7 +106,7 @@ class GroupRole extends Entity {
    */
   public function clearPermissionCache() {
     $cache = &drupal_static('GroupRole::getPermissions', array());
-    unset($cache[$this->rid]);
+    unset($cache[$this->name]);
   }
 
   /**
@@ -119,11 +119,11 @@ class GroupRole extends Entity {
     $new = array_diff($permissions, $this->getPermissions());
 
     $query = db_insert('group_permission');
-    $query->fields(array('rid', 'permission'));
+    $query->fields(array('role', 'permission'));
 
     foreach ($new as $permission) {
       $query->values(array(
-        'rid' => $this->rid,
+        'role' => $this->role,
         'permission' => $permission,
       ));
     }
@@ -140,7 +140,7 @@ class GroupRole extends Entity {
    */
   public function revokePermissions(array $permissions) {
     $query = db_delete('group_permission');
-    $query->condition('rid', $this->rid);
+    $query->condition('role', $this->name);
     $query->condition('permission', $permissions, 'IN');
     $query->execute();
 
