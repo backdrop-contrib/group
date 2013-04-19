@@ -17,6 +17,17 @@ class GroupController extends EntityAPIController {
   }
 
   /**
+   * Deletes a group.
+   *
+   * @see EntityAPIController::delete()
+   */
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
+    //@todo Clean up before deletion.
+
+    parent::delete($ids, $transaction);
+  }
+
+  /**
    * Creates a group.
    *
    * We first set up the values that are specific to the group schema
