@@ -45,6 +45,130 @@ class Group extends Entity {
   }
 
   /**
+   * Retrieve all possible roles for a group.
+   *
+   * @return array
+   *   A list of group_role entities.
+   *
+   * @see GroupType::getRoles()
+   */
+  public function getRoles() {
+    return group_type_load($this->type)->getRoles();
+  }
+
+  /**
+   * Add an entity to a group.
+   *
+   * @param int $entity_id
+   *   The id of the entity.
+   * @param string $entity_type
+   *   The type of the entity.
+   * @param string $bundle
+   *   The bundle of the entity.
+   */
+  public function addEntity($entity_id, $entity_type, $bundle) {
+    $query = db_insert('group_entity');
+    $query->fields(
+      array(
+        'gid' => $this->gid,
+        'entity_id' => $entity_id,
+        'entity_type' => $entity_type,
+        'bundle' => $bundle,
+      )
+    );
+
+    $query->execute();
+  }
+
+  /**
+   * Get all child entities.
+   *
+   * @param bool $flat
+   *   Whether or not to flatten the result array.
+   *
+   * @return array
+   *   An array of child entities, keyed by their type, bundle and entity id.
+   *   When $flat is set to TRUE, the return value is one big array of
+   *   entities, which are keyed numerically and not by their entity id!
+   *
+   * @todo Statically cache the result.
+   */
+  public function getEntities($flat = FALSE) {
+    $entities = array(
+      'flat' => array(),
+      'full' => array(),
+    );
+
+    $query = db_select('group_entity', 'ge');
+    $query->condition('ge.gid', $this->gid);
+    $query->addField('ge', 'entity_type');
+    $query->addField('ge', 'entity_id');
+    $query->addField('ge', 'bundle');
+
+    // Divide the retrieved entity ids by type and bundle.
+    foreach ($query->execute() as $record) {
+      $entities['full'][$record->entity_type][$record->bundle][] = $record->entity_id;
+    }
+
+    // Actually load the retrieved entities.
+    foreach ($entities['full'] as $type => $bundles) {
+      foreach ($bundles as $bundle => $ids) {
+        $entities['full'][$type][$bundle] = entity_load($type, $ids);
+
+        // We run the entity_load() result through array_values() to prevent
+        // people from making the false assumption that we still return the
+        // entity ids as array keys.
+        $entities['flat'] = array_merge($entities['flat'], array_values($entities['full'][$type][$bundle]));
+      }
+    }
+
+    return $flat
+      ? $entities['flat']
+      : $entities['full'];
+  }
+
+  /**
+   * Get all child entities of a certain type.
+   *
+   * @param string $entity_type
+   *   The type of child entities.
+   * @param string $bundle
+   *   (optional) The bundle of the entity type.
+   *
+   * @return array
+   *   An array of child entities of a certain type and optionally bundle,
+   *   keyed by their entity id.
+   */
+  public function getEntitiesOfType($entity_type, $bundle = NULL) {
+    // We can reuse the cached result of Group::getEntities().
+    $children = $this->getEntities();
+
+    // Fetch the child entities of the requested type or
+    // initialize an empty array when none were found.
+    $children = isset($children[$entity_type]) ? $children[$entity_type] : array();
+
+    if (isset($bundle)) {
+      // Fetch the child entities of the requested bundle or
+      // initialize an empty array when none were found.
+      $entities = isset($children[$bundle]) ? $children[$bundle] : array();
+    }
+
+    // To maintain a consistent return value, we combine the
+    // entity's bundle arrays if no bundle was specified.
+    else {
+      $combined = array();
+
+      foreach ($children as $bundle => $entities) {
+        $combined += $entities;
+      }
+
+      $entities = $combined;
+    }
+
+    return $entities;
+  }
+
+  /**
    * Retrieve all subgroups for a group.
    *
    * This retrieves all descendant subgroups, not just child groups.
@@ -64,15 +188,43 @@ class Group extends Entity {
   }
 
   /**
-   * Retrieve all possible roles for a group.
+   * Add a user to a group with a specific role.
    *
-   * @return array
-   *   A list of group_role entities.
+   * @param int $user
+   *   The id of the user.
+   * @param string $role
+   *   The machine name of the group role.
    *
-   * @see GroupType::getRoles()
+   * @todo: Roles optional (like authenticated user)?
+   * @todo: Potentially refresh caches.
+   * @todo: Verify the role is valid for this group type.
    */
-  public function getRoles() {
-    return group_type_load($this->type)->getRoles();
+  public function addMember($uid, $role) {
+    $query = db_insert('group_user');
+    $query->fields(
+      array(
+        'gid' => $this->gid,
+        'uid' => $uid,
+        'role' => $role,
+      )
+    );
+
+    $query->execute();
+  }
+
+  /**
+   * Remove a user from a group.
+   *
+   * @param int $uid
+   *   The id of the user.
+   *
+   * @todo: Potentially refresh caches.
+   */
+  public function removeMember($uid) {
+    $query = db_delete('group_user');
+    $query->condition('gid', $this->gid);
+    $query->condition('uid', $uid);
+    $query->execute();
   }
 
   /**
@@ -173,95 +325,7 @@ class Group extends Entity {
   }
 
   /**
-   * Get all child entities.
-   *
-   * @param bool $flat
-   *   Whether or not to flatten the result array.
-   *
-   * @return array
-   *   An array of child entities, keyed by their type, bundle and entity id.
-   *   When $flat is set to TRUE, the return value is one big array of
-   *   entities, which are keyed numerically and not by their entity id!
-   *
-   * @todo Statically cache the result.
-   */
-  public function getEntities($flat = FALSE) {
-    $entities = array(
-      'flat' => array(),
-      'full' => array(),
-    );
-
-    $query = db_select('group_entity', 'ge');
-    $query->condition('ge.gid', $this->gid);
-    $query->addField('ge', 'entity_type');
-    $query->addField('ge', 'entity_id');
-    $query->addField('ge', 'bundle');
-
-    // Divide the retrieved entity ids by type and bundle.
-    foreach ($query->execute() as $record) {
-      $entities['full'][$record->entity_type][$record->bundle][] = $record->entity_id;
-    }
-
-    // Actually load the retrieved entities.
-    foreach ($entities['full'] as $type => $bundles) {
-      foreach ($bundles as $bundle => $ids) {
-        $entities['full'][$type][$bundle] = entity_load($type, $ids);
-
-        // We run the entity_load() result through array_values() to prevent
-        // people from making the false assumption that we still return the
-        // entity ids as array keys.
-        $entities['flat'] = array_merge($entities['flat'], array_values($entities['full'][$type][$bundle]));
-      }
-    }
-
-    return $flat
-      ? $entities['flat']
-      : $entities['full'];
-  }
-
-  /**
-   * Get all child entities of a certain type.
-   *
-   * @param string $entity_type
-   *   The type of child entities.
-   * @param string $bundle
-   *   (optional) The bundle of the entity type.
-   *
-   * @return array
-   *   An array of child entities of a certain type and optionally bundle,
-   *   keyed by their entity id.
-   */
-  public function getEntitiesOfType($entity_type, $bundle = NULL) {
-    // We can reuse the cached result of Group::getEntities().
-    $children = $this->getEntities();
-
-    // Fetch the child entities of the requested type or
-    // initialize an empty array when none were found.
-    $children = isset($children[$entity_type]) ? $children[$entity_type] : array();
-
-    if (isset($bundle)) {
-      // Fetch the child entities of the requested bundle or
-      // initialize an empty array when none were found.
-      $entities = isset($children[$bundle]) ? $children[$bundle] : array();
-    }
-
-    // To maintain a consistent return value, we combine the
-    // entity's bundle arrays if no bundle was specified.
-    else {
-      $combined = array();
-
-      foreach ($children as $bundle => $entities) {
-        $combined += $entities;
-      }
-
-      $entities = $combined;
-    }
-
-    return $entities;
-  }
-
-  /**
-   * Check if a given has a certain role for a group.
+   * Check if a given user has a certain role for a group.
    *
    * @param int $uid
    *   The uid of the given user.
@@ -278,69 +342,5 @@ class Group extends Entity {
     $query->condition('gu.role', $role);
 
     return !!$query->countQuery()->execute()->fetchfield();
-  }
-
-  /**
-   * Add a user to a group with a specific role.
-   *
-   * @param int $user
-   *   The id of the user.
-   * @param string $role
-   *   The machine name of the group role.
-   *
-   * @todo: Roles optional (like authenticated user)?
-   * @todo: Potentially refresh caches.
-   * @todo: Verify the role is valid for this group type.
-   */
-  public function addMember($uid, $role) {
-    $query = db_insert('group_user');
-    $query->fields(
-      array(
-        'gid' => $this->gid,
-        'uid' => $uid,
-        'role' => $role,
-      )
-    );
-
-    $query->execute();
-  }
-
-  /**
-   * Remove a user from a group.
-   *
-   * @param int $uid
-   *   The id of the user.
-   *
-   * @todo: Potentially refresh caches.
-   */
-  public function removeMember($uid) {
-    $query = db_delete('group_user');
-    $query->condition('gid', $this->gid);
-    $query->condition('uid', $uid);
-    $query->execute();
-  }
-
-  /**
-   * Add an entity to a group.
-   *
-   * @param int $entity_id
-   *   The id of the entity.
-   * @param string $entity_type
-   *   The type of the entity.
-   * @param string $bundle
-   *   The bundle of the entity.
-   */
-  public function addEntity($entity_id, $entity_type, $bundle) {
-    $query = db_insert('group_entity');
-    $query->fields(
-      array(
-        'gid' => $this->gid,
-        'entity_id' => $entity_id,
-        'entity_type' => $entity_type,
-        'bundle' => $bundle,
-      )
-    );
-
-    $query->execute();
   }
 }
