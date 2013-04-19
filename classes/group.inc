@@ -399,4 +399,42 @@ class Group extends Entity {
   public function userHasRole($uid, $role) {
     return in_array($role, $this->userRoles($uid));
   }
+
+  /**
+   * Retrieve a user's permissions for a group.
+   *
+   * @param int $uid
+   *   The uid of the user to retrieve the permissions for.
+   *
+   * @return array
+   *   An array of group permission names.
+   *
+   * @todo Cache this?
+   */
+  public function userPermissions($uid) {
+    $permissions = array();
+
+    foreach ($this->groupRoles($uid) as $role) {
+      foreach ($role->getPermissions() as $permission) {
+        $permissions[] = $permission;
+      }
+    }
+
+    return array_unique($permissions);
+  }
+
+  /**
+   * Check if a given user has a certain group permission.
+   *
+   * @param int $uid
+   *   The uid of the given user.
+   * @param string $permission
+   *   The name of the group permission.
+   *
+   * @return bool
+   *   Whether the user has the specified permission.
+   */
+  public function userHasPermission($uid, $permission) {
+    return in_array($permission, $this->userPermissions($uid));
+  }
 }
