@@ -11,8 +11,14 @@
  *   The group type to show the permissions page for.
  * @param GroupRole $role
  *   (optional) A single group role to show the page for.
+ *
+ * @todo Implement theme_group_admin_permissions().
+ * @todo Implement $role menu callback.
+ * @todo Implement anonymous / registered / admin.
  */
 function group_permission_form($form, &$form_state, $type, $role = NULL) {
+  $form['#theme'] = 'user_admin_permissions';
+
   // Retrieve role names for columns.
   $roles = isset($role) ? array($role) : $type->getRoles();
 
@@ -21,6 +27,13 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
   foreach ($roles as $role) {
     $role_permissions[$role->name] = $role->getPermissions();
   }
+
+  // Store $roles for use when saving the data.
+  // @todo rename to roles when we wrote theme_...
+  $form['role_names'] = array(
+    '#type' => 'value',
+    '#value' => $roles,
+  );
 
   // Render role/permission overview:
   $options = array();
@@ -76,7 +89,7 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
       '#attributes' => array('class' => array('rid-' . $name)),
     );
 
-    $form['roles'][$name] = array(
+    $form['role_names'][$name] = array(
       '#markup' => check_plain($role->label),
       '#tree' => TRUE,
     );

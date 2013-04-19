@@ -149,6 +149,19 @@ function group_menu() {
 }
 
 /**
+ * Implements hook_group_permission().
+ */
+function group_group_permission() {
+  $permissions = array(
+    'view group' => array(
+      'title' => t('View group'),
+    ),
+  );
+
+  return $permissions;
+}
+
+/**
  * Implements hook_permission().
  */
 function group_permission() {
