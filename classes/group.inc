@@ -45,7 +45,7 @@ class Group extends Entity {
   }
 
   /**
-   * Retrieves all subgroups for this group.
+   * Retrieve all subgroups for a group.
    *
    * This retrieves all descendant subgroups, not just child groups.
    *
@@ -64,7 +64,7 @@ class Group extends Entity {
   }
 
   /**
-   * Retrieves all possible roles for this group.
+   * Retrieve all possible roles for a group.
    *
    * @return array
    *   A list of group_role entities.
@@ -80,7 +80,7 @@ class Group extends Entity {
    *
    * @return array
    *   An array of arrays for every possible role name, each containing
-   *   the uids of the users having that role for this group.
+   *   the uids of the users having that role for the group.
    */
   public function getMembers() {
     $query = db_select('group_user', 'gu');
@@ -103,15 +103,15 @@ class Group extends Entity {
    *
    * @return array
    *   An array of arrays for every possible role name, each containing
-   *   the uids of the users having that role for this group or any
+   *   the uids of the users having that role for the group or any
    *   of its subgroups.
    */
   public function getMembersRecursive() {
-    // Start of by gathering all members of this group.
+    // Start of by gathering all members of the group.
     $members = $this->getMembers();
 
-    // Gather all members of each of this group's subgroups
-    // and add them to the members of this group.
+    // Gather all members of each of the group's subgroups
+    // and add them to the members of the group.
     foreach ($this->getSubgroups() as $subgroup) {
       foreach ($subgroup->getMembers() as $role => $uids) {
         // Prevent PHP notices when this role wasn't set yet.
@@ -261,7 +261,7 @@ class Group extends Entity {
   }
 
   /**
-   * Check if a given has a certain role for this group.
+   * Check if a given has a certain role for a group.
    *
    * @param int $uid
    *   The uid of the given user.
@@ -281,13 +281,14 @@ class Group extends Entity {
   }
 
   /**
-   * Add a user to the group with a specific role.
+   * Add a user to a group with a specific role.
    *
    * @param int $user
    *   The id of the user.
    * @param string $role
    *   The machine name of the group role.
    *
+   * @todo: Roles optional (like authenticated user)?
    * @todo: Potentially refresh caches.
    * @todo: Verify the role is valid for this group type.
    */
