@@ -73,4 +73,118 @@ class GroupRole extends Entity {
       && empty($this->is_new)
       && (($this->status & ENTITY_IN_CODE) || ($this->status & ENTITY_FIXED));
   }
+
+  /**
+   * Retrieve all permissions defined for this role.
+   *
+   * @return array
+   *   An array of known permission names.
+   */
+  public function getPermissions() {
+    $cache = &drupal_static('GroupRole::getPermissions', array());
+
+    // Check if the permissions have been fetched before.
+    if (isset($cache[$this->rid])) {
+      $permissions = $cache[$this->rid];
+    }
+
+    // Otherwise, retrieve the permissions from the database.
+    else {
+      $query = db_select('group_permission', 'gp');
+      $query->addField('g', 'permission');
+      $query->condition('g.rid', $this->rid);
+
+      $permissions = $query->execute()->fetchCol();
+      $cache[$this->rid] = $permissions;
+    }
+
+    return $permissions;
+  }
+
+  /**
+   * Clear the permission cache for this role only.
+   */
+  public function clearPermissionCache() {
+    $cache = &drupal_static('GroupRole::getPermissions', array());
+    unset($cache[$this->rid]);
+  }
+
+  /**
+   * Grant permissions to this role.
+   *
+   * @param array $permissions
+   *   A list of permission names to grant.
+   */
+  public function grantPermissions(array $permissions) {
+    $new = array_diff($permissions, $this->getPermissions());
+
+    $query = db_insert('group_permission');
+    $query->fields(array('rid', 'permission'));
+
+    foreach ($new as $permission) {
+      $query->values(array(
+        'rid' => $this->rid,
+        'permission' => $permission,
+      ));
+    }
+
+    $query->execute();
+    $this->clearPermissionCache();
+  }
+
+  /**
+   * Revoke permissions from this role.
+   *
+   * @param array $permissions
+   *   A list of permission names to revoke.
+   */
+  public function revokePermissions(array $permissions) {
+    $query = db_delete('group_permission');
+    $query->condition('rid', $this->rid);
+    $query->condition('permission', $permissions, 'IN');
+    $query->execute();
+
+    $this->clearPermissionCache();
+  }
+
+  /**
+   * Change permissions for this role.
+   *
+   * This function may be used to grant and revoke multiple permissions at once.
+   * For example, when a form exposes checkboxes to configure permissions for a
+   * role, the form submit handler may directly pass the submitted values for the
+   * checkboxes form element to this function.
+   *
+   * @param $permissions
+   *   An associative array, where the key holds the permission name and the value
+   *   determines whether to grant or revoke that permission. Any value that
+   *   evaluates to TRUE will cause the permission to be granted. Any value that
+   *   evaluates to FALSE will cause the permission to be revoked.
+   *   @code
+   *     array(
+   *       'administer users' => 0,      // Revoke 'administer users'
+   *       'administer group' => FALSE,  // Revoke 'administer group'
+   *       'create subgroups' => 1,      // Grant 'create subgroups'
+   *       'edit group' => TRUE,         // Grant 'edit group'
+   *       'view group' => 'view group', // Grant 'view group'
+   *     )
+   *   @endcode
+   *   Existing permissions are not changed, unless specified in $permissions.
+   *
+   * @see GroupRole::grantPermissions()
+   * @see GroupRole::revokePermissions()
+   */
+  public function changePermissions(array $permissions) {
+    // Grant new permissions for the role.
+    $grant = array_filter($permissions);
+    if (!empty($grant)) {
+      $this->grantPermissions(array_keys($grant));
+    }
+
+    // Revoke permissions for the role.
+    $revoke = array_diff_assoc($permissions, $grant);
+    if (!empty($revoke)) {
+      $this->revokePermissions(array_keys($revoke));
+    }
+  }
 }
