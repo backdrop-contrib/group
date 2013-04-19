@@ -366,10 +366,30 @@ class Group extends Entity {
   }
 
   /**
+   * Retrieve a user's roles for a group.
+   *
+   * @param int $uid
+   *   The uid of the user to retrieve the roles for.
+   *
+   * @return array
+   *   An array of role names.
+   *
+   * @todo Cache this?
+   */
+  public function userRoles($uid) {
+    $query = db_select('group_user', 'gu');
+    $query->addField('gu', 'role');
+    $query->condition('gu.gid', $this->gid);
+    $query->condition('gu.uid', $uid);
+
+    return $query->execute()->fetchCol();
+  }
+
+  /**
    * Check if a given user has a certain role for a group.
    *
    * @param int $uid
-   *   The uid of the given user.
+   *   The uid of the user to check for.
    * @param string $role
    *   The machine name of the group role.
    *
@@ -377,11 +397,6 @@ class Group extends Entity {
    *   Whether the user has the specified role.
    */
   public function userHasRole($uid, $role) {
-    $query = db_select('group_user', 'gu');
-    $query->condition('gu.gid', $this->gid);
-    $query->condition('gu.uid', $uid);
-    $query->condition('gu.role', $role);
-
-    return !!$query->countQuery()->execute()->fetchfield();
+    return in_array($role, $this->userRoles($uid));
   }
 }
