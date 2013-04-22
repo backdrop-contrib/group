@@ -83,8 +83,8 @@ function group_type_form_submit_delete(&$form, &$form_state) {
  *   The group type to show the permissions page for.
  * @param GroupRole $role
  *   (optional) A single group role to show the page for.
+ *   When $role is provided, $type is ignored.
  *
- * @todo Implement $role menu callback.
  * @todo Implement anonymous / registered / admin.
  */
 function group_permission_form($form, &$form_state, $type, $role = NULL) {
@@ -92,19 +92,24 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
   $hide = system_admin_compact_mode();
 
   // Retrieve role names for columns.
-  $roles = isset($role) ? array($role) : $type->getRoles();
-
-  // Fetch permissions for all roles or the one selected role.
-  $role_permissions = array();
-  foreach ($roles as $role) {
-    $role_permissions[$role->name] = $role->getPermissions();
-  }
+  $roles = isset($role) ? array($role->name => $role) : $type->getRoles();
 
   // Store $roles for use in the theme function and submit handler.
   $form['roles'] = array(
     '#type' => 'value',
     '#value' => $roles,
   );
+
+  // Shortcut to the theme function if no roles are available.
+  if (empty($roles)) {
+    return $form;
+  }
+
+  // Fetch permissions for all roles or the one selected role.
+  $role_permissions = array();
+  foreach ($roles as $role) {
+    $role_permissions[$role->name] = $role->getPermissions();
+  }
 
   // Get a list of all the modules implementing a hook_group_permission()
   // and sort by display name.
@@ -232,6 +237,11 @@ function theme_group_permission_description($variables) {
 function theme_group_permission_form($variables) {
   $form = $variables['form'];
   $roles = $form['roles']['#value'];
+
+  // Shortcircuit when no roles are defined.
+  if (empty($roles)) {
+    return '<p>' . t('You have not created any roles for this group type yet. Go to the <a href="@create-role">group role creation page</a> to add a new group role.', array('@create-role' => url('admin/group/role/add'))) . '</p>';
+  }
 
   // Theme the rows of the permission table.
   foreach (element_children($form['permissions']) as $pname) {

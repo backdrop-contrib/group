@@ -25,25 +25,46 @@ class GroupRoleUIController extends EntityDefaultUIController {
     $items[$this->path]['type'] = MENU_LOCAL_TASK;
     $items[$this->path]['weight'] = 0;
 
-    // @todo Temporarily disabled until we figure out where we want this.
-    /*
-    $items["$this->path/manage/%entity_object/permissions"] = array(
+    $items["$this->path/manage/%group_role/permissions"] = array(
       'title' => 'Permissions',
-      'description' => 'Edit role permissions',
+      'description' => 'Edit permissions for this role',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('group_permission_form', 4),
-      'load arguments' => array($this->entityType),
+      'page arguments' => array('group_permission_form', NULL, 4),
       //@todo Check this.
       'access callback' => 'user_access',
       'access arguments' => array('administer group types'),
-      'file' => 'admin/group_role.inc',
+      'file' => 'admin/group_type.inc',
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
-      'weight' => 5,
+      'weight' => 0,
     );
-    */
 
     return $items;
+  }
+
+  /**
+   * Returns the operation count for calculating colspans.
+   */
+  protected function operationCount() {
+    return parent::operationCount() + 1;
+  }
+
+  /**
+   * Generates the row for the passed entity and may be overridden in order to
+   * customize the rows.
+   *
+   * @param $additional_cols
+   * Additional columns to be added after the entity label column.
+   */
+  protected function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
+    $row = parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
+    $new = array(
+      l(t('permissions'), $this->path . '/manage/' . $id . '/permissions')
+    );
+
+    array_splice($row, 3, 0, $new);
+
+    return $row;
   }
 
   //@todo Show a table of roles per group type.
