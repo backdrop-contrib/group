@@ -5,7 +5,7 @@
  */
 
 /**
- * Generates the model type editing form.
+ * Generates the group role editing form.
  */
 function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
   if ($op == 'clone') {

@@ -132,6 +132,26 @@ function group_entity_info_alter(&$entity_info) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function group_theme() {
+  $theme['group_permission_description'] = array(
+    'variables' => array(
+      'permission' => NULL,
+      'hide' => NULL,
+    ),
+    'file' => 'admin/group_type.inc',
+  );
+
+  $theme['group_permission_form'] = array(
+    'render element' => 'form',
+    'file' => 'admin/group_type.inc',
+  );
+
+  return $theme;
+}
+
+/**
  * Implements hook_menu().
  */
 function group_menu() {
@@ -153,6 +173,11 @@ function group_menu() {
  */
 function group_group_permission() {
   $permissions = array(
+    'administer group' => array(
+      'title' => t('Administer group'),
+      'description' => t('Administer the group, its users and permissions'),
+      'restrict access' => TRUE,
+    ),
     'view group' => array(
       'title' => t('View group'),
     ),
