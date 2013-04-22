@@ -123,7 +123,7 @@ class GroupRole extends Entity {
 
     foreach ($new as $permission) {
       $query->values(array(
-        'role' => $this->role,
+        'role' => $this->name,
         'permission' => $permission,
       ));
     }
