@@ -86,7 +86,7 @@ function group_add_page() {
     $output =  theme('admin_block_content', array('content' => $content));
   }
   else {
-    $output = '<p>' . t('You have not created any group types yet. Go to the <a href="@create-group">group type creation page</a> to add a new group type.', array('@create-group' => url('admin/structure/group_type/add'))) . '</p>';
+    $output = '<p>' . t('You have not created any group types yet. Go to the <a href="@create-group">group type creation page</a> to add a new group type.', array('@create-group' => url('admin/group/type/add'))) . '</p>';
   }
 
   return $output;
