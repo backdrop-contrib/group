@@ -40,21 +40,20 @@ class GroupUIController extends EntityDefaultUIController {
     $items['group/autocomplete'] = array(
       'title' => 'Group autocomplete',
       'page callback' => 'group_autocomplete',
-      'access callback' => 'user_access',
-      'access arguments' => array('view groups'),
+      // @todo Check this.
+      'access callback' => TRUE,
       'file' => 'pages/group.inc',
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_CALLBACK,
     );
 
-    $items['group/autocomplete/type/%entity_object'] = array(
+    $items['group/autocomplete/type/%group_type'] = array(
       'title' => 'Group type specific autocomplete',
       'title callback' => 'check_plain',
       'page callback' => 'group_autocomplete_by_type',
       'page arguments' => array(3),
-      'load arguments' => array('group_type'),
-      'access callback' => 'user_access',
-      'access arguments' => array('view groups'),
+      // @todo Check this.
+      'access callback' => TRUE,
       'file' => 'pages/group.inc',
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_CALLBACK,
@@ -63,14 +62,13 @@ class GroupUIController extends EntityDefaultUIController {
     $items['group/add'] = array(
       'title' => 'Add group',
       'page callback' => 'group_add_page',
-      'access callback' => '_node_add_access',
-      'access callback' => TRUE,
+      'access callback' => '_group_add_access',
       'file' => 'pages/group.inc',
       'file path' => drupal_get_path('module', 'group'),
     );
 
     foreach (group_types() as $name => $type) {
-      $entity = entity_create($this->entityType, array());
+      $entity = entity_create('group', array());
       $entity->type = $name;
 
       $items["group/add/$name"] = array(
@@ -78,9 +76,9 @@ class GroupUIController extends EntityDefaultUIController {
         'title callback' => 'check_plain',
         'description' => "Create $type->label",
         'page callback' => 'entity_ui_get_form',
-        'page arguments' => array($this->entityType, $entity, 'add'),
-        'access callback' => 'entity_access',
-        'access arguments' => array('create', $this->entityType),
+        'page arguments' => array('group', $entity, 'add'),
+        'access callback' => 'group_entity_access',
+        'access arguments' => array('create', NULL, NULL, 'group', $name),
         'file' => 'forms/group.inc',
         'file path' => drupal_get_path('module', 'group'),
       );
@@ -90,7 +88,7 @@ class GroupUIController extends EntityDefaultUIController {
       'title' => 'Delete',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_operation_form', 'group', 1, 'delete'),
-      'access callback' => 'group_access',
+      'access callback' => 'group_entity_access',
       'access arguments' => array('delete', 1),
       'weight' => 1,
       'type' => MENU_LOCAL_TASK,

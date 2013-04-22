@@ -5,6 +5,34 @@
  */
 
 /**
+ * Determine whether the user has a given privilege for a group.
+ *
+ * Important: Group access should always trump user access. If a user has the
+ * right to view nodes of type Page, he can still face an 'Access denied'
+ * message if he tries to view a Page of a private group.
+ *
+ * @param string $permission
+ *   The permission, such as "administer group", being checked for.
+ * @param Group $group
+ *   The group to check the permission on.
+ * @param object $account
+ *   (optional) The account to check, if not given use currently logged in user.
+ *
+ * @return bool
+ *   Wether the user has the requested permission.
+ */
+function group_access($permission, $group, $account = NULL) {
+  global $user;
+
+  if (!isset($account)) {
+    $account = $user;
+  }
+
+  return user_access('bypass group access', $account)
+    || $group->userHasPermission($account->uid, $permission);
+}
+
+/**
  * Get the parent groups for an entity.
  *
  * @param string $entity_type

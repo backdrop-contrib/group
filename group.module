@@ -45,7 +45,7 @@ function group_entity_info() {
       'bundle' => 'type',
       'label' => 'title',
     ),
-    'access callback' => 'group_access',
+    'access callback' => 'group_entity_access',
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
     'bundles' => array(),
@@ -195,77 +195,74 @@ function group_permission() {
       'title' => t('Configure Group module'),
       'restrict access' => TRUE,
     ),
+    'administer group types' => array(
+      'title' => t('Administer group types, their roles and permissions'),
+      'restrict access' => TRUE,
+    ),
     'bypass group access' => array(
       'title' => t('Bypass group access control'),
       'description' => t('View, edit and delete all groups regardless of permission restrictions'),
       'restrict access' => TRUE,
     ),
-    'administer group types' => array(
-      'title' => t('Administer group types, their roles and permissions'),
-      'restrict access' => TRUE,
-    ),
-    'administer groups' => array(
-      'title' => t('Administer groups'),
-      'restrict access' => TRUE,
-    ),
     'access group overview' => array(
       'title' => t('Access the group overview page'),
     ),
-    'create groups' => array(
-      'title' => t('Create groups'),
-    ),
-    'view groups' => array(
-      'title' => t('View groups'),
-    ),
-    'edit any groups' => array(
-      'title' => t('Edit any groups'),
-      'restrict access' => TRUE,
-    ),
-    // @todo See todo in group_access.
-    //'edit own groups' => array(
-    //  'title' => t('Edit own groups'),
-    //),
-    'delete any groups' => array(
-      'title' => t('Delete any groups'),
-      'restrict access' => TRUE,
-    ),
-    // @todo See todo in group_access.
-    //'delete own groups' => array(
-    //  'title' => t('Delete own groups'),
-    //),
   );
+
+  // Generate standard node permissions for all applicable node types.
+  foreach (group_types() as $name => $type) {
+    $permissions["create $name group"] = array(
+      'title' => t('%type_name: Create new group', array('%type_name' => $type->label)),
+    );
+  }
 
   return $permissions;
 }
 
 /**
  * Entity API access callback for groups.
+ *
+ * @param string $group_type
+ *   (optional) The group type to create. Only needs to be specified
+ *   when $op is 'create'.
  */
-function group_access($op, $group, $account = NULL, $entity_type = NULL) {
+function group_entity_access($op, $group, $account = NULL, $entity_type = NULL, $group_type = NULL) {
   switch ($op) {
     case 'create':
-      return user_access('administer groups', $account)
-        || user_access('create groups', $account);
+      return !empty($group_type) && user_access("create $group_type group", $account);
     case 'view':
-      return user_access('administer groups', $account)
-        || user_access('view groups', $account);
+      return group_access('administer group', $group, $account)
+        || group_access('view group', $group, $account);
     case 'update':
-      return user_access('administer groups', $account)
-        || user_access('edit any groups', $account);
-        // @todo: should use $group->isAdmin($uid).
-        //|| (user_access('edit own groups', $account) && ($group->uid == $account->uid));
     case 'delete':
-      return user_access('administer groups', $account)
-        || user_access('delete any groups', $account);
-        // @todo: should use $group->isAdmin($uid).
-        //|| (user_access('delete own groups', $account) && ($group->uid == $account->uid));
+      return group_access('administer group', $group, $account);
   }
 }
 
 /**
- * Entity API access callback for group types.
+ * Access callback: Checks whether the user has permission to add a group.
  */
-function group_type_access($op, $group, $account = NULL, $entity_type = NULL) {
+function _group_add_access() {
+  foreach (group_types() as $type) {
+    if (group_entity_access('create', NULL, NULL, 'group', $type->name)) {
+      return TRUE;
+    }
+  }
+
+  if (user_access('administer group types')) {
+    // There are no group types defined that the user has permission to create,
+    // but the user does have the permission to administer the content types, so
+    // grant them access to the page anyway.
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Entity API access callback for group types and roles.
+ */
+function group_type_access($op, $group_type_or_role, $account = NULL, $entity_type = NULL) {
   return user_access('administer group types', $account);
 }
 
