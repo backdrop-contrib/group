@@ -40,7 +40,7 @@ class GroupUIController extends EntityDefaultUIController {
     $items['group/autocomplete'] = array(
       'title' => 'Group autocomplete',
       'page callback' => 'group_autocomplete',
-      // @todo Check this.
+      // TRUE because of individual 'view' access checks on every group.
       'access callback' => TRUE,
       'file' => 'pages/group.inc',
       'file path' => drupal_get_path('module', 'group'),
@@ -52,7 +52,7 @@ class GroupUIController extends EntityDefaultUIController {
       'title callback' => 'check_plain',
       'page callback' => 'group_autocomplete_by_type',
       'page arguments' => array(3),
-      // @todo Check this.
+      // TRUE because of individual 'view' access checks on every group.
       'access callback' => TRUE,
       'file' => 'pages/group.inc',
       'file path' => drupal_get_path('module', 'group'),
