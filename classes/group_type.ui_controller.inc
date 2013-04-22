@@ -25,12 +25,11 @@ class GroupTypeUIController extends EntityDefaultUIController {
     $items[$this->path]['type'] = MENU_LOCAL_TASK;
     $items[$this->path]['weight'] = -5;
 
-    $items["$this->path/manage/%entity_object/permissions"] = array(
+    $items["$this->path/manage/%group_type/permissions"] = array(
       'title' => 'Permissions',
       'description' => 'Edit permissions for groups of this type',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_permission_form', 4),
-      'load arguments' => array($this->entityType),
       //@todo Check this.
       'access callback' => 'user_access',
       'access arguments' => array('administer group types'),
