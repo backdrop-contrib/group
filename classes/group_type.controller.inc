@@ -25,6 +25,21 @@ class GroupTypeController extends EntityAPIControllerExportable {
     //@todo Clean up before deletion.
 
     parent::delete($ids, $transaction);
+
+    // Rebuild the menu cache so the group/add page works.
+    menu_rebuild();
+  }
+
+  /**
+   * Save a group type.
+   *
+   * @see EntityAPIController::save()
+   */
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
+    parent::save($entity, $transaction);
+
+    // Rebuild the menu cache so the group/add page works.
+    menu_rebuild();
   }
 
   /**
