@@ -22,7 +22,7 @@ class GroupRoleController extends EntityAPIControllerExportable {
    * @see EntityAPIController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
-    //@todo Clean up before deletion.
+    //@todo Clean up permissions before deletion.
 
     parent::delete($ids, $transaction);
   }
@@ -49,5 +49,42 @@ class GroupRoleController extends EntityAPIControllerExportable {
     );
 
     return parent::create($values);
+  }
+
+  /**
+   * Export a group role.
+   *
+   * Exports a group role and its permissions.
+   */
+  public function export($entity, $prefix = '') {
+    $entity->permissions = $entity->getPermissions();
+
+    return parent::export($entity, $prefix);
+  }
+
+  /**
+   * Import a group role.
+   *
+   * Imports a group role and its permissions.
+   */
+  public function import($export) {
+    $vars = drupal_json_decode($export);
+
+    if (is_array($vars)) {
+      // Store the permissions in a temporary variable.
+      $permissions =  $vars['permissions'];
+
+      // Remove the permissions property before creating the group role.
+      unset($vars['permissions']);
+
+      if ($group_role = $this->create($vars)) {
+        // Store the exported permissions on the group role.
+        $group_role->grantPermissions($permissions);
+
+        return $group_role;
+      }
+    }
+
+    return FALSE;
   }
 }

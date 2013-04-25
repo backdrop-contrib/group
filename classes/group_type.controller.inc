@@ -22,7 +22,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * @see EntityAPIController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
-    //@todo Clean up before deletion.
+    //@todo Clean up local roles before deletion.
 
     parent::delete($ids, $transaction);
 
@@ -63,5 +63,52 @@ class GroupTypeController extends EntityAPIControllerExportable {
     );
 
     return parent::create($values);
+  }
+
+  /**
+   * Export a group type.
+   *
+   * Exports a group type and its group roles.
+   *
+   * @todo Only export local roles.
+   */
+  public function export($entity, $prefix = '') {
+    // Get the GroupRole controller.
+    $controller = entity_get_controller('group_role');
+
+    // Add group roles to the group type.
+    foreach ($entity->getRoles() as $role) {
+      $entity->roles[] = drupal_json_decode($controller->export($role, $prefix));
+    }
+
+    return parent::export($entity, $prefix);
+  }
+
+  /**
+   * Import a group type.
+   *
+   * Imports a group type and its group roles.
+   */
+  public function import($export) {
+    $vars = drupal_json_decode($export);
+
+    if (is_array($vars)) {
+      if (isset($vars['roles'])) {
+        // Get the GroupRole controller.
+        $controller = entity_get_controller('group_role');
+
+        // Import the group roles for this group type.
+        foreach ($vars['roles'] as $role) {
+          $controller->save($controller->import(entity_var_json_export($role)));
+        }
+
+        // Remove the roles property before creating the group type.
+        unset($vars['roles']);
+      }
+
+      return $this->create($vars);
+    }
+
+    return FALSE;
   }
 }
