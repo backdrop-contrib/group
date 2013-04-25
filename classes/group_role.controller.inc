@@ -22,9 +22,48 @@ class GroupRoleController extends EntityAPIControllerExportable {
    * @see EntityAPIController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
-    //@todo Clean up permissions before deletion.
+    // Clean up permissions before deletion.
+    foreach (group_roles($ids) as $role) {
+      $role->revokePermissions();
+    }
 
     parent::delete($ids, $transaction);
+  }
+
+  /**
+   * Save a group role.
+   *
+   * @see EntityAPIController::save()
+   */
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
+    $is_new = !empty($entity->is_new) || empty($entity->{$this->idKey});
+    $is_rebuild = !empty($entity->is_rebuild);
+
+    // Delete all attached permissions if it is a rebuild.
+    if (!$is_new && $is_rebuild) {
+      $entity->revokePermissions();
+    }
+
+    // Create (or recreate) permissions if the group type is new or rebuilt.
+    if ($is_new && isset($entity->permissions)) {
+      // Store the exported permissions on the group role.
+      $entity->grantPermissions($entity->permissions);
+
+      // Remove the permissions property before creating the group role.
+      unset($entity->permissions);
+    }
+
+    // Add the ENTITY_CUSTOM flag the group type the role belongs to.
+    $group_type = group_type_load($entity->type);
+    $group_type->status |= ENTITY_CUSTOM;
+    group_type_save($group_type);
+
+    $return = parent::save($entity, $transaction);
+
+    // Rebuild the menu cache so the group/add page works.
+    menu_rebuild();
+
+    return $return;
   }
 
   /**
@@ -60,31 +99,5 @@ class GroupRoleController extends EntityAPIControllerExportable {
     $entity->permissions = $entity->getPermissions();
 
     return parent::export($entity, $prefix);
-  }
-
-  /**
-   * Import a group role.
-   *
-   * Imports a group role and its permissions.
-   */
-  public function import($export) {
-    $vars = drupal_json_decode($export);
-
-    if (is_array($vars)) {
-      // Store the permissions in a temporary variable.
-      $permissions =  $vars['permissions'];
-
-      // Remove the permissions property before creating the group role.
-      unset($vars['permissions']);
-
-      if ($group_role = $this->create($vars)) {
-        // Store the exported permissions on the group role.
-        $group_role->grantPermissions($permissions);
-
-        return $group_role;
-      }
-    }
-
-    return FALSE;
   }
 }

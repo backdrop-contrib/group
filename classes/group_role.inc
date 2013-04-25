@@ -114,6 +114,8 @@ class GroupRole extends Entity {
    *
    * @param array $permissions
    *   A list of permission names to grant.
+   *
+   * @todo Flag parent type as ENTITY_CUSTOM.
    */
   public function grantPermissions(array $permissions) {
     $new = array_diff($permissions, $this->getPermissions());
@@ -136,12 +138,18 @@ class GroupRole extends Entity {
    * Revoke permissions from a role.
    *
    * @param array $permissions
-   *   A list of permission names to revoke.
+   *   (Optional) A list of permission names to revoke. Will revoke all
+   *   permissions from the group role if $permissions is left blank.
+   *
+   * @todo Flag parent type as ENTITY_CUSTOM.
    */
-  public function revokePermissions(array $permissions) {
+  public function revokePermissions(array $permissions = array()) {
     $query = db_delete('group_permission');
     $query->condition('role', $this->name);
-    $query->condition('permission', $permissions, 'IN');
+
+    if ($permissions) {
+      $query->condition('permission', $permissions, 'IN');
+    }
     $query->execute();
 
     $this->clearPermissionCache();

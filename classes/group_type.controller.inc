@@ -22,7 +22,12 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * @see EntityAPIController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
-    //@todo Clean up local roles before deletion.
+    // Clean up local roles before deletion.
+    foreach (group_types($ids) as $type) {
+      foreach($type->getRoles() as $role) {
+        group_role_delete($role);
+      }
+    }
 
     parent::delete($ids, $transaction);
 
@@ -36,10 +41,37 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * @see EntityAPIController::save()
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
-    parent::save($entity, $transaction);
+    $is_new = !empty($entity->is_new) || empty($entity->{$this->idKey});
+    $is_rebuild = !empty($entity->is_rebuild);
+
+    // Delete all attached group roles if it is a rebuild.
+    if (!$is_new && $is_rebuild) {
+      foreach($entity->getRoles() as $role) {
+        group_role_delete($role);
+      }
+    }
+
+    // Create (or recreate) group roles if the group type is new or rebuilt.
+    if (($is_new || $is_rebuild) && isset($entity->roles)) {
+      // Get the GroupRole controller.
+      $controller = entity_get_controller('group_role');
+
+      // Import the group roles for this group type.
+      // @todo group_role_import() and group_role_save().
+      foreach ($entity->roles as $role) {
+        $controller->save($controller->import(entity_var_json_export($role)));
+      }
+
+      // Remove the roles property before saving the group type.
+      unset($entity->roles);
+    }
+
+    $return = parent::save($entity, $transaction);
 
     // Rebuild the menu cache so the group/add page works.
     menu_rebuild();
+
+    return $return;
   }
 
   /**
@@ -82,33 +114,5 @@ class GroupTypeController extends EntityAPIControllerExportable {
     }
 
     return parent::export($entity, $prefix);
-  }
-
-  /**
-   * Import a group type.
-   *
-   * Imports a group type and its group roles.
-   */
-  public function import($export) {
-    $vars = drupal_json_decode($export);
-
-    if (is_array($vars)) {
-      if (isset($vars['roles'])) {
-        // Get the GroupRole controller.
-        $controller = entity_get_controller('group_role');
-
-        // Import the group roles for this group type.
-        foreach ($vars['roles'] as $role) {
-          $controller->save($controller->import(entity_var_json_export($role)));
-        }
-
-        // Remove the roles property before creating the group type.
-        unset($vars['roles']);
-      }
-
-      return $this->create($vars);
-    }
-
-    return FALSE;
   }
 }
