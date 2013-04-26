@@ -75,6 +75,15 @@ class GroupRole extends Entity {
   }
 
   /**
+   * Flag the group type the role belongs to as ENTITY_CUSTOM.
+   */
+  public function typeIsCustom() {
+    $group_type = group_type_load($this->type);
+    $group_type->status |= ENTITY_CUSTOM;
+    group_type_save($group_type);
+  }
+
+  /**
    * Retrieve all permissions for a group role.
    *
    * @return array
