@@ -75,12 +75,16 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Flag the group type the role belongs to as ENTITY_CUSTOM.
+   * Flag the parent group type as ENTITY_CUSTOM.
+   *
+   * If the group role belongs to a group type, the group type it belongs
+   * to will be flagged as ENTITY_CUSTOM.
+   *
+   * @todo Conditional check for global roles.
    */
-  public function typeIsCustom() {
-    $group_type = group_type_load($this->type);
-    $group_type->status |= ENTITY_CUSTOM;
-    group_type_save($group_type);
+  public function flagTypeCustom() {
+    // Saving without $entity->is_rebuild automatically sets ENTITY_CUSTOM.
+    group_type_save(group_type_load($this->type));
   }
 
   /**
@@ -121,10 +125,12 @@ class GroupRole extends Entity {
   /**
    * Grant permissions to a role.
    *
+   * When calling this function through code, you need to check for yourself
+   * whether you need to flag the group role as ENTITY_CUSTOM. To do so, call
+   * group_role_save() on it.
+   *
    * @param array $permissions
    *   A list of permission names to grant.
-   *
-   * @todo Flag parent type as ENTITY_CUSTOM.
    */
   public function grantPermissions(array $permissions) {
     $new = array_diff($permissions, $this->getPermissions());
@@ -146,11 +152,13 @@ class GroupRole extends Entity {
   /**
    * Revoke permissions from a role.
    *
+   * When calling this function through code, you need to check for yourself
+   * whether you need to flag the group role as ENTITY_CUSTOM. To do so, call
+   * group_role_save() on it.
+   *
    * @param array $permissions
    *   (Optional) A list of permission names to revoke. Will revoke all
    *   permissions from the group role if $permissions is left blank.
-   *
-   * @todo Flag parent type as ENTITY_CUSTOM.
    */
   public function revokePermissions(array $permissions = array()) {
     $query = db_delete('group_permission');
@@ -171,6 +179,10 @@ class GroupRole extends Entity {
    * For example, when a form exposes checkboxes to configure permissions for a
    * role, the form submit handler may directly pass the submitted values for the
    * checkboxes form element to this function.
+   *
+   * If the permissions were imported along with a group role, that role will be
+   * flagged as ENTITY_CUSTOM. If the role itself was imported along with a group
+   * type, that group type will be flagged as ENTITY_CUSTOM as well.
    *
    * @param $permissions
    *   An associative array, where the key holds the permission name and the value
@@ -203,5 +215,8 @@ class GroupRole extends Entity {
     if (!empty($revoke)) {
       $this->revokePermissions(array_keys($revoke));
     }
+
+    // By calling group_role_save(), we flag the role as ENTITY_CUSTOM.
+    group_role_save($this);
   }
 }

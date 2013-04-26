@@ -48,7 +48,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
 
     $return = parent::save($entity, $transaction);
 
-    // Delete all attached group roles if it is a rebuild.
+    // Delete attached group roles if it is a rebuild.
     if (!$is_new && $is_rebuild) {
       foreach ($entity->getRoles() as $role) {
         // We only delete those group roles that were not originally provided
@@ -74,7 +74,10 @@ class GroupTypeController extends EntityAPIControllerExportable {
       foreach ($entity->roles as $role) {
         // @todo group_role_import() and group_role_save().
         $group_role = $controller->import(entity_var_json_export($role));
+
+        $group_role->is_rebuild = TRUE;
         $group_role->type_is_saved = TRUE;
+        $group_role->status |= ENTITY_IN_CODE;
 
         // Update a role if it already existed.
         if (!empty($existing_roles[$group_role->name])) {

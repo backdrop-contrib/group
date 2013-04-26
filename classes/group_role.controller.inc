@@ -27,9 +27,9 @@ class GroupRoleController extends EntityAPIControllerExportable {
       $role->revokePermissions();
 
       // If we delete a role that was not flagged as ENTITY_CUSTOM,
-      // we need to flag the parent group type as ENTITY_CUSTOM.
+      // we need to call GroupRole::flagTypeCustom().
       if ($role->status == ENTITY_CUSTOM) {
-        $role->typeIsCustom();
+        $role->flagTypeCustom();
       }
     }
 
@@ -45,35 +45,36 @@ class GroupRoleController extends EntityAPIControllerExportable {
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $is_new = !empty($entity->is_new) || empty($entity->{$this->idKey});
-    $is_type_save = !empty($entity->type_is_saved);
 
-    // Delete all attached permissions if the group type is being saved.
-    if ($is_type_save && !$is_new) {
-      $entity->revokePermissions();
-    }
+    // If the permissions property is set, we are dealing with a group role
+    // that was imported in code and we need to take care of the permissions.
+    if (isset($entity->permissions)) {
+      // Check if the imported permissions were overridden. If they weren't,
+      // they need to be recreated with the most recent imported settings.
+      $recreate = !$is_new && $entity->getPermissions() == $entity->permissions;
 
-    // Create (or recreate) permissions if the group role is new or the
-    // group type the roles belong to is being saved.
-    if (($is_new || $is_type_save) && isset($entity->permissions)) {
-      // Store the exported permissions on the group role.
-      $entity->grantPermissions($entity->permissions);
+      // Delete all attached permissions if the group type is being rebuilt
+      // and the permissions are not overridden.
+      if ($recreate) {
+        $entity->revokePermissions();
+      }
+
+      // Create permissions if the group role is new or recreate them if they
+      // are imported but were deleted above.
+      if (($is_new || $recreate) && $entity->permissions) {
+        $entity->grantPermissions($entity->permissions);
+      }
 
       // Remove the permissions property before creating the group role.
       unset($entity->permissions);
     }
 
-    // If we manually save a group role we flag the group type the role
-    // belongs to as ENTITY_CUSTOM.
-    if (!$is_type_save) {
-      $entity->typeIsCustom();
-
-      // @todo Is this necessary here?
-      // Rebuild the menu cache so the group/add page works.
-      menu_rebuild();
+    // If we manually save a group role we call GroupRole::flagTypeCustom().
+    if (empty($entity->type_is_saved)) {
+      $entity->flagTypeCustom();
     }
-
-    // Remove the type_is_saved property before creating the group role.
     else {
+      // Remove the type_is_saved property before creating the group role.
       unset($entity->type_is_saved);
     }
 
