@@ -65,15 +65,11 @@ class GroupTypeController extends EntityAPIControllerExportable {
       // Get the existing group roles.
       $existing_roles = group_roles();
 
-      // Get the GroupRole controller.
-      $controller = entity_get_controller('group_role');
-
       // Import the group roles for this group type. The type_is_saved flag
       // lets GroupRoleController::save() know that it got called during the
       // saving of a group type.
       foreach ($entity->roles as $role) {
-        // @todo group_role_import() and group_role_save().
-        $group_role = $controller->import(entity_var_json_export($role));
+        $group_role = group_role_import(entity_var_json_export($role));
 
         $group_role->is_rebuild = TRUE;
         $group_role->type_is_saved = TRUE;
@@ -85,7 +81,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
           unset($group_role->is_new);
         }
 
-        $controller->save($group_role);
+        group_role_save($group_role);
       }
 
       // Remove the roles property before saving the group type.
