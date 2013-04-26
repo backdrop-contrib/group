@@ -38,14 +38,14 @@ function group_type_load_multiple($tids = FALSE, $reset = FALSE) {
  * Import a group type.
  */
 function group_type_import($export) {
-  entity_import('group_type', $export);
+  return entity_import('group_type', $export);
 }
 
 /**
  * Save a group type.
  */
 function group_type_save($type) {
-  entity_save('group_type', $type);
+  return entity_save('group_type', $type);
 }
 
 /**

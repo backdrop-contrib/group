@@ -38,14 +38,14 @@ function group_role_load_multiple($rids = FALSE, $reset = FALSE) {
  * Import a group role.
  */
 function group_role_import($export) {
-  entity_import('group_role', $export);
+  return entity_import('group_role', $export);
 }
 
 /**
  * Save a group role.
  */
 function group_role_save($role) {
-  entity_save('group_role', $role);
+  return entity_save('group_role', $role);
 }
 
 /**
