@@ -38,6 +38,13 @@ class GroupRole extends Entity {
   public $label;
 
   /**
+   * Whether the group role is global or not.
+   *
+   * @var int
+   */
+  public $global;
+
+  /**
    * The internal weight of the group role.
    *
    * @var int

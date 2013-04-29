@@ -140,6 +140,14 @@ function group_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'global' => array(
+        'description' => 'Whether the group role is global or specific for a group type.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
       'weight' => array(
         'description' => 'The weight of this group role in relation to others.',
         'type' => 'int',
@@ -151,6 +159,7 @@ function group_schema() {
         'description' => 'The exportable status of the entity.',
         'type' => 'int',
         'size' => 'tiny',
+        'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => ENTITY_CUSTOM,
       ),

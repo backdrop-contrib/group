@@ -99,6 +99,7 @@ class GroupRoleController extends EntityAPIControllerExportable {
       'type' => '',
       'name' => '',
       'label' => '',
+      'global' => 1,
       'weight' => 0,
     );
 
