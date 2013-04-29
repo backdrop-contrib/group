@@ -82,6 +82,7 @@ function group_entity_info() {
       'file' => 'admin/group_type.inc',
       'controller class' => 'GroupTypeUIController',
     ),
+    'features controller class' => 'GroupTypeFeaturesController',
   );
 
   // @todo bundles?
@@ -107,6 +108,7 @@ function group_entity_info() {
       'file' => 'admin/group_role.inc',
       'controller class' => 'GroupRoleUIController',
     ),
+    'features controller class' => 'GroupRoleFeaturesController',
   );
 
   return $info;
