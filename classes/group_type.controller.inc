@@ -62,10 +62,6 @@ class GroupTypeController extends EntityAPIControllerExportable {
           // while saving a group type.
           $group_role->type_is_saved = TRUE;
 
-          // Set the defaults for creating a new entity during a rebuild.
-          $group_role->is_rebuild = TRUE;
-          $group_role->status |= ENTITY_IN_CODE;
-
           group_role_save($group_role);
         }
 
