@@ -39,8 +39,6 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * Save a group type.
    *
    * @see EntityAPIController::save()
-   *
-   * @todo Keep overridden roles overridden?
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $is_new = !empty($entity->is_new) || empty($entity->{$this->idKey});
