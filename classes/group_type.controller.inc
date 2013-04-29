@@ -42,48 +42,36 @@ class GroupTypeController extends EntityAPIControllerExportable {
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $is_new = !empty($entity->is_new) || empty($entity->{$this->idKey});
-    $is_rebuild = !empty($entity->is_rebuild);
 
     $return = parent::save($entity, $transaction);
 
-    // Delete attached group roles if it is a rebuild.
-    if (!$is_new && $is_rebuild) {
-      foreach ($entity->getRoles() as $role) {
-        // We only delete those group roles that were not originally provided
-        // by the imported group type. Overridden group roles will be resaved
-        // to their default state further below.
-        if ($role->status == ENTITY_CUSTOM) {
-          group_role_delete($role);
-        }
-      }
-    }
-
-    // Create (or recreate) group roles if the group type is new or rebuilt.
-    if (($is_new || $is_rebuild) && isset($entity->roles)) {
-      // Get the existing group roles.
-      $existing_roles = group_roles();
-
-      // Import the group roles for this group type. The type_is_saved flag
-      // lets GroupRoleController::save() know that it got called during the
-      // saving of a group type.
-      foreach ($entity->roles as $role) {
-        $group_role = group_role_import(entity_var_json_export($role));
-
-        $group_role->is_rebuild = TRUE;
-        $group_role->type_is_saved = TRUE;
-        $group_role->status |= ENTITY_IN_CODE;
-
-        // Update a role if it already existed.
-        if (!empty($existing_roles[$group_role->name])) {
-          $group_role->rid = $existing_roles[$group_role->name]->rid;
-          unset($group_role->is_new);
-        }
-
-        group_role_save($group_role);
+    // If the roles property is set, we are dealing with a group type
+    // that was imported in code and we need to take care of the roles.
+    if (isset($entity->roles)) {
+      // Delete attached group roles if it is a rebuild.
+      if (!$is_new) {
+        group_role_delete_multiple(array_keys($entity->getRoles()));
       }
 
-      // Remove the roles property before saving the group type.
-      unset($entity->roles);
+      // Create the group roles that were imported along with the type.
+      if ($entity->roles) {
+        foreach ($entity->roles as $role) {
+          $group_role = group_role_import(entity_var_json_export($role));
+
+          // Let GroupRoleController::save() know that it got called
+          // while saving a group type.
+          $group_role->type_is_saved = TRUE;
+
+          // Set the defaults for creating a new entity during a rebuild.
+          $group_role->is_rebuild = TRUE;
+          $group_role->status |= ENTITY_IN_CODE;
+
+          group_role_save($group_role);
+        }
+
+        // Remove the roles property before saving the group type.
+        unset($entity->roles);
+      }
     }
 
     // Rebuild the menu cache so the group/add page works.
