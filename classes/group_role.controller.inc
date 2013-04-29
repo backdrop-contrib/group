@@ -40,8 +40,6 @@ class GroupRoleController extends EntityAPIControllerExportable {
    * Save a group role.
    *
    * @see EntityAPIController::save()
-   *
-   * @todo Check for is_rebuild for global roles.
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $is_new = !empty($entity->is_new) || empty($entity->{$this->idKey});
@@ -49,19 +47,13 @@ class GroupRoleController extends EntityAPIControllerExportable {
     // If the permissions property is set, we are dealing with a group role
     // that was imported in code and we need to take care of the permissions.
     if (isset($entity->permissions)) {
-      // Check if the imported permissions were overridden. If they weren't,
-      // they need to be recreated with the most recent imported settings.
-      $recreate = !$is_new && $entity->getPermissions() == $entity->permissions;
-
-      // Delete all attached permissions if the group type is being rebuilt
-      // and the permissions are not overridden.
-      if ($recreate) {
+      // Delete all attached permissions if the group type is being rebuilt.
+      if (!$is_new) {
         $entity->revokePermissions();
       }
 
-      // Create permissions if the group role is new or recreate them if they
-      // are imported but were deleted above.
-      if (($is_new || $recreate) && $entity->permissions) {
+      // Create the permissions that were imported along with the role.
+      if ($entity->permissions) {
         $entity->grantPermissions($entity->permissions);
       }
 
