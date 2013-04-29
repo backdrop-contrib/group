@@ -22,6 +22,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
   public function hook_menu() {
     $items = parent::hook_menu();
 
+    $items[$this->path]['title'] = t('Group roles (global)');
     $items[$this->path]['type'] = MENU_LOCAL_TASK;
     $items[$this->path]['weight'] = 0;
 
@@ -40,6 +41,16 @@ class GroupRoleUIController extends EntityDefaultUIController {
     );
 
     return $items;
+  }
+
+  /**
+   * Builds the entity overview form.
+   */
+  public function overviewForm($form, &$form_state) {
+    // Only show global roles.
+    $form['table'] = $this->overviewTable(array('global' => 1));
+    $form['pager'] = array('#theme' => 'pager');
+    return $form;
   }
 
   /**
@@ -66,6 +77,4 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
     return $row;
   }
-
-  //@todo Show a table of roles per group type.
 }
