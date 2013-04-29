@@ -119,8 +119,6 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * Export a group type.
    *
    * Exports a group type and its group roles.
-   *
-   * @todo Only export local roles.
    */
   public function export($entity, $prefix = '') {
     // Get the GroupRole controller.
