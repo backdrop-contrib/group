@@ -124,7 +124,6 @@ function group_schema() {
         'description' => 'The {group_type}.name for the group.',
         'type' => 'varchar',
         'length' => 32,
-        'not null' => TRUE,
         'default' => '',
       ),
       'name' => array(
