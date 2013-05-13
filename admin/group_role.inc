@@ -17,12 +17,12 @@ function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
     $group_types[$name] = $group_type->label;
   }
 
-  $form['type'] = array(
-    '#type' => 'select',
-    '#title' => t('Group type'),
-    '#options' => $group_types,
-    '#default_value' => $group_role->type,
-  );
+  if (empty($group_role->global) && !empty($group_role->type)) {
+    $form['type'] = array(
+      '#type' => 'value',
+      '#value' => $group_role->type,
+    );
+  }
 
   $form['label'] = array(
     '#title' => t('Label'),
