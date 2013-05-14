@@ -86,12 +86,13 @@ class GroupRole extends Entity {
    *
    * If the group role belongs to a group type, the group type it belongs
    * to will be flagged as ENTITY_CUSTOM.
-   *
-   * @todo Conditional check for global roles.
    */
   public function flagTypeCustom() {
-    // Saving without $entity->is_rebuild automatically sets ENTITY_CUSTOM.
-    group_type_save(group_type_load($this->type));
+    // Only flag the parent type when we're dealing with a local group role.
+    if (empty($this->global)) {
+      // Saving without $entity->is_rebuild automatically sets ENTITY_CUSTOM.
+      group_type_save(group_type_load($this->type));
+    }
   }
 
   /**
