@@ -23,6 +23,10 @@ function group_hook_info() {
     'group' => 'group',
   );
 
+  $hooks['default_group_role'] = array(
+    'group' => 'group',
+  );
+
   return $hooks;
 }
 
