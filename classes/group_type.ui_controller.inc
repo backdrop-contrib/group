@@ -30,12 +30,42 @@ class GroupTypeUIController extends EntityDefaultUIController {
       'description' => 'Edit permissions for groups of this type',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_permission_form', 4),
-      //@todo Check this.
       'access callback' => 'user_access',
       'access arguments' => array('administer group types'),
       'file' => 'admin/group_type.inc',
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
+      'weight' => 0,
+    );
+
+    $items["$this->path/manage/%group_type/permissions/list"] = array(
+      'title' => 'Permissions',
+      'description' => 'Edit permissions for this group type',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => 0,
+    );
+
+    $items["$this->path/manage/%group_type/permissions/roles"] = array(
+      'title' => 'Roles',
+      'description' => 'Manage group roles for this group type.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('group_role_overview_form', 'group_role', 4),
+      'access callback' => 'user_access',
+      'access arguments' => array('administer group types'),
+      'file' => 'includes/entity.ui.inc',
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 5,
+    );
+
+    $items["$this->path/manage/%group_type/permissions/roles/add"] = array(
+      'title' => 'Add group role',
+      'page callback' => 'group_type_add_role_form',
+      'page arguments' => array(4),
+      'access callback' => 'user_access',
+      'access arguments' => array('administer group types'),
+      'file' => 'admin/group_role.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_LOCAL_ACTION,
       'weight' => 0,
     );
 

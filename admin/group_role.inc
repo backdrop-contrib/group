@@ -5,6 +5,19 @@
  */
 
 /**
+ * Wrapper around group_role_form().
+ *
+ * Called from hook_menu() to dynamically prepopulate the
+ * group type the newly created group role belongs to.
+ *
+ * @see GroupTypeUIController::hook_menu()
+ */
+function group_type_add_role_form($group_type) {
+  $group_role = entity_create('group_role', array('type' => $group_type->name, 'global' => 0));
+  return entity_ui_get_form('group_role', $group_role, 'add');
+}
+
+/**
  * Generates the group role editing form.
  */
 function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
@@ -76,7 +89,11 @@ function group_role_form_submit(&$form, &$form_state) {
   $group_role = entity_ui_form_submit_build_entity($form, $form_state);
   $group_role->save();
 
-  $form_state['redirect'] = 'admin/group/role';
+  // Redirect to the global roles or group type roles page, depending on
+  // whether there was a group type specified.
+  $form_state['redirect'] = !empty($form_state['values']['type'])
+    ? 'admin/group/type/manage/' . $form_state['values']['type'] . '/permissions/roles'
+    : 'admin/group/role';
 }
 
 /**
