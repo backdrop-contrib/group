@@ -68,15 +68,14 @@ class GroupUIController extends EntityDefaultUIController {
     );
 
     foreach (group_types() as $name => $type) {
-      $entity = entity_create('group', array());
-      $entity->type = $name;
+      $group = entity_create('group', array('type' => $name));
 
       $items["group/add/$name"] = array(
         'title' => $type->label,
         'title callback' => 'check_plain',
         'description' => "Create $type->label",
         'page callback' => 'entity_ui_get_form',
-        'page arguments' => array('group', $entity, 'add'),
+        'page arguments' => array('group', $group, 'add'),
         'access callback' => 'group_entity_access',
         'access arguments' => array('create', NULL, NULL, 'group', $name),
         'file' => 'forms/group.inc',
