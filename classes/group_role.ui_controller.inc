@@ -60,12 +60,18 @@ class GroupRoleUIController extends EntityDefaultUIController {
       $this->group_type = $form_state['build_info']['args'][1]->name;
     }
 
+    // Show the appropriate description for the overview page.
+    $help = !empty($this->group_type)
+      ? t("<p>These are <strong>group type specific roles</strong>, meaning they only apply to this group type. You can create global group roles by visiting <a href='@url'>the 'Group roles' page</a>.</p>", array('@url' => url('admin/group/role')))
+      : t("<p>These are <strong>global group roles</strong>, meaning they apply to every group of every group type. Use this if you don't want to create the same role over and over again for every group type. A good usage example would be a <em>group moderator</em> role that has limited admin rights.</p><p>You can create group type specific roles under 'Roles' on the 'Permissions' tab of a group type.</p>");
+
     // Either show the roles for a certain group type or all global roles.
     $conditions = !empty($this->group_type)
       ? array('type' => $this->group_type)
       : array('global' => 1);
 
-    // Apply the conditions set above.
+    // Apply the variables set above.
+    $form['help'] = array('#markup' => $help);
     $form['table'] = $this->overviewTable($conditions);
     $form['pager'] = array('#theme' => 'pager');
 
