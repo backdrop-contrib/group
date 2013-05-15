@@ -82,11 +82,12 @@ class GroupRoleUIController extends EntityDefaultUIController {
    * Generates the table headers for the overview table.
    */
   protected function overviewTableHeaders($conditions, $rows, $additional_header = array()) {
+    $additional_header[] = t('permissions');
     $header = parent::overviewTableHeaders($conditions, $rows, $additional_header);
 
     // Drop the Status column for local group roles.
     if (!empty($this->group_type)) {
-      unset($header[1]);
+      unset($header[1 + count($additional_header)]);
     }
 
     return $header;
@@ -98,10 +99,10 @@ class GroupRoleUIController extends EntityDefaultUIController {
   protected function operationCount() {
     // Drop the Export action for local group roles.
     if (!empty($this->group_type)) {
-      return parent::operationCount();
+      return parent::operationCount() - 1;
     }
 
-    return parent::operationCount() + 1;
+    return parent::operationCount();
   }
 
   /**
@@ -112,16 +113,31 @@ class GroupRoleUIController extends EntityDefaultUIController {
    * Additional columns to be added after the entity label column.
    */
   protected function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
-    $row = parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
-    $new = array(
-      l(t('permissions'), $this->path . '/manage/' . $id . '/permissions')
+    // Check if the group role or parent group type is ENTITY_FIXED.
+    $role_fixed = entity_has_status('group_role', $entity, ENTITY_FIXED);
+    $type_fixed = !empty($this->group_type)
+      ? entity_has_status('group_type', group_type_load($this->group_type), ENTITY_FIXED)
+      : FALSE;
+
+    $action = $role_fixed || $type_fixed ? t('view') : t('edit');
+    $additional_cols = array(
+      l($action, $this->path . '/manage/' . $id . '/permissions'),
     );
 
-    array_splice($row, 3, 0, $new);
+    $row = parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
 
     // Drop the Status column and Export action for local group roles.
     if (!empty($this->group_type)) {
-      unset($row[1], $row[6]);
+      // Get the amount of extra columns.
+      $count = count($additional_cols);
+
+      // Get the indexes of Status and Export.
+      // We increase operationCount to counter the decrease in that function.
+      // @todo Change 3 to 4 when http://drupal.org/node/1995470 is committed.
+      $i_status = $count + 1;
+      $i_export = $count + ($role_fixed ? 3 : 1 + $this->operationCount() + 1);
+
+      unset($row[$i_status], $row[$i_export]);
     }
 
     return $row;

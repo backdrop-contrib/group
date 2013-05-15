@@ -73,10 +73,15 @@ class GroupTypeUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Returns the operation count for calculating colspans.
+   * Generates the table headers for the overview table.
    */
-  protected function operationCount() {
-    return parent::operationCount() + 1;
+  protected function overviewTableHeaders($conditions, $rows, $additional_header = array()) {
+    $additional_header[] = array(
+      'data' => t('permissions'),
+      'colspan' => 2,
+    );
+
+    return parent::overviewTableHeaders($conditions, $rows, $additional_header);
   }
 
   /**
@@ -87,13 +92,13 @@ class GroupTypeUIController extends EntityDefaultUIController {
    * Additional columns to be added after the entity label column.
    */
   protected function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
-    $row = parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
-    $new = array(
-      l(t('permissions'), $this->path . '/manage/' . $id . '/permissions')
+    $verb = entity_has_status($this->entityType, $entity, ENTITY_FIXED) ? t('view') : t('edit');
+
+    $additional_cols = array(
+      l($verb, $this->path . '/manage/' . $id . '/permissions'),
+      l(t('roles'), $this->path . '/manage/' . $id . '/permissions/roles'),
     );
 
-    array_splice($row, 3, 0, $new);
-
-    return $row;
+    return parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
   }
 }
