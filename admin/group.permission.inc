@@ -16,11 +16,14 @@
  * @todo Implement anonymous / registered / admin.
  */
 function group_permission_form($form, &$form_state, $type, $role = NULL) {
+  // Store whether we are on a global role page.
+  $global_page = isset($role);
+
   // Store if the permission descriptions should be hidden.
   $hide = system_admin_compact_mode();
 
   // Retrieve role names for columns.
-  $roles = isset($role) ? array($role->name => $role) : $type->getRoles();
+  $roles = $global_page ? array($role->name => $role) : $type->getRoles();
 
   // Store $roles for use in the theme function and submit handler.
   $form['roles'] = array(
@@ -103,6 +106,7 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
       '#options' => $options,
       '#default_value' => isset($status[$rname]) ? $status[$rname] : array(),
       '#attributes' => array('class' => array('rid-' . $rname)),
+      '#disabled' => !$global_page && $role->global,
     );
 
     // Add the role names to the table.
