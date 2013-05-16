@@ -419,7 +419,7 @@ class Group extends Entity {
   public function userPermissions($uid) {
     $permissions = array();
 
-    foreach ($this->getRoles($uid) as $role) {
+    foreach ($this->userRoles($uid) as $role) {
       foreach ($role->getPermissions() as $permission) {
         $permissions[] = $permission;
       }
