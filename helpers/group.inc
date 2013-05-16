@@ -71,3 +71,10 @@ function group_autocomplete_result_gid($result) {
 
   return FALSE;
 }
+
+/**
+ * Check whether a group role machine name exists.
+ */
+function group_role_exists($name) {
+  return in_array($name, array('anonymous', 'member')) || !!group_role_load($name);
+}
