@@ -146,12 +146,12 @@ function group_theme() {
       'permission' => NULL,
       'hide' => NULL,
     ),
-    'file' => 'admin/group_type.inc',
+    'file' => 'theme/group.permission.inc',
   );
 
   $theme['group_permission_form'] = array(
     'render element' => 'form',
-    'file' => 'admin/group_type.inc',
+    'file' => 'theme/group.permission.inc',
   );
 
   return $theme;
