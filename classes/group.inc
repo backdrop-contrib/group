@@ -284,8 +284,13 @@ class Group extends Entity {
     // Prepopulate $members with empty arrays for every role name.
     $members = array_fill_keys(array_keys($this->getRoles()), array());
 
+    // Unset the anonymous role.
+    unset($members['anonymous']);
+
+    // Add the uids to the roles they belong to, as well as the member role.
     foreach ($query->execute()->fetchAllKeyed() as $uid => $role) {
       $members[$role][$uid] = $uid;
+      $members['member'][$uid] = $uid;
     }
 
     return $members;

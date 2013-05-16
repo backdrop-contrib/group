@@ -24,9 +24,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
     // Clean up local roles before deletion.
     foreach (group_types($ids) as $type) {
-      foreach($type->getRoles() as $role) {
-        group_role_delete($role);
-      }
+      $type->removeRoles();
     }
 
     parent::delete($ids, $transaction);
@@ -50,7 +48,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
     if (isset($entity->roles)) {
       // Delete attached group roles if it is a rebuild.
       if (!$is_new) {
-        group_role_delete_multiple(array_keys($entity->getRoles()));
+        $entity->removeRoles();
       }
 
       // Create the group roles that were imported along with the type.
@@ -110,6 +108,16 @@ class GroupTypeController extends EntityAPIControllerExportable {
 
     // Add group roles to the group type.
     foreach ($entity->getRoles() as $role) {
+      // Global group roles are never exported along with a group type.
+      if ($role->global) {
+        continue;
+      }
+
+      // @todo Remove this and figure out what to do with anonymous and member.
+      if (in_array($role->name, array('anonymous', 'member'))) {
+        continue;
+      }
+
       $entity->roles[] = drupal_json_decode($controller->export($role, $prefix));
     }
 
