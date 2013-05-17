@@ -13,7 +13,7 @@ function group_default_group_role() {
   $group_admin = entity_create('group_role', array(
     'name' => 'group_admin',
     'label' => 'Administrator',
-    'weight' => 100,
+    'weight' => 10,
     'permissions' => array_keys(module_invoke_all('group_permission')),
     'status' => ENTITY_FIXED,
   ));
