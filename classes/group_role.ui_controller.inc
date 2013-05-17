@@ -10,11 +10,25 @@
 class GroupRoleUIController extends EntityDefaultUIController {
 
   /**
-   * The optional group type the UI is called for.
+   * Whether the UI is invoked for global or local roles.
    *
-   * @var string
+   * @var bool
    */
-  protected $group_type;
+  protected $global_ui;
+
+  /**
+   * Whether or not to show the tabledrag UI.
+   *
+   * @var bool
+   */
+  protected $tabledrag;
+
+  /**
+   * Whether the parent group type (if any) is ENTITY_FIXED.
+   *
+   * @var bool
+   */
+  protected $fixed_type;
 
   /**
    * Class constructor.
@@ -22,8 +36,12 @@ class GroupRoleUIController extends EntityDefaultUIController {
   public function __construct($entity_type, $entity_info) {
     parent::__construct($entity_type, $entity_info);
 
-    // By default we show the global UI.
-    $this->group_type = '';
+    // By default we show the global UI and tabledrag.
+    $this->global_ui = TRUE;
+    $this->tabledrag = TRUE;
+
+    // We assume a default of a non-fixed parent type.
+    $this->fixed_type = FALSE;
   }
 
   /**
@@ -57,87 +75,294 @@ class GroupRoleUIController extends EntityDefaultUIController {
    */
   public function overviewForm($form, &$form_state) {
     if (!empty($form_state['build_info']['args'][1])) {
-      $this->group_type = $form_state['build_info']['args'][1]->name;
+      $group_type = $form_state['build_info']['args'][1]->name;
+
+      // We're not viewing the global UI.
+      $this->global_ui = FALSE;
+
+      // Check if the parent group type is ENTITY_FIXED.
+      $this->fixed_type = !empty($group_type)
+        ? entity_has_status('group_type', group_type_load($group_type), ENTITY_FIXED)
+        : FALSE;
+
+      // Show only the roles for this group type.
+      $conditions = array('type' => $group_type);
+    }
+    else {
+      // Show all global roles.
+      $conditions = array('global' => 1);
     }
 
+    // Determine whether or not we show the tabledrag.
+    $this->tabledrag = $this->global_ui || !$this->fixed_type;
+
     // Show the appropriate description for the overview page.
-    $help = !empty($this->group_type)
+    $help = !$this->global_ui
       ? t("<p>These are <strong>group type specific roles</strong>, meaning they only apply to this group type. You can create global group roles by visiting <a href='@url'>the 'Group roles' page</a>.</p>", array('@url' => url('admin/group/role')))
       : t("<p>These are <strong>global group roles</strong>, meaning they apply to every group of every group type. Use this if you don't want to create the same role over and over again for every group type. A good usage example would be a <em>group moderator</em> role that has limited admin rights.</p><p>You can create group type specific roles under 'Roles' on the 'Permissions' tab of a group type.</p>");
 
-    // Either show the roles for a certain group type or all global roles.
-    $conditions = !empty($this->group_type)
-      ? array('type' => $this->group_type)
-      : array('global' => 1);
-
     // Apply the variables set above.
     $form['help'] = array('#markup' => $help);
-    $form['table'] = $this->overviewTable($conditions);
-    $form['pager'] = array('#theme' => 'pager');
+    $form['table'] = $this->roleTable($conditions);
+
+    if ($this->tabledrag) {
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save order'),
+      );
+    }
 
     return $form;
   }
 
   /**
-   * Generates the table headers for the overview table.
+   * Overview form submit callback.
+   *
+   * @param $form
+   *   The form array of the overview form.
+   * @param $form_state
+   *   The overview form state which will be used for submitting.
    */
-  protected function overviewTableHeaders($conditions, $rows, $additional_header = array()) {
-    $additional_header[] = t('permissions');
-    $header = parent::overviewTableHeaders($conditions, $rows, $additional_header);
+  public function overviewFormSubmit($form, &$form_state) {
+    foreach ($form_state['values']['weights'] as $name => $weight) {
+      $group_role = group_role_load($name);
 
-    // Drop the Status column for local group roles.
-    if (!empty($this->group_type)) {
-      unset($header[1 + count($additional_header)]);
+      if (entity_has_status('group_role', $group_role, ENTITY_FIXED)) {
+        continue;
+      }
+
+      $group_role->weight = $weight;
+      group_role_save($group_role);
+    }
+  }
+
+  /**
+   * Helper function for sorting roles by weight.
+   */
+  protected function sortRoles($a, $b) {
+    return $a->weight < $b->weight ? -1 : 1;
+  }
+
+  /**
+   * Generates the render array for an overview table for group roles
+   * matching the given conditions.
+   *
+   * @param $conditions
+   *   An array of conditions as needed by entity_load().
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function roleTable($conditions = array()) {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'group_role');
+
+    // Add all conditions to query.
+    foreach ($conditions as $key => $value) {
+      $query->propertyCondition($key, $value);
+    }
+
+    if ($this->overviewPagerLimit) {
+      $query->pager($this->overviewPagerLimit);
+    }
+
+    $result = $query->execute();
+
+    $rows = $weights = array();
+    if (isset($result['group_role'])) {
+      $roles = group_roles(array_keys($result['group_role']));
+      uasort($roles, array($this, 'sortRoles'));
+
+      foreach ($roles as $name => $role) {
+        $row = $this->roleTableRow($name, $role);
+        $rows[$name] = $row;
+
+        if ($this->tabledrag) {
+          $weights[$name] = array(
+            'weight' => &$rows[$name]['data']['weight']['data'],
+          );
+        }
+      }
+    }
+
+    $table = array(
+      '#theme' => 'table',
+      '#header' => $this->roleTableHeaders(),
+      '#rows' => $rows,
+      '#empty' => t('There are no group roles available.'),
+    );
+
+    // Build a tabledrag without having to write a theme function for it.
+    // See http://dropbucket.org/node/204.
+    if ($this->tabledrag) {
+      $table['elements'] = $weights;
+      $table['#attributes'] = array('id' => 'group-role-table');
+
+      drupal_add_tabledrag('group-role-table', 'order', 'sibling', 'group-role-weight');
+    }
+
+    return $table;
+  }
+
+  /**
+   * Returns the available operations for the page.
+   */
+  protected function roleOperations() {
+    $ops = array();
+
+    // Entity status and export column for global roles.
+    if ($this->global_ui) {
+      $ops[] = 'status';
+
+      if (!empty($this->entityInfo['exportable'])) {
+        $ops[] = 'export';
+      }
+    }
+
+    // Edit, clone and delete/revert links when not local roles of a fixed type.
+    if ($this->tabledrag) {
+      array_push($ops, 'edit', 'clone', 'delete');
+    }
+
+    return $ops;
+  }
+
+  /**
+   * Generates the table headers for the role table.
+   */
+  protected function roleTableHeaders() {
+    $header = array();
+
+    // Optionally add the tabledrag spacer.
+    if ($this->tabledrag) {
+      $header['drag'] = array(
+        'data' => NULL,
+        'colspan' => 2,
+      );
+    }
+
+    $header['label'] = t('Name');
+    $header['permisisons'] = t('Permissions');
+
+    // Add Entity API related columns.
+    if ($ops = $this->roleOperations()) {
+      $count  = count($ops);
+
+      // Add the status column if available.
+      if (in_array('status', $ops)) {
+        $header['status'] = t('Status');
+        $count--;
+      }
+
+      // Add the actions column if available.
+      if ($count) {
+        $header['actions'] = array(
+          'data' => t('Actions'),
+          'colspan' => $count,
+        );
+      }
     }
 
     return $header;
   }
 
   /**
-   * Returns the operation count for calculating colspans.
-   */
-  protected function operationCount() {
-    // Drop the Export action for local group roles.
-    if (!empty($this->group_type)) {
-      return parent::operationCount() - 1;
-    }
-
-    return parent::operationCount();
-  }
-
-  /**
-   * Generates the row for the passed entity and may be overridden in order to
-   * customize the rows.
+   * Generates the row for the passed role.
    *
    * @param $additional_cols
    * Additional columns to be added after the entity label column.
    */
-  protected function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
-    // Check if the group role or parent group type is ENTITY_FIXED.
-    $role_fixed = entity_has_status('group_role', $entity, ENTITY_FIXED);
-    $type_fixed = !empty($this->group_type)
-      ? entity_has_status('group_type', group_type_load($this->group_type), ENTITY_FIXED)
-      : FALSE;
+  protected function roleTableRow($name, $role) {
+    // Check if the group role is ENTITY_FIXED.
+    $fixed_role = entity_has_status('group_role', $role, ENTITY_FIXED);
 
-    $action = $role_fixed || $type_fixed ? t('view') : t('edit');
-    $additional_cols = array(
-      l($action, $this->path . '/manage/' . $id . '/permissions'),
+    // Create the row container array.
+    $row = array(
+      'data' => array(),
+      'class' => array('draggable'),
     );
 
-    $row = parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
+    if ($this->tabledrag) {
+      // Cell for the cross drag&drop element.
+      $row['data']['drag'] = array(
+        'class' => array('entry-cross')
+      );
 
-    // Drop the Status column and Export action for local group roles.
-    if (!empty($this->group_type)) {
-      // Get the amount of extra columns.
-      $count = count($additional_cols);
+      // Weight item for the tabledrag.
+      $row['data']['weight'] = array(
+        'data' => array(
+          '#type' => 'weight',
+          '#title' => t('Weight'),
+          '#title_display' => 'invisible',
+          '#default_value' => $role->weight,
+          '#parents' => array('weights', $name),
+          '#attributes' => array(
+            'class' => array('group-role-weight'),
+          ),
+          '#disabled' => $fixed_role,
+        )
+      );
+    }
 
-      // Get the indexes of Status and Export.
-      // We increase operationCount to counter the decrease in that function.
-      // @todo Change 3 to 4 when http://drupal.org/node/1995470 is committed.
-      $i_status = $count + 1;
-      $i_export = $count + ($role_fixed ? 3 : 1 + $this->operationCount() + 1);
+    // Add the role label.
+    $row['data']['label'] = check_plain($role->label);
 
-      unset($row[$i_status], $row[$i_export]);
+    // Permissions related links.
+    $what = $fixed_role || $this->fixed_type ? t('view permissions') : t('edit permissions');
+    $row['data']['permissions'] = l($what, "$this->path/manage/$name/permissions");
+
+    // Add Entity API related columns.
+    if ($ops = $this->roleOperations()) {
+      // Add the status column if available.
+      if (in_array('status', $ops)) {
+        $row['data']['status'] = array(
+          'data' => array(
+            '#theme' => 'entity_status',
+            '#status' => $role->status,
+          )
+        );
+      }
+
+      // Add the edit action if available.
+      if (in_array('edit', $ops)) {
+        $row['data']['edit'] = $fixed_role ? '' : l(t('edit'), "$this->path/manage/$name");
+      }
+
+      // Add the clone action if available.
+      if (in_array('clone', $ops)) {
+        $row['data']['clone'] = l(t('clone'), "$this->path/manage/$name/clone");
+      }
+
+      // Add the delete/revert action if available.
+      if (in_array('delete', $ops)) {
+        $overridden = entity_has_status('group_role', $role, ENTITY_OVERRIDDEN);
+
+        // Don't show action for fixed or default roles.
+        if ($fixed_role || $role->status == ENTITY_IN_CODE) {
+          $row['data']['delete'] = '';
+        }
+
+        else {
+          // Show revert action for overridden roles.
+          if ($overridden) {
+            $what = t('revert');
+            $path = "$this->path/manage/$name/revert";
+          }
+
+          // Show delete action for custom roles.
+          else {
+            $what = t('delete');
+            $path = "$this->path/manage/$name/delete";
+          }
+
+          $row['data']['delete'] = l($what, $path, array('query' => drupal_get_destination()));
+        }
+      }
+
+      // Add the export action if available.
+      if (in_array('export', $ops)) {
+        $row['data']['export'] = l(t('export'), "$this->path/manage/$name/export");
+      }
     }
 
     return $row;
