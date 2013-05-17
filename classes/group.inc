@@ -10,27 +10,6 @@
 class Group extends Entity {
 
   /**
-   * The id of the group.
-   *
-   * @var integer
-   */
-  public $gid;
-
-  /**
-   * The type of the group.
-   *
-   * @var string
-   */
-  public $type;
-
-  /**
-   * The title of the group.
-   *
-   * @var string
-   */
-  public $title;
-
-  /**
    * Class constructor.
    */
   public function __construct(array $values = array(), $entityType = NULL) {

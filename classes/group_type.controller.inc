@@ -87,11 +87,10 @@ class GroupTypeController extends EntityAPIControllerExportable {
    *   A new instance of the group type entity type.
    */
   public function create(array $values = array()) {
-    // Add values that are specific to a group.
+    // Provide defaults that are needed in group_type_form().
     $values += array(
       'name' => '',
       'label' => '',
-      'weight' => 0,
     );
 
     return parent::create($values);

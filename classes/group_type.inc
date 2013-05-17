@@ -10,48 +10,6 @@
 class GroupType extends Entity {
 
   /**
-   * The internal id of the group type.
-   *
-   * @var int
-   */
-  public $tid;
-
-  /**
-   * The machine-readable name of the group type.
-   *
-   * @var string
-   */
-  public $name;
-
-  /**
-   * The human-readable name of the group type.
-   *
-   * @var string
-   */
-  public $label;
-
-  /**
-   * The internal weight of the group type.
-   *
-   * @var int
-   */
-  public $weight;
-
-  /**
-   * The entity status of the group type.
-   *
-   * @var int
-   */
-  public $status;
-
-  /**
-   * The module that provided the group type.
-   *
-   * @var string
-   */
-  public $module;
-
-  /**
    * Class constructor.
    */
   public function __construct(array $values = array(), $entityType = NULL) {

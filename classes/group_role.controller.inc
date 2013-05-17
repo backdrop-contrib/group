@@ -80,13 +80,12 @@ class GroupRoleController extends EntityAPIControllerExportable {
    *   A new instance of the group role entity type.
    */
   public function create(array $values = array()) {
-    // Add values that are specific to a group.
+    // Provide defaults that are needed in group_role_form().
     $values += array(
       'type' => '',
       'name' => '',
       'label' => '',
       'global' => 1,
-      'weight' => 0,
     );
 
     return parent::create($values);
