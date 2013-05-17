@@ -24,11 +24,18 @@ class GroupRoleUIController extends EntityDefaultUIController {
   protected $tabledrag;
 
   /**
-   * Whether the parent group type (if any) is ENTITY_FIXED.
+   * Whether the parent group type (if any) is ENTITY_IN_CODE.
    *
    * @var bool
    */
-  protected $fixed_type;
+  protected $type_in_code;
+
+  /**
+   * More specifically, whether the parent group type is ENTITY_FIXED.
+   *
+   * @var bool
+   */
+  protected $type_fixed;
 
   /**
    * Class constructor.
@@ -40,8 +47,9 @@ class GroupRoleUIController extends EntityDefaultUIController {
     $this->global_ui = TRUE;
     $this->tabledrag = TRUE;
 
-    // We assume a default of a non-fixed parent type.
-    $this->fixed_type = FALSE;
+    // We assume roles that were not imported along with a group type.
+    $this->type_in_code = FALSE;
+    $this->type_fixed = FALSE;
   }
 
   /**
@@ -75,18 +83,22 @@ class GroupRoleUIController extends EntityDefaultUIController {
    */
   public function overviewForm($form, &$form_state) {
     if (!empty($form_state['build_info']['args'][1])) {
-      $group_type = $form_state['build_info']['args'][1]->name;
+      $group_type = $form_state['build_info']['args'][1];
 
       // We're not viewing the global UI.
       $this->global_ui = FALSE;
 
-      // Check if the parent group type is ENTITY_FIXED.
-      $this->fixed_type = !empty($group_type)
-        ? entity_has_status('group_type', group_type_load($group_type), ENTITY_FIXED)
-        : FALSE;
+      // Get some information about the parent group type.
+      if (entity_has_status('group_type', $group_type, ENTITY_FIXED)) {
+        $this->type_in_code = TRUE;
+        $this->type_fixed = TRUE;
+      }
+      elseif (entity_has_status('group_type', $group_type, ENTITY_IN_CODE)) {
+        $this->type_in_code = TRUE;
+      }
 
       // Show only the roles for this group type.
-      $conditions = array('type' => $group_type);
+      $conditions = array('type' => $group_type->name);
     }
     else {
       // Show all global roles.
@@ -94,7 +106,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
     }
 
     // Determine whether or not we show the tabledrag.
-    $this->tabledrag = $this->global_ui || !$this->fixed_type;
+    $this->tabledrag = $this->global_ui || !$this->type_fixed;
 
     // Show the appropriate description for the overview page.
     $help = !$this->global_ui
@@ -221,7 +233,12 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
     // Edit, clone and delete/revert links when not local roles of a fixed type.
     if ($this->tabledrag) {
-      array_push($ops, 'edit', 'clone', 'delete');
+      array_push($ops, 'edit', 'clone');
+
+      // Delete is unavailable to roles that were imported along with a group type.
+      if (!$this->type_in_code) {
+        $ops[] = 'delete';
+      }
     }
 
     return $ops;
@@ -274,7 +291,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
    */
   protected function roleTableRow($name, $role) {
     // Check if the group role is ENTITY_FIXED.
-    $fixed_role = entity_has_status('group_role', $role, ENTITY_FIXED);
+    $role_fixed = entity_has_status('group_role', $role, ENTITY_FIXED);
 
     // Create the row container array.
     $row = array(
@@ -299,7 +316,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
           '#attributes' => array(
             'class' => array('group-role-weight'),
           ),
-          '#disabled' => $fixed_role,
+          '#disabled' => $role_fixed,
         )
       );
     }
@@ -308,7 +325,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
     $row['data']['label'] = check_plain($role->label);
 
     // Permissions related links.
-    $what = $fixed_role || $this->fixed_type ? t('view permissions') : t('edit permissions');
+    $what = $role_fixed || $this->type_fixed ? t('view permissions') : t('edit permissions');
     $row['data']['permissions'] = l($what, "$this->path/manage/$name/permissions");
 
     // Add Entity API related columns.
@@ -325,7 +342,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
       // Add the edit action if available.
       if (in_array('edit', $ops)) {
-        $row['data']['edit'] = $fixed_role ? '' : l(t('edit'), "$this->path/manage/$name");
+        $row['data']['edit'] = $role_fixed ? '' : l(t('edit'), "$this->path/manage/$name");
       }
 
       // Add the clone action if available.
@@ -338,7 +355,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
         $overridden = entity_has_status('group_role', $role, ENTITY_OVERRIDDEN);
 
         // Don't show action for fixed or default roles.
-        if ($fixed_role || $role->status == ENTITY_IN_CODE) {
+        if ($role_fixed || $role->status == ENTITY_IN_CODE) {
           $row['data']['delete'] = '';
         }
 

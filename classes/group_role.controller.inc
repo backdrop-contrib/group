@@ -25,12 +25,6 @@ class GroupRoleController extends EntityAPIControllerExportable {
     // Clean up permissions before deletion.
     foreach (group_roles($ids) as $role) {
       $role->revokePermissions();
-
-      // If we delete a role that was not flagged as ENTITY_CUSTOM,
-      // we need to call GroupRole::flagTypeCustom().
-      if ($role->status == ENTITY_CUSTOM) {
-        $role->flagTypeCustom();
-      }
     }
 
     parent::delete($ids, $transaction);
