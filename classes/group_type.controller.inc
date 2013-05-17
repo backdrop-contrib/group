@@ -92,7 +92,6 @@ class GroupTypeController extends EntityAPIControllerExportable {
       'name' => '',
       'label' => '',
       'weight' => 0,
-      'status' => ENTITY_CUSTOM,
     );
 
     return parent::create($values);

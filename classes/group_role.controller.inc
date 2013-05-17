@@ -93,7 +93,6 @@ class GroupRoleController extends EntityAPIControllerExportable {
       'label' => '',
       'global' => 1,
       'weight' => 0,
-      'status' => ENTITY_CUSTOM,
     );
 
     return parent::create($values);
