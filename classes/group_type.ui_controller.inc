@@ -73,32 +73,235 @@ class GroupTypeUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Generates the table headers for the overview table.
+   * Builds the entity overview form.
    */
-  protected function overviewTableHeaders($conditions, $rows, $additional_header = array()) {
-    $additional_header[] = array(
-      'data' => t('permissions'),
-      'colspan' => 2,
+  public function overviewForm($form, &$form_state) {
+    $form['table'] = $this->typeTable();
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save order'),
     );
 
-    return parent::overviewTableHeaders($conditions, $rows, $additional_header);
+    return $form;
   }
 
   /**
-   * Generates the row for the passed entity and may be overridden in order to
-   * customize the rows.
+   * Overview form submit callback.
    *
-   * @param $additional_cols
-   * Additional columns to be added after the entity label column.
+   * @param $form
+   *   The form array of the overview form.
+   * @param $form_state
+   *   The overview form state which will be used for submitting.
    */
-  protected function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
-    $verb = entity_has_status($this->entityType, $entity, ENTITY_FIXED) ? t('view') : t('edit');
+  public function overviewFormSubmit($form, &$form_state) {
+    foreach ($form_state['values']['weights'] as $name => $weight) {
+      $group_type = group_type_load($name);
 
-    $additional_cols = array(
-      l($verb, $this->path . '/manage/' . $id . '/permissions'),
-      l(t('roles'), $this->path . '/manage/' . $id . '/permissions/roles'),
+      if (entity_has_status('group_type', $group_type, ENTITY_FIXED)) {
+        continue;
+      }
+
+      $group_type->weight = $weight;
+      group_type_save($group_type);
+    }
+  }
+
+  /**
+   * Generates the render array for an overview table for group types.
+   *
+   * Builds a tabledrag without having to write a theme function for it.
+   * See http://dropbucket.org/node/204.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function typeTable() {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'group_type');
+    $query->propertyOrderBy('weight');
+
+    if ($this->overviewPagerLimit) {
+      $query->pager($this->overviewPagerLimit);
+    }
+
+    $result = $query->execute();
+
+    $rows = $weights = array();
+    if (isset($result['group_type'])) {
+      $types = group_types(array_keys($result['group_type']));
+
+      foreach ($types as $name => $type) {
+        $row = $this->typeTableRow($name, $type);
+        $rows[$name] = $row;
+
+        $weights[$name] = array(
+          'weight' => &$rows[$name]['data']['weight']['data'],
+        );
+      }
+    }
+
+    $table = array(
+      '#theme' => 'table',
+      '#header' => $this->typeTableHeaders(),
+      '#rows' => $rows,
+      '#empty' => t('There are no group types available.'),
+      '#attributes' => array('id' => 'group-type-table'),
+      'elements' => $weights,
     );
 
-    return parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
+    drupal_add_tabledrag('group-type-table', 'order', 'sibling', 'group-type-weight');
+
+    return $table;
+  }
+
+  /**
+   * Returns the available operations for the page.
+   */
+  protected function typeOperations() {
+    $ops = array('status', 'edit');
+    if (module_exists('field_ui')) {
+      array_push($ops, 'manage fields', 'manage display');
+    }
+    array_push($ops, 'clone', 'delete', 'export');
+
+    return $ops;
+  }
+
+  /**
+   * Generates the table headers for the type table.
+   */
+  protected function typeTableHeaders() {
+    $header = array(
+      'drag' => array(
+        'data' => NULL,
+        'colspan' => 2,
+      ),
+      'label' => t('Name'),
+      'permissions' => array(
+        'data' => t('Permissions'),
+        'colspan' => 2,
+      ),
+    );
+
+    // Add Entity API related columns.
+    if ($ops = $this->typeOperations()) {
+      $count = count($ops);
+
+      // Add the status column.
+      if (in_array('status', $ops)) {
+        $header['status'] = t('Status');
+        $count--;
+      }
+
+      // Add the actions column.
+      $header['actions'] = array(
+        'data' => t('Actions'),
+        'colspan' => $count,
+      );
+    }
+
+    return $header;
+  }
+
+  /**
+   * Generates the row for the passed type.
+   */
+  protected function typeTableRow($name, $type) {
+    // Check if the group type is ENTITY_FIXED.
+    $type_fixed = entity_has_status('group_type', $type, ENTITY_FIXED);
+
+    // Create the row container array.
+    $row = array(
+      'data' => array(),
+      'class' => array('draggable'),
+    );
+
+    // Cell for the cross drag&drop element.
+    $row['data']['drag'] = array(
+      'class' => array('entry-cross')
+    );
+
+    // Weight item for the tabledrag.
+    $row['data']['weight'] = array(
+      'data' => array(
+        '#type' => 'weight',
+        '#title' => t('Weight'),
+        '#title_display' => 'invisible',
+        '#default_value' => $type->weight,
+        '#parents' => array('weights', $name),
+        '#attributes' => array(
+          'class' => array('group-type-weight'),
+        ),
+        '#disabled' => $type_fixed,
+      )
+    );
+
+    // Add the type label.
+    $row['data']['label'] = check_plain($type->label);
+
+    // Permissions related links.
+    $what = $type_fixed ? t('view permissions') : t('edit permissions');
+    $row['data']['permissions'] = l($what, "$this->path/manage/$name/permissions");
+    $row['data']['roles'] = l(t('roles'), "$this->path/manage/$name/permissions/roles");
+
+    // Add Entity API related columns.
+    if ($ops = $this->typeOperations()) {
+      // Add the status column if available.
+      if (in_array('status', $ops)) {
+        $row['data']['status'] = array(
+          'data' => array(
+            '#theme' => 'entity_status',
+            '#status' => $type->status,
+          )
+        );
+      }
+
+      // Add the edit action.
+      $row['data']['edit'] = $type_fixed ? '' : l(t('edit'), "$this->path/manage/$name");
+
+      // Add the Field UI actions.
+      if (module_exists('field_ui')) {
+        if (!$type_fixed) {
+          $row['data']['manage fields'] = l(t('manage fields'), "$this->path/manage/$name/fields");
+          $row['data']['manage display'] = l(t('manage display'), "$this->path/manage/$name/display");
+        }
+        else {
+          $row['data']['manage fields'] = array(
+            'data' => '',
+            'colspan' => 2,
+          );
+        }
+      }
+
+      // Add the clone action.
+      $row['data']['clone'] = l(t('clone'), "$this->path/manage/$name/clone");
+
+      // Don't show delete action for fixed or default types.
+      if ($type_fixed || $type->status == ENTITY_IN_CODE) {
+        $row['data']['delete'] = '';
+      }
+
+      // Add the delete/revert action.
+      else {
+        // Show revert action for overridden roles.
+        if (entity_has_status('group_type', $type, ENTITY_OVERRIDDEN)) {
+          $what = t('revert');
+          $path = "$this->path/manage/$name/revert";
+        }
+
+        // Show delete action for custom types.
+        else {
+          $what = t('delete');
+          $path = "$this->path/manage/$name/delete";
+        }
+
+        $row['data']['delete'] = l($what, $path, array('query' => drupal_get_destination()));
+      }
+
+      // Add the export action.
+      $row['data']['export'] = l(t('export'), "$this->path/manage/$name/export");
+    }
+
+    return $row;
   }
 }
