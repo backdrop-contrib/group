@@ -140,6 +140,9 @@ class GroupRoleUIController extends EntityDefaultUIController {
    * Generates the render array for an overview table for group roles
    * matching the given conditions.
    *
+   * Builds a tabledrag without having to write a theme function for it.
+   * See http://dropbucket.org/node/204.
+   *
    * @param $conditions
    *   An array of conditions as needed by entity_load().
    *
@@ -185,8 +188,6 @@ class GroupRoleUIController extends EntityDefaultUIController {
       '#empty' => t('There are no group roles available.'),
     );
 
-    // Build a tabledrag without having to write a theme function for it.
-    // See http://dropbucket.org/node/204.
     if ($this->tabledrag) {
       $table['elements'] = $weights;
       $table['#attributes'] = array('id' => 'group-role-table');
@@ -236,11 +237,11 @@ class GroupRoleUIController extends EntityDefaultUIController {
     }
 
     $header['label'] = t('Name');
-    $header['permisisons'] = t('Permissions');
+    $header['permissions'] = t('Permissions');
 
     // Add Entity API related columns.
     if ($ops = $this->roleOperations()) {
-      $count  = count($ops);
+      $count = count($ops);
 
       // Add the status column if available.
       if (in_array('status', $ops)) {
@@ -262,9 +263,6 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
   /**
    * Generates the row for the passed role.
-   *
-   * @param $additional_cols
-   * Additional columns to be added after the entity label column.
    */
   protected function roleTableRow($name, $role) {
     // Check if the group role is ENTITY_FIXED.
