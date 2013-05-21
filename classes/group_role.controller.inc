@@ -25,6 +25,7 @@ class GroupRoleController extends EntityAPIControllerExportable {
     // Clean up permissions before deletion.
     foreach (group_roles($ids) as $role) {
       $role->revokePermissions();
+      $role->flagTypeCustom();
     }
 
     parent::delete($ids, $transaction);
@@ -55,14 +56,10 @@ class GroupRoleController extends EntityAPIControllerExportable {
       unset($entity->permissions);
     }
 
-    // If we manually save a group role we call GroupRole::flagTypeCustom().
-    if (empty($entity->type_is_saved)) {
-      $entity->flagTypeCustom();
-    }
-    else {
-      // Remove the type_is_saved property before creating the group role.
-      unset($entity->type_is_saved);
-    }
+    // If we save a group role we call GroupRole::flagTypeCustom() which in turn
+    // will check whether or not there is a parent group type that needs to be
+    // flagged as ENTITY_CUSTOM.
+    $entity->flagTypeCustom();
 
     return parent::save($entity, $transaction);
   }

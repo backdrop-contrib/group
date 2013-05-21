@@ -41,8 +41,6 @@ class GroupTypeController extends EntityAPIControllerExportable {
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $is_new = !empty($entity->is_new) || empty($entity->{$this->idKey});
 
-    $return = parent::save($entity, $transaction);
-
     // If the roles property is set, we are dealing with a group type
     // that was imported in code and we need to take care of the roles.
     if (isset($entity->roles)) {
@@ -55,11 +53,6 @@ class GroupTypeController extends EntityAPIControllerExportable {
       if ($entity->roles) {
         foreach ($entity->roles as $role) {
           $group_role = group_role_import(entity_var_json_export($role));
-
-          // Let GroupRoleController::save() know that it got called
-          // while saving a group type.
-          $group_role->type_is_saved = TRUE;
-
           group_role_save($group_role);
         }
 
@@ -67,6 +60,11 @@ class GroupTypeController extends EntityAPIControllerExportable {
         unset($entity->roles);
       }
     }
+
+    // Save the group type after manipulating the roles and permissions
+    // so that those functions don't incorrectly flag this group type
+    // as ENTITY_CUSTOM.
+    $return = parent::save($entity, $transaction);
 
     // Rebuild the menu cache so the group/add page works.
     menu_rebuild();

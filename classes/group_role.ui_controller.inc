@@ -24,13 +24,6 @@ class GroupRoleUIController extends EntityDefaultUIController {
   protected $tabledrag;
 
   /**
-   * Whether the parent group type (if any) is ENTITY_IN_CODE.
-   *
-   * @var bool
-   */
-  protected $type_in_code;
-
-  /**
    * More specifically, whether the parent group type is ENTITY_FIXED.
    *
    * @var bool
@@ -48,7 +41,6 @@ class GroupRoleUIController extends EntityDefaultUIController {
     $this->tabledrag = TRUE;
 
     // We assume roles that were not imported along with a group type.
-    $this->type_in_code = FALSE;
     $this->type_fixed = FALSE;
   }
 
@@ -88,13 +80,9 @@ class GroupRoleUIController extends EntityDefaultUIController {
       // We're not viewing the global UI.
       $this->global_ui = FALSE;
 
-      // Get some information about the parent group type.
+      // Whether the parent group type is fixed.
       if (entity_has_status('group_type', $group_type, ENTITY_FIXED)) {
-        $this->type_in_code = TRUE;
         $this->type_fixed = TRUE;
-      }
-      elseif (entity_has_status('group_type', $group_type, ENTITY_IN_CODE)) {
-        $this->type_in_code = TRUE;
       }
 
       // Show only the roles for this group type.
@@ -231,14 +219,10 @@ class GroupRoleUIController extends EntityDefaultUIController {
       }
     }
 
-    // Edit, clone and delete/revert links when not local roles of a fixed type.
+    // Edit, clone and delete/revert links when not showing the UI for a fixed
+    // global role or the roles of a fixed group type.
     if ($this->tabledrag) {
-      array_push($ops, 'edit', 'clone');
-
-      // Delete is unavailable to roles that were imported along with a group type.
-      if (!$this->type_in_code) {
-        $ops[] = 'delete';
-      }
+      array_push($ops, 'edit', 'clone', 'delete');
     }
 
     return $ops;

@@ -34,8 +34,13 @@ class GroupRole extends Entity {
   public function flagTypeCustom() {
     // Only flag the parent type when we're dealing with a local group role.
     if (empty($this->global)) {
-      // Saving without $entity->is_rebuild automatically sets ENTITY_CUSTOM.
-      group_type_save(group_type_load($this->type));
+      // If the type cannot be loaded, it should mean that this function was
+      // run while we are still building an imported type. We therefore do not
+      // need to flag the type as ENTITY_CUSTOM just yet.
+      if ($group_type = group_type_load($this->type)) {
+        // Saving without $entity->is_rebuild automatically sets ENTITY_CUSTOM.
+        group_type_save($group_type);
+      }
     }
   }
 
