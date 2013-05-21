@@ -13,17 +13,17 @@
  *   (optional) A single group role to show the page for.
  *   When $role is provided, $type is ignored.
  *
- * @todo Implement anonymous / registered / admin.
+ * @todo Implement anonymous / registered.
  */
 function group_permission_form($form, &$form_state, $type, $role = NULL) {
-  // Store whether we are on a global role page.
-  $global_page = isset($role);
+  // Define whether we're on a group type overview page or not.
+  $type_page = !empty($type) && empty($role);
 
   // Store if the permission descriptions should be hidden.
   $hide = system_admin_compact_mode();
 
   // Retrieve role names for columns.
-  $roles = $global_page ? array($role->name => $role) : $type->getRoles();
+  $roles = !$type_page ? array($role->name => $role) : $type->getRoles();
 
   // Store $roles for use in the theme function and submit handler.
   $form['roles'] = array(
@@ -99,14 +99,28 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
     }
   }
 
+  // Keep track of every role's disabled status.
+  $all_disabled = TRUE;
+
   foreach ($roles as $rname => $role) {
+    // Check whether this role should be disabled. This is the case for either
+    // fixed global roles, local roles that belong to a fixed group type or
+    // global roles displayed on the group type permissions overview.
+    $disabled = $role->global && ($type_page || $role->status == ENTITY_FIXED);
+    if (!empty($role->type) && $group_type = group_type_load($role->type)) {
+      $disabled = $disabled || $group_type->status == ENTITY_FIXED;
+    }
+
+    // Add this role's disabled status to the tracker.
+    $all_disabled = $all_disabled && $disabled;
+
     // Build the checkboxes for every role.
     $form['checkboxes'][$rname] = array(
       '#type' => 'checkboxes',
       '#options' => $options,
       '#default_value' => isset($status[$rname]) ? $status[$rname] : array(),
       '#attributes' => array('class' => array('rid-' . $rname)),
-      '#disabled' => !$global_page && $role->global,
+      '#disabled' => $disabled,
     );
 
     // Add the role names to the table.
@@ -116,11 +130,13 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
     );
   }
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save permissions'),
-  );
+  if (!$all_disabled) {
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save permissions'),
+    );
+  }
 
   // @todo.
   $form['#attached']['js'][] = drupal_get_path('module', 'user') . '/user.permissions.js';
