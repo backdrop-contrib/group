@@ -101,8 +101,10 @@ class GroupTypeUIController extends EntityDefaultUIController {
         continue;
       }
 
-      $group_type->weight = $weight;
-      group_type_save($group_type);
+      if ($group_type->weight != $weight) {
+        $group_type->weight = $weight;
+        group_type_save($group_type);
+      }
     }
   }
 
