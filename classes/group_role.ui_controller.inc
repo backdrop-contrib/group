@@ -137,13 +137,6 @@ class GroupRoleUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Helper function for sorting roles by weight.
-   */
-  protected function sortRoles($a, $b) {
-    return $a->weight < $b->weight ? -1 : 1;
-  }
-
-  /**
    * Generates the render array for an overview table for group roles
    * matching the given conditions.
    *
@@ -156,6 +149,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
   protected function roleTable($conditions = array()) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'group_role');
+    $query->propertyOrderBy('weight');
 
     // Add all conditions to query.
     foreach ($conditions as $key => $value) {
@@ -171,7 +165,6 @@ class GroupRoleUIController extends EntityDefaultUIController {
     $rows = $weights = array();
     if (isset($result['group_role'])) {
       $roles = group_roles(array_keys($result['group_role']));
-      uasort($roles, array($this, 'sortRoles'));
 
       foreach ($roles as $name => $role) {
         $row = $this->roleTableRow($name, $role);
