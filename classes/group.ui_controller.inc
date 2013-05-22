@@ -94,15 +94,34 @@ class GroupUIController extends EntityDefaultUIController {
       'file path' => drupal_get_path('module', 'group'),
     );
 
+    $items['group/%group/view'] = array(
+      'title' => 'View',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+
+    $items['group/%group/edit'] = array(
+      'title' => 'Edit',
+      'page callback' => 'entity_ui_get_form',
+      'page arguments' => array('group', 1),
+      'access callback' => 'group_entity_access',
+      'access arguments' => array('update', 1),
+      'file' => 'forms/group.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => -5,
+      //'context' => MENU_CONTEXT_INLINE,
+    );
+
     $items['group/%group/delete'] = array(
       'title' => 'Delete',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_operation_form', 'group', 1, 'delete'),
       'access callback' => 'group_entity_access',
       'access arguments' => array('delete', 1),
-      'weight' => 1,
-      'type' => MENU_LOCAL_TASK,
-      //'context' => MENU_CONTEXT_INLINE,
+      'file' => 'forms/group.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_CALLBACK,
     );
 
     return $items;
