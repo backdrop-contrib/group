@@ -91,3 +91,56 @@ function group_add_page() {
 
   return $output;
 }
+
+/**
+ * Returns the group title.
+ *
+ * @param Group $group
+ *   The group object.
+ *
+ * @return string
+ *  An unsanitized string that is the title of the group.
+ */
+function group_page_title($group) {
+  return $group->title;
+}
+
+/**
+ * Generates the front page of a group.
+ *
+ * @param Group $group
+ *   The group object.
+ *
+ * @return array
+ *   A render array suitable for use by drupal_render().
+ */
+function group_page($group) {
+  // If there is a menu link to this group, the link becomes the last part
+  // of the active trail, and the link name becomes the page title.
+  // Thus, we must explicitly set the page title to be the group title.
+  drupal_set_title($group->title);
+
+  // Retrieve the URI for the group.
+  $uri = entity_uri('group', $group);
+
+  // Set the group path as the canonical URL to prevent duplicate content.
+  $attributes = array(
+    'rel' => 'canonical',
+    'href' => url($uri['path'], $uri['options']),
+  );
+  drupal_add_html_head_link($attributes, TRUE);
+
+  // Set the non-aliased path as a default shortlink.
+  $attributes = array(
+    'rel' => 'shortlink',
+    'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE))),
+  );
+  drupal_add_html_head_link($attributes, TRUE);
+
+  // Start building the actual render array.
+  $page['stub'] = array(
+    '#markup' => t('Work in progress'),
+  );
+
+  return $page;
+}

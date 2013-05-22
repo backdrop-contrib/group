@@ -83,6 +83,17 @@ class GroupUIController extends EntityDefaultUIController {
       );
     }
 
+    $items['group/%group'] = array(
+      'title callback' => 'group_page_title',
+      'title arguments' => array(1),
+      'page callback' => 'group_page',
+      'page arguments' => array(1),
+      'access callback' => 'group_entity_access',
+      'access arguments' => array('view', 1),
+      'file' => 'pages/group.inc',
+      'file path' => drupal_get_path('module', 'group'),
+    );
+
     $items['group/%group/delete'] = array(
       'title' => 'Delete',
       'page callback' => 'drupal_get_form',
