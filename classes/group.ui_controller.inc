@@ -174,10 +174,11 @@ class GroupUIController extends EntityDefaultUIController {
    */
   public function applyOperation($op, $group) {
     if ($op == 'delete') {
-      entity_delete('group', $id);
-      watchdog('group', 'Deleted %title.', array('%title' => $group->title));
+      $title = $group->title;
+      entity_delete('group', $group->gid);
 
-      return t('Deleted %title.', array('%title' => $group->title));
+      watchdog('group', 'Deleted %title.', array('%title' => $title));
+      return t('Deleted %title.', array('%title' => $title));
     }
 
     return FALSE;
