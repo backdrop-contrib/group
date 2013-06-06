@@ -56,6 +56,32 @@ function group_load_by_type($type) {
 }
 
 /**
+ * Load all groups for a given user, optionally filtered by type.
+ *
+ * @param int $uid
+ *   The id of the user.
+ * @param string $type
+ *   An optional group type.
+ *
+ * @return array
+ *   An array of Group entities, keyed by their group ids.
+ */
+function group_load_by_member($uid, $type = NULL) {
+  $query = db_select('group_user', 'gu');
+  $query->addField('gu', 'gid');
+  $query->condition('gu.uid', $uid);
+
+  if (isset($type)) {
+    $query->join('groups', 'g', 'gu.gid = g.gid');
+    $query->condition('g.type', $type);
+  }
+
+  $query->distinct();
+
+  return group_load_multiple($query->execute()->fetchCol());
+}
+
+/**
  * Save a group.
  */
 function group_save($group) {
