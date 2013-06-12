@@ -8,6 +8,8 @@
  * Generates the group type editing form.
  */
 function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
+  $locked = entity_has_status('group_type', $group_type, ENTITY_IN_CODE);
+
   if ($op == 'clone') {
     $group_type->label .= ' (cloned)';
   }
@@ -25,7 +27,7 @@ function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
     '#type' => 'machine_name',
     '#default_value' => $group_type->name,
     '#maxlength' => 32,
-    '#disabled' => $group_type->isLocked() || $op == 'edit',
+    '#disabled' => $locked || $op == 'edit',
     '#machine_name' => array(
       'exists' => 'group_type_load',
       'source' => array('label'),
@@ -44,7 +46,7 @@ function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
     '#weight' => 40,
   );
 
-  if (!$group_type->isLocked() && $op == 'edit') {
+  if (!$locked && $op == 'edit') {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
       '#value' => t('Delete group type'),

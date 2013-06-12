@@ -21,6 +21,8 @@ function group_type_add_role_form($group_type) {
  * Generates the group role editing form.
  */
 function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
+  $locked = entity_has_status('group_role', $group_role, ENTITY_IN_CODE);
+
   if ($op == 'clone') {
     $group_role->label .= ' (cloned)';
   }
@@ -50,7 +52,7 @@ function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
     '#type' => 'machine_name',
     '#default_value' => $group_role->name,
     '#maxlength' => 32,
-    '#disabled' => $group_role->isLocked() || $op == 'edit',
+    '#disabled' => $locked || $op == 'edit',
     '#machine_name' => array(
       'exists' => 'group_role_exists',
       'source' => array('label'),
@@ -69,7 +71,7 @@ function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
     '#weight' => 40,
   );
 
-  if (!$group_role->isLocked() && $op == 'edit') {
+  if (!$locked && $op == 'edit') {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
       '#value' => t('Delete group role'),

@@ -17,15 +17,6 @@ class GroupType extends Entity {
   }
 
   /**
-   * Returns whether a group type is locked.
-   */
-  public function isLocked() {
-    return isset($this->status)
-      && empty($this->is_new)
-      && (($this->status & ENTITY_IN_CODE) || ($this->status & ENTITY_FIXED));
-  }
-
-  /**
    * Retrieve all possible roles for a group type.
    *
    * @return array

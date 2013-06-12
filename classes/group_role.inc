@@ -17,15 +17,6 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Return whether a group role is locked.
-   */
-  public function isLocked() {
-    return isset($this->status)
-      && empty($this->is_new)
-      && (($this->status & ENTITY_IN_CODE) || ($this->status & ENTITY_FIXED));
-  }
-
-  /**
    * Flag the parent group type as ENTITY_CUSTOM.
    *
    * If the group role belongs to a group type, the group type it belongs
