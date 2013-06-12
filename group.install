@@ -121,7 +121,7 @@ function group_schema() {
         'not null' => TRUE,
       ),
       'type' => array(
-        'description' => 'The {group_type}.name for the group.',
+        'description' => 'The {group_type}.name for the group role.',
         'type' => 'varchar',
         'length' => 32,
         'default' => '',

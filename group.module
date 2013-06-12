@@ -138,6 +138,203 @@ function group_entity_info_alter(&$entity_info) {
 }
 
 /**
+ * Implements hook_entity_property_info().
+ */
+function group_entity_property_info() {
+  $info = array();
+
+  // Properties for Group entities.
+  $group = &$info['group']['properties'];
+  $group['gid'] = array(
+    'label' => t('Group ID'),
+    'description' => t('The unique group ID.'),
+    'type' => 'integer',
+    'schema_field' => 'gid',
+  );
+
+  $group['type'] = array(
+    'label' => t('Group type name'),
+    'description' => t('The name of the group type.'),
+    'type' => 'token',
+    'setter callback' => 'entity_property_verbatim_set',
+    'clear' => array('group_type'),
+    'schema_field' => 'type',
+  );
+
+  $group['group_type'] = array(
+    'label' => t('Group type'),
+    'description' => t('The group type.'),
+    'type' => 'group_type',
+    'getter callback' => 'group_get_properties',
+    'setter callback' => 'group_set_properties',
+    'computed' => TRUE,
+    'clear' => array('type'),
+  );
+
+  $group['title'] = array(
+    'label' => t('Title'),
+    'description' => t('The title of the group.'),
+    'type' => 'text',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema_field' => 'title',
+  );
+
+  // Properties for GroupType entities.
+  $type = &$info['group_type']['properties'];
+  $type['tid'] = array(
+    'label' => t('Group type ID'),
+    'description' => t('The unique group type ID.'),
+    'type' => 'integer',
+    'schema_field' => 'tid',
+  );
+
+  $type['name'] = array(
+    'label' => t('Machine name'),
+    'description' => t('The machine readable name for the type.'),
+    'type' => 'token',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema_field' => 'name',
+  );
+
+  $type['label'] = array(
+    'label' => t('Label'),
+    'description' => t('The human readable name for the type.'),
+    'type' => 'text',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema_field' => 'label',
+  );
+
+  $type['weight'] = array(
+    'label' => t('Weight'),
+    'description' => t('The weight of the type compared to others.'),
+    'type' => 'integer',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema_field' => 'weight',
+  );
+
+  $type['status'] = array(
+    'label' => t('Entity status'),
+    'description' => t('The entity status of the type.'),
+    'type' => 'integer',
+    'schema_field' => 'status',
+  );
+
+  $type['module'] = array(
+    'label' => t('Providing module'),
+    'description' => t('The module providing the entity.'),
+    'type' => 'text',
+    'schema_field' => 'module',
+  );
+
+  // Properties for GroupRole entities.
+  $role = &$info['group_role']['properties'];
+  $role['rid'] = array(
+    'label' => t('Group role ID'),
+    'description' => t('The unique group role ID.'),
+    'type' => 'integer',
+    'schema_field' => 'rid',
+  );
+
+  $role['type'] = array(
+    'label' => t('Group type name'),
+    'description' => t('The name of the group type the role is coupled to.'),
+    'type' => 'token',
+    'setter callback' => 'entity_property_verbatim_set',
+    'clear' => array('group_type'),
+    'schema_field' => 'type',
+  );
+
+  $role['group_type'] = array(
+    'label' => t('Group type'),
+    'description' => t('The group type the role is coupled to.'),
+    'type' => 'group_type',
+    'getter callback' => 'group_get_properties',
+    'setter callback' => 'group_set_properties',
+    'computed' => TRUE,
+    'clear' => array('type'),
+  );
+
+  $role['name'] = array(
+    'label' => t('Machine name'),
+    'description' => t('The machine readable name for the role.'),
+    'type' => 'token',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema_field' => 'name',
+  );
+
+  $role['label'] = array(
+    'label' => t('Label'),
+    'description' => t('The human readable name for the role.'),
+    'type' => 'text',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema_field' => 'label',
+  );
+
+  $role['global'] = array(
+    'label' => t('Global status'),
+    'description' => t('Whether the role is global or not.'),
+    'type' => 'boolean',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema_field' => 'global',
+  );
+
+  $role['weight'] = array(
+    'label' => t('Weight'),
+    'description' => t('The weight of the role compared to others.'),
+    'type' => 'integer',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema_field' => 'weight',
+  );
+
+  $role['status'] = array(
+    'label' => t('Entity status'),
+    'description' => t('The entity status of the role.'),
+    'type' => 'integer',
+    'schema_field' => 'status',
+  );
+
+  $role['module'] = array(
+    'label' => t('Providing module'),
+    'description' => t('The module providing the entity.'),
+    'type' => 'text',
+    'schema_field' => 'module',
+  );
+
+  return $info;
+}
+
+/**
+ * Callback for getting only-in-code group properties.
+ */
+function group_get_properties($data, $options, $name, $type, $info) {
+  switch ($name) {
+    case 'group':
+      return $data->gid;
+    case 'group_type':
+      return $data->type;
+    case 'user':
+      return $data->uid;
+  }
+}
+
+/**
+ * Callback for setting only-in-code group properties.
+ */
+function group_set_properties(&$data, $name, $value, $langcode, $type, $info) {
+  switch ($name) {
+    case 'group':
+      $data->gid = $value;
+      break;
+    case 'group_type':
+      $data->type = $value;
+      break;
+    case 'user':
+      $data->uid = $value;
+      break;
+  }
+}
+
+/**
  * Implements hook_theme().
  */
 function group_theme() {
