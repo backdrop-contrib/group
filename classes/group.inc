@@ -73,6 +73,11 @@ class Group extends Entity {
    *   The type of the entity.
    */
   public function removeEntity($entity_id, $entity_type) {
+    if ($entity_type === 'user') {
+      $this->removeMember($entity_id);
+      return;
+    }
+
     $query = db_delete('group_entity');
     $query->condition('entity_id', $entity_id);
     $query->condition('entity_type', $entity_type);
