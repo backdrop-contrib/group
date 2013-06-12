@@ -8,6 +8,7 @@
  * Load our helper functions without polluting the .module file.
  */
 ctools_include('entity.group', 'group', 'helpers');
+ctools_include('entity.group_membership', 'group', 'helpers');
 ctools_include('entity.group_role', 'group', 'helpers');
 ctools_include('entity.group_type', 'group', 'helpers');
 ctools_include('group', 'group', 'helpers');
@@ -89,7 +90,6 @@ function group_entity_info() {
     'features controller class' => 'GroupTypeFeaturesController',
   );
 
-  // @todo bundles?
   $info['group_role'] = array(
     'label' => t('Group role'),
     'plural label' => t('Group roles'),
@@ -113,6 +113,19 @@ function group_entity_info() {
       'controller class' => 'GroupRoleUIController',
     ),
     'features controller class' => 'GroupRoleFeaturesController',
+  );
+
+  $info['group_membership'] = array(
+    'label' => t('Group membership'),
+    'plural label' => t('Group memberships'),
+    'description' => t('Provides functionality to link Group to User entities.'),
+    'entity class' => 'GroupMembership',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'group_membership',
+    'entity keys' => array(
+      'id' => 'mid',
+    ),
+    'module' => 'group',
   );
 
   return $info;
@@ -306,6 +319,60 @@ function group_entity_property_info() {
     'description' => t('The module providing the entity.'),
     'type' => 'text',
     'schema_field' => 'module',
+  );
+
+  // Properties for GroupMembership entities.
+  $membership = &$info['group_membership']['properties'];
+  $membership['mid'] = array(
+    'label' => t('Group membership ID'),
+    'description' => t('The unique group membership ID.'),
+    'type' => 'integer',
+    'schema_field' => 'mid',
+  );
+
+  $membership['gid'] = array(
+    'label' => t('Group ID'),
+    'description' => t('The ID of the group the membership belongs to.'),
+    'type' => 'integer',
+    'setter callback' => 'entity_property_verbatim_set',
+    'clear' => array('group'),
+    'schema field' => 'gid',
+  );
+
+  $membership['group'] = array(
+    'label' => t('Group'),
+    'description' => t('The group the membership belongs to.'),
+    'type' => 'group',
+    'getter callback' => 'group_get_properties',
+    'setter callback' => 'group_set_properties',
+    'computed' => TRUE,
+    'clear' => array('gid'),
+  );
+
+  $membership['uid'] = array(
+    'label' => t('User ID'),
+    'description' => t('The ID of the user the membership belongs to.'),
+    'type' => 'integer',
+    'setter callback' => 'entity_property_verbatim_set',
+    'clear' => array('user'),
+    'schema_field' => 'uid',
+  );
+
+  $membership['user'] = array(
+    'label' => t('User'),
+    'description' => t('The user the membership belongs to.'),
+    'type' => 'user',
+    'getter callback' => 'group_get_properties',
+    'setter callback' => 'group_set_properties',
+    'computed' => TRUE,
+    'clear' => array('uid'),
+  );
+
+  $membership['roles'] = array(
+    'label' => t('Roles'),
+    'description' => t('The group roles for the membership.'),
+    'type' => 'list<group_role>',
+    //'options list' => '',
   );
 
   return $info;

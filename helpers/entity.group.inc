@@ -56,29 +56,25 @@ function group_load_by_type($type) {
 }
 
 /**
- * Load all groups for a given user, optionally filtered by type.
+ * Load all groups for a given user.
  *
  * @param int $uid
  *   The id of the user.
- * @param string $type
- *   An optional group type.
  *
  * @return array
  *   An array of Group entities, keyed by their group ids.
+ *
+ * @todo Optionally by type.
  */
 function group_load_by_member($uid, $type = NULL) {
-  $query = db_select('group_user', 'gu');
-  $query->addField('gu', 'gid');
-  $query->condition('gu.uid', $uid);
+  $memberships = group_membership_load_by_user($uid);
 
-  if (isset($type)) {
-    $query->join('groups', 'g', 'gu.gid = g.gid');
-    $query->condition('g.type', $type);
+  $groups = array();
+  foreach (group_membership_load_by_user($uid) as $membership) {
+    $groups[] = $membership->gid;
   }
 
-  $query->distinct();
-
-  return group_load_multiple($query->execute()->fetchCol());
+  return group_load_multiple($groups);
 }
 
 /**

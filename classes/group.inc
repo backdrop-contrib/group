@@ -208,102 +208,85 @@ class Group extends Entity {
   }
 
   /**
-   * Add a user to a group with a specific role.
+   * Add a user to a group.
    *
-   * @param int $user
-   *   The id of the user.
+   * If the user was already a member of the group, the specified role
+   * will be added to the user's active membership.
+   *
+   * @param int $uid
+   *   The uid of the member.
    * @param string $role
-   *   The machine name of the group role.
+   *   (optional) The machine name of the group role to assign to this
+   *   membership. Leave blank to make the user 'just a member'.
    *
-   * @todo: Roles optional (like authenticated user)?
    * @todo: Potentially refresh caches.
    * @todo: Verify the role is valid for this group type.
    */
-  public function addMember($uid, $role) {
-    $query = db_insert('group_user');
-    $query->fields(
-      array(
-        'gid' => $this->gid,
-        'uid' => $uid,
-        'role' => $role,
-      )
-    );
+  public function addMember($uid, $role = NULL) {
+    if (!($membership = $this->getMember($uid))) {
+      $membership = entity_create('group_membership');
 
-    $query->execute();
+      $membership->gid = $this->gid;
+      $membership->uid = $uid;
+      $membership->roles = array();
+    }
+
+    if (!empty($role)) {
+      $membership->roles[] = $role;
+      array_unique($membership->roles);
+    }
+
+    $membership->save();
   }
 
   /**
-   * Remove a user from a group.
+   * Remove a member from a group.
    *
    * @param int $uid
-   *   The id of the user.
+   *   The uid of the member.
    *
    * @todo: Potentially refresh caches.
    */
   public function removeMember($uid) {
-    $query = db_delete('group_user');
-    $query->condition('gid', $this->gid);
-    $query->condition('uid', $uid);
-    $query->execute();
+    if ($membership = $this->getMember($uid)) {
+      group_membership_delete($membership);
+    }
+  }
+
+  /**
+   * Get a single member of a group.
+   *
+   * @param int $uid
+   *   The uid of the member.
+   *
+   * @return GroupMembership
+   *   The GroupMembership of the user.
+   */
+  public function getMember($uid) {
+    return group_membership_load($this->gid, $uid);
   }
 
   /**
    * Get all members of a group.
    *
    * @return array
-   *   An array of arrays for every possible role name, each containing
-   *   the uids of the users having that role for the group.
+   *   An array of GroupMembership entities.
    */
   public function getMembers() {
-    $query = db_select('group_user', 'gu');
-    $query->condition('gu.gid', $this->gid);
-    $query->addField('gu', 'uid');
-    $query->addField('gu', 'role');
-
-    // Prepopulate $members with empty arrays for every role name.
-    $members = array_fill_keys(array_keys($this->getRoles()), array());
-
-    // Unset the anonymous role.
-    unset($members['anonymous']);
-
-    // Add the uids to the roles they belong to, as well as the member role.
-    foreach ($query->execute()->fetchAllKeyed() as $uid => $role) {
-      $members[$role][$uid] = $uid;
-      $members['member'][$uid] = $uid;
-    }
-
-    return $members;
+    return group_membership_load_by_group($this->gid);
   }
 
   /**
    * Get all members of a group, including subgroup members.
    *
    * @return array
-   *   An array of arrays for every possible role name, each containing
-   *   the uids of the users having that role for the group or any
-   *   of its subgroups.
+   *   An array of GroupMembership entities.
    */
   public function getMembersRecursive() {
-    // Start of by gathering all members of the group.
     $members = $this->getMembers();
 
-    // Gather all members of each of the group's subgroups
-    // and add them to the members of the group.
     foreach ($this->getSubgroups() as $subgroup) {
-      foreach ($subgroup->getMembers() as $role => $uids) {
-        // Prevent PHP notices when this role wasn't set yet.
-        if (!isset($members[$role])) {
-          $members[$role] = array();
-        }
-
-        // Skip empty group roles.
-        if (empty($uids)) {
-          continue;
-        }
-
-        // Return only unique ids for each role.
-        $members[$role] += array_combine($uids, $uids);
-      }
+      $members += $subgroup->getMembers();
     }
 
     return $members;
@@ -312,16 +295,13 @@ class Group extends Entity {
   /**
    * Get the amount of members in a group.
    *
-   * If you want to know the amount of members with a specific role inside a
-   * group, use count() on a subarray of the Group::getMembers() return value.
-   *
    * @return int
    *   The total amount of group members.
    */
   public function getMemberCount() {
-    $query = db_select('group_user', 'gu');
-    $query->condition('gu.gid', $this->gid);
-    $query->addField('gu', 'uid');
+    $query = db_select('group_membership', 'gm');
+    $query->condition('gm.gid', $this->gid);
+    $query->addField('gm', 'uid');
     $query->distinct();
 
     return $query->countQuery()->execute()->fetchField();
@@ -330,10 +310,6 @@ class Group extends Entity {
   /**
    * Get the amount of members in a group, including subgroup members.
    *
-   * If you want to know the amount of members with a specific role inside a
-   * group and its subgroups, use count() on a subarray of the
-   * Group::getMembersRecursive() return value.
-   *
    * @return int
    *   The total amount of group members.
    */
@@ -341,9 +317,9 @@ class Group extends Entity {
     // Retrieve the gids of the group's subgroups and add the group's gid.
     $gids = array_merge(array($this->gid), array_keys($this->getSubgroups()));
 
-    $query = db_select('group_user', 'gu');
-    $query->condition('gu.gid', $gids, 'IN');
-    $query->addField('gu', 'uid');
+    $query = db_select('group_membership', 'gm');
+    $query->condition('gm.gid', $gids, 'IN');
+    $query->addField('gm', 'uid');
     $query->distinct();
 
     return $query->countQuery()->execute()->fetchField();
@@ -357,16 +333,9 @@ class Group extends Entity {
    *
    * @return array
    *   An array of GroupRole objects, keyed by their machine name.
-   *
-   * @todo Cache this?
    */
   public function userRoles($uid) {
-    $query = db_select('group_user', 'gu');
-    $query->addField('gu', 'role');
-    $query->condition('gu.gid', $this->gid);
-    $query->condition('gu.uid', $uid);
-
-    return group_roles($query->execute()->fetchCol());
+    return $this->getMember($uid)->getRoles();
   }
 
   /**
@@ -381,7 +350,7 @@ class Group extends Entity {
    *   Whether the user has the specified role.
    */
   public function userHasRole($uid, $role) {
-    return in_array($role, $this->userRoles($uid));
+    return array_key_exists($role, $this->userRoles($uid));
   }
 
   /**

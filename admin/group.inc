@@ -229,8 +229,8 @@ function group_admin_groups() {
   $query->addField('g', 'title');
 
   // Add the member count to the result set.
-  $query->leftJoin('group_user', 'gu', 'g.gid=gu.gid');
-  $query->addExpression('COUNT(distinct gu.uid)', 'members');
+  $query->leftJoin('group_membership', 'gm', 'g.gid=gm.gid');
+  $query->addExpression('COUNT(distinct gm.uid)', 'members');
 
   // Group by gid to ensure the member count is correct.
   $query->groupBy('g.gid');
