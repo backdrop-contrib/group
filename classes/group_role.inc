@@ -45,88 +45,31 @@ class GroupRole extends Entity {
   }
 
   /**
-   * Retrieve all permissions for a group role.
-   *
-   * @return array
-   *   An array of group permission names.
-   */
-  public function getPermissions() {
-    $cache = &drupal_static('GroupRole::getPermissions', array());
-
-    // Check if the permissions have been fetched before.
-    if (isset($cache[$this->name])) {
-      $permissions = $cache[$this->name];
-    }
-
-    // Otherwise, retrieve the permissions from the database.
-    else {
-      $query = db_select('group_permission', 'gp');
-      $query->addField('gp', 'permission');
-      $query->condition('gp.role', $this->name);
-
-      $permissions = $query->execute()->fetchCol();
-      $cache[$this->name] = $permissions;
-    }
-
-    return $permissions;
-  }
-
-  /**
-   * Clear the permission cache for a group role.
-   */
-  public function clearPermissionCache() {
-    $cache = &drupal_static('GroupRole::getPermissions', array());
-    unset($cache[$this->name]);
-  }
-
-  /**
    * Grant permissions to a role.
-   *
-   * When calling this function through code, you need to check for yourself
-   * whether you need to flag the group role as ENTITY_CUSTOM. To do so, call
-   * group_role_save() on it.
    *
    * @param array $permissions
    *   A list of permission names to grant.
    */
   public function grantPermissions(array $permissions) {
-    $new = array_diff($permissions, $this->getPermissions());
+    $this->permissions = array_merge($this->permissions, $permissions);
+    array_unique($this->permissions);
 
-    $query = db_insert('group_permission');
-    $query->fields(array('role', 'permission'));
-
-    foreach ($new as $permission) {
-      $query->values(array(
-        'role' => $this->name,
-        'permission' => $permission,
-      ));
-    }
-
-    $query->execute();
-    $this->clearPermissionCache();
+    group_role_save($this);
   }
 
   /**
    * Revoke permissions from a role.
-   *
-   * When calling this function through code, you need to check for yourself
-   * whether you need to flag the group role as ENTITY_CUSTOM. To do so, call
-   * group_role_save() on it.
    *
    * @param array $permissions
    *   (Optional) A list of permission names to revoke. Will revoke all
    *   permissions from the group role if $permissions is left blank.
    */
   public function revokePermissions(array $permissions = array()) {
-    $query = db_delete('group_permission');
-    $query->condition('role', $this->name);
+    $this->permissions = !empty($permissions)
+      ? array_values(array_diff($this->permissions, $permissions))
+      : array();
 
-    if ($permissions) {
-      $query->condition('permission', $permissions, 'IN');
-    }
-    $query->execute();
-
-    $this->clearPermissionCache();
+    group_role_save($this);
   }
 
   /**
@@ -136,10 +79,6 @@ class GroupRole extends Entity {
    * For example, when a form exposes checkboxes to configure permissions for a
    * role, the form submit handler may directly pass the submitted values for the
    * checkboxes form element to this function.
-   *
-   * If the permissions were imported along with a group role, that role will be
-   * flagged as ENTITY_CUSTOM. If the role itself was imported along with a group
-   * type, that group type will be flagged as ENTITY_CUSTOM as well.
    *
    * @param $permissions
    *   An associative array, where the key holds the permission name and the value
@@ -172,8 +111,5 @@ class GroupRole extends Entity {
     if (!empty($revoke)) {
       $this->revokePermissions(array_keys($revoke));
     }
-
-    // By calling group_role_save(), we flag the role as ENTITY_CUSTOM.
-    group_role_save($this);
   }
 }

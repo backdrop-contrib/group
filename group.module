@@ -278,6 +278,14 @@ function group_entity_property_info() {
     'schema_field' => 'global',
   );
 
+  $role['permissions'] = array(
+    'label' => t('Permissions'),
+    'description' => t('The permissions for the role.'),
+    'type' => 'list<text>',
+    'setter callback' => 'entity_property_verbatim_set',
+    //'options list' => '',
+  );
+
   $role['weight'] = array(
     'label' => t('Weight'),
     'description' => t('The weight of the role compared to others.'),

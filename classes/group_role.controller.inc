@@ -22,9 +22,8 @@ class GroupRoleController extends EntityAPIControllerExportable {
    * @see EntityAPIController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
-    // Clean up permissions before deletion.
+    // Flag parent type as ENTITY_CUSTOM.
     foreach (group_roles($ids) as $role) {
-      $role->revokePermissions();
       $role->flagTypeCustom();
     }
 
@@ -37,25 +36,6 @@ class GroupRoleController extends EntityAPIControllerExportable {
    * @see EntityAPIController::save()
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
-    $is_new = !empty($entity->is_new) || empty($entity->{$this->idKey});
-
-    // If the permissions property is set, we are dealing with a group role
-    // that was imported in code and we need to take care of the permissions.
-    if (isset($entity->permissions)) {
-      // Delete all attached permissions if the group type is being rebuilt.
-      if (!$is_new) {
-        $entity->revokePermissions();
-      }
-
-      // Create the permissions that were imported along with the role.
-      if ($entity->permissions) {
-        $entity->grantPermissions($entity->permissions);
-      }
-
-      // Remove the permissions property before creating the group role.
-      unset($entity->permissions);
-    }
-
     // If we save a group role we call GroupRole::flagTypeCustom() which in turn
     // will check whether or not there is a parent group type that needs to be
     // flagged as ENTITY_CUSTOM.
@@ -83,19 +63,9 @@ class GroupRoleController extends EntityAPIControllerExportable {
       'name' => '',
       'label' => '',
       'global' => 1,
+      'permissions' => array(),
     );
 
     return parent::create($values);
-  }
-
-  /**
-   * Export a group role.
-   *
-   * Exports a group role and its permissions.
-   */
-  public function export($entity, $prefix = '') {
-    $entity->permissions = $entity->getPermissions();
-
-    return parent::export($entity, $prefix);
   }
 }

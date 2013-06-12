@@ -22,6 +22,8 @@ function group_uninstall() {
 
 /**
  * Implements hook_schema().
+ *
+ * @todo Before releasing an alpha, check indexes.
  */
 function group_schema() {
   // Cannot name table 'group' as this is a keyword in SQL.
@@ -147,6 +149,12 @@ function group_schema() {
         'not null' => TRUE,
         'default' => 1,
       ),
+      'permissions' => array(
+        'description' => 'The group permissions for the role.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
       'weight' => array(
         'description' => 'The weight of this group role in relation to others.',
         'type' => 'int',
@@ -179,36 +187,6 @@ function group_schema() {
       ),
     ),
     'primary key' => array('rid'),
-  );
-
-  $schema['group_permission'] = array(
-    'description' => 'Stores the permissions assigned to group roles.',
-    'fields' => array(
-      'role' => array(
-        'description' => 'The {group_role}.name for the permission link.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'permission' => array(
-        'description' => 'A single permission granted to the role.',
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-    ),
-    'primary key' => array('role', 'permission'),
-    'indexes' => array(
-      'permission' => array('permission'),
-    ),
-    'foreign keys' => array(
-      'group_role' => array(
-        'table' => 'group_role',
-        'columns' => array('role' => 'name'),
-      ),
-    ),
   );
 
   $schema['group_user'] = array(

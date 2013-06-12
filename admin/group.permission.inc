@@ -39,7 +39,7 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
   // Fetch permissions for all roles or the one selected role.
   $role_permissions = array();
   foreach ($roles as $role) {
-    $role_permissions[$role->name] = $role->getPermissions();
+    $role_permissions[$role->name] = $role->permissions;
   }
 
   // Get a list of all the modules implementing a hook_group_permission()
