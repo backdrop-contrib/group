@@ -110,6 +110,7 @@ class GroupUIController extends EntityDefaultUIController {
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
       'weight' => -5,
+      // @todo Properly implement contextual links.
       //'context' => MENU_CONTEXT_INLINE,
     );
 

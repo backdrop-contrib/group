@@ -99,7 +99,7 @@ function group_add_page() {
  *   The group object.
  *
  * @return string
- *  An unsanitized string that is the title of the group.
+ *   An unsanitized string that is the title of the group.
  */
 function group_page_title($group) {
   return $group->title;

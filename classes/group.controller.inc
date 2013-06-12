@@ -22,7 +22,7 @@ class GroupController extends EntityAPIController {
    * @see EntityAPIController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
-    //@todo Clean up before deletion.
+    //@todo Potentially clean up before deletion.
 
     parent::delete($ids, $transaction);
   }

@@ -2,7 +2,7 @@
 /**
  * @file
  * Hooks provided by the Group module.
- */ 
+ */
 
 /**
  * Define group permissions.
@@ -37,8 +37,8 @@
  *     This should rarely be used, since it is important for all permissions to
  *     have a clear, consistent security warning that is the same across the
  *     site. Use the 'description' key instead to provide any information that
- *     is specific to the permission you are defining. 
- * 
+ *     is specific to the permission you are defining.
+ *
  * @see hook_permission()
  */
 function hook_group_permission() {
@@ -48,4 +48,4 @@ function hook_group_permission() {
       'description' => t('Send group members a private message.'),
     ),
   );
-} 
+}

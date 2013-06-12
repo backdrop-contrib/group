@@ -60,6 +60,8 @@ function group_load_by_type($type) {
  *
  * @param int $uid
  *   The id of the user.
+ * @param string $type
+ *   (optional) Filters the results for a given group type.
  *
  * @return array
  *   An array of Group entities, keyed by their group ids.
@@ -67,8 +69,6 @@ function group_load_by_type($type) {
  * @todo Optionally by type.
  */
 function group_load_by_member($uid, $type = NULL) {
-  $memberships = group_membership_load_by_user($uid);
-
   $groups = array();
   foreach (group_membership_load_by_user($uid) as $membership) {
     $groups[] = $membership->gid;

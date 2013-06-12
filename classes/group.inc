@@ -46,7 +46,6 @@ class Group extends Entity {
    *   The bundle of the entity.
    */
   public function addEntity($entity_id, $entity_type, $bundle) {
-    // @todo Update this if Group::addMember() changes.
     if ($entity_type === 'user') {
       $this->addMember($entity_id, NULL);
       return;
@@ -219,7 +218,6 @@ class Group extends Entity {
    *   (optional) The machine name of the group role to assign to this
    *   membership. Leave blank to make the user 'just a member'.
    *
-   * @todo: Potentially refresh caches.
    * @todo: Verify the role is valid for this group type.
    */
   public function addMember($uid, $role = NULL) {
@@ -244,8 +242,6 @@ class Group extends Entity {
    *
    * @param int $uid
    *   The uid of the member.
-   *
-   * @todo: Potentially refresh caches.
    */
   public function removeMember($uid) {
     if ($membership = $this->getMember($uid)) {
@@ -361,8 +357,6 @@ class Group extends Entity {
    *
    * @return array
    *   An array of group permission names.
-   *
-   * @todo Cache this?
    */
   public function userPermissions($uid) {
     $permissions = array();

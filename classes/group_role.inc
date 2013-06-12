@@ -52,7 +52,7 @@ class GroupRole extends Entity {
    * Revoke permissions from a role.
    *
    * @param array $permissions
-   *   (Optional) A list of permission names to revoke. Will revoke all
+   *   (optional) A list of permission names to revoke. Will revoke all
    *   permissions from the group role if $permissions is left blank.
    */
   public function revokePermissions(array $permissions = array()) {

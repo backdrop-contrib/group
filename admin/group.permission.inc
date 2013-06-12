@@ -138,7 +138,7 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
     );
   }
 
-  // @todo.
+  // @todo: Do we want our own version?
   $form['#attached']['js'][] = drupal_get_path('module', 'user') . '/user.permissions.js';
 
   return $form;
