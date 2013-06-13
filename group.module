@@ -120,7 +120,7 @@ function group_entity_info() {
     'plural label' => t('Group memberships'),
     'description' => t('Provides functionality to link Group to User entities.'),
     'entity class' => 'GroupMembership',
-    'controller class' => 'EntityAPIController',
+    'controller class' => 'GroupMembershipController',
     'base table' => 'group_membership',
     'entity keys' => array(
       'id' => 'mid',
