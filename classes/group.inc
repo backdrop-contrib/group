@@ -227,11 +227,8 @@ class Group extends Entity {
    */
   public function addMember($uid, $roles = array()) {
     if (!($membership = $this->getMember($uid))) {
-      $membership = entity_create('group_membership');
-
-      $membership->gid = $this->gid;
-      $membership->uid = $uid;
-      $membership->roles = array();
+      $values = array('gid' => $this->gid, 'uid' => $uid);
+      $membership = entity_create('group_membership', $values);
     }
 
     if (!empty($roles)) {
