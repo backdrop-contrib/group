@@ -10,13 +10,6 @@
 class GroupRole extends Entity {
 
   /**
-   * Class constructor.
-   */
-  public function __construct(array $values = array(), $entityType = NULL) {
-    parent::__construct($values, 'group_role');
-  }
-
-  /**
    * Flag the parent group type as ENTITY_CUSTOM.
    *
    * If the group role belongs to a group type, the group type it belongs

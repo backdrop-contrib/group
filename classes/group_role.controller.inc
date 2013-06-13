@@ -10,13 +10,6 @@
 class GroupRoleController extends EntityAPIControllerExportable {
 
   /**
-   * Class constructor.
-   */
-  public function __construct($entityType) {
-    parent::__construct($entityType);
-  }
-
-  /**
    * Delete a group role.
    *
    * @see EntityAPIController::delete()

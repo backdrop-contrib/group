@@ -10,13 +10,6 @@
 class GroupMembership extends Entity {
 
   /**
-   * Class constructor.
-   */
-  public function __construct(array $values = array(), $entityType = NULL) {
-    parent::__construct($values, 'group_membership');
-  }
-
-  /**
    * Get all roles for a group membership.
    *
    * @return array

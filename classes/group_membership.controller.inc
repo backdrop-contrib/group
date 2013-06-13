@@ -10,13 +10,6 @@
 class GroupMembershipController extends EntityAPIController {
 
   /**
-   * Class constructor.
-   */
-  public function __construct($entityType) {
-    parent::__construct($entityType);
-  }
-
-  /**
    * Create a group membership.
    *
    * We first set up the values that are specific to the group schema

@@ -10,13 +10,6 @@
 class Group extends Entity {
 
   /**
-   * Class constructor.
-   */
-  public function __construct(array $values = array(), $entityType = NULL) {
-    parent::__construct($values, 'group');
-  }
-
-  /**
    * Specifies the default uri, which is picked up by uri() by default.
    */
   protected function defaultURI() {

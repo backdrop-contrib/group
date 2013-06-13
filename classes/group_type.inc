@@ -10,13 +10,6 @@
 class GroupType extends Entity {
 
   /**
-   * Class constructor.
-   */
-  public function __construct(array $values = array(), $entityType = NULL) {
-    parent::__construct($values, 'group_type');
-  }
-
-  /**
    * Retrieve all possible roles for a group type.
    *
    * @return array

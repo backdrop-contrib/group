@@ -10,13 +10,6 @@
 class GroupTypeController extends EntityAPIControllerExportable {
 
   /**
-   * Class constructor.
-   */
-  public function __construct($entityType) {
-    parent::__construct($entityType);
-  }
-
-  /**
    * Delete a group type.
    *
    * @see EntityAPIController::delete()

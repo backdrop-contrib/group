@@ -10,13 +10,6 @@
 class GroupUIController extends EntityDefaultUIController {
 
   /**
-   * Class constructor.
-   */
-  public function __construct($entity_type, $entity_info) {
-    parent::__construct($entity_type, $entity_info);
-  }
-
-  /**
    * Provides definitions for implementing hook_menu().
    */
   public function hook_menu() {
