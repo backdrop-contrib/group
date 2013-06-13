@@ -47,7 +47,7 @@ class Group extends Entity {
    */
   public function addEntity($entity_id, $entity_type, $bundle) {
     if ($entity_type === 'user') {
-      $this->addMember($entity_id, NULL);
+      $this->addMember($entity_id);
       return;
     }
 
@@ -219,13 +219,13 @@ class Group extends Entity {
    *
    * @param int $uid
    *   The uid of the member.
-   * @param string $role
-   *   (optional) The machine name of the group role to assign to this
+   * @param array $roles
+   *   (optional) The machine names of the group roles to assign to this
    *   membership. Leave blank to make the user 'just a member'.
    *
-   * @todo: Verify the role is valid for this group type.
+   * @todo: Verify the roles are valid for this group type.
    */
-  public function addMember($uid, $role = NULL) {
+  public function addMember($uid, $roles = array()) {
     if (!($membership = $this->getMember($uid))) {
       $membership = entity_create('group_membership');
 
@@ -234,8 +234,8 @@ class Group extends Entity {
       $membership->roles = array();
     }
 
-    if (!empty($role)) {
-      $membership->roles[] = $role;
+    if (!empty($roles)) {
+      $membership->roles = array_merge($membership->roles, $roles);
       array_unique($membership->roles);
     }
 
