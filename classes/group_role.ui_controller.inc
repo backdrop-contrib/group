@@ -169,10 +169,10 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
     $rows = $weights = array();
     if (isset($result['group_role'])) {
-      $roles = group_roles(array_keys($result['group_role']));
+      $group_roles = group_roles(array_keys($result['group_role']));
 
-      foreach ($roles as $name => $role) {
-        $row = $this->roleTableRow($name, $role);
+      foreach ($group_roles as $name => $group_role) {
+        $row = $this->roleTableRow($name, $group_role);
         $rows[$name] = $row;
 
         if ($this->tabledrag) {
@@ -266,9 +266,9 @@ class GroupRoleUIController extends EntityDefaultUIController {
   /**
    * Generates the row for the passed role.
    */
-  protected function roleTableRow($name, $role) {
+  protected function roleTableRow($name, $group_role) {
     // Check if the group role is ENTITY_FIXED.
-    $role_fixed = entity_has_status('group_role', $role, ENTITY_FIXED);
+    $role_fixed = entity_has_status('group_role', $group_role, ENTITY_FIXED);
 
     // Create the row container array.
     $row = array(
@@ -288,7 +288,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
           '#type' => 'weight',
           '#title' => t('Weight'),
           '#title_display' => 'invisible',
-          '#default_value' => $role->weight,
+          '#default_value' => $group_role->weight,
           '#parents' => array('weights', $name),
           '#attributes' => array(
             'class' => array('group-role-weight'),
@@ -299,7 +299,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
     }
 
     // Add the role label.
-    $row['data']['label'] = check_plain($role->label);
+    $row['data']['label'] = check_plain($group_role->label);
 
     // Permissions related links.
     $what = $role_fixed || $this->type_fixed ? t('view permissions') : t('edit permissions');
@@ -312,7 +312,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
         $row['data']['status'] = array(
           'data' => array(
             '#theme' => 'entity_status',
-            '#status' => $role->status,
+            '#status' => $group_role->status,
           )
         );
       }
@@ -329,10 +329,10 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
       // Add the delete/revert action if available.
       if (in_array('delete', $ops)) {
-        $overridden = entity_has_status('group_role', $role, ENTITY_OVERRIDDEN);
+        $overridden = entity_has_status('group_role', $group_role, ENTITY_OVERRIDDEN);
 
         // Don't show action for fixed or default roles.
-        if ($role_fixed || $role->status == ENTITY_IN_CODE) {
+        if ($role_fixed || $group_role->status == ENTITY_IN_CODE) {
           $row['data']['delete'] = '';
         }
 

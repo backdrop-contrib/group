@@ -7,39 +7,39 @@
 /**
  * Builds the role permission page.
  *
- * @param GroupType $type
+ * @param GroupType $group_type
  *   The group type to show the permissions page for.
- * @param GroupRole $role
+ * @param GroupRole $group_role
  *   (optional) A single group role to show the page for.
- *   When $role is provided, $type is ignored.
+ *   When $group_role is provided, $group_type is ignored.
  *
  * @todo Implement anonymous / registered.
  */
-function group_permission_form($form, &$form_state, $type, $role = NULL) {
+function group_permission_form($form, &$form_state, $group_type, $group_role = NULL) {
   // Define whether we're on a group type overview page or not.
-  $type_page = !empty($type) && empty($role);
+  $type_page = !empty($group_type) && empty($group_role);
 
   // Store if the permission descriptions should be hidden.
   $hide = system_admin_compact_mode();
 
   // Retrieve role names for columns.
-  $roles = !$type_page ? array($role->name => $role) : $type->getRoles();
+  $group_roles = !$type_page ? array($group_role->name => $group_role) : $group_type->getRoles();
 
-  // Store $roles for use in the theme function and submit handler.
+  // Store $group_roles for use in the theme function and submit handler.
   $form['roles'] = array(
     '#type' => 'value',
-    '#value' => $roles,
+    '#value' => $group_roles,
   );
 
   // Shortcut to the theme function if no roles are available.
-  if (empty($roles)) {
+  if (empty($group_roles)) {
     return $form;
   }
 
   // Fetch permissions for all roles or the one selected role.
   $role_permissions = array();
-  foreach ($roles as $role) {
-    $role_permissions[$role->name] = $role->permissions;
+  foreach ($group_roles as $group_role) {
+    $role_permissions[$group_role->name] = $group_role->permissions;
   }
 
   // Get a list of all the modules implementing a hook_group_permission()
@@ -89,7 +89,7 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
           )),
         );
 
-        foreach ($roles as $rname => $role) {
+        foreach ($group_roles as $rname => $group_role) {
           // Save which checkboxes should already be checked.
           if (in_array($pname, $role_permissions[$rname])) {
             $status[$rname][] = $pname;
@@ -102,12 +102,14 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
   // Keep track of every role's disabled status.
   $all_disabled = TRUE;
 
-  foreach ($roles as $rname => $role) {
+  foreach ($group_roles as $rname => $group_role) {
+    $role_fixed = entity_has_status('group_role', $group_role, ENTITY_FIXED);
+
     // Check whether this role should be disabled. This is the case for either
     // fixed global roles, local roles that belong to a fixed group type or
     // global roles displayed on the group type permissions overview.
-    $disabled = $role->global && ($type_page || entity_has_status('group_role', $role, ENTITY_FIXED));
-    if (!empty($role->type) && $group_type = group_type_load($role->type)) {
+    $disabled = $group_role->global && ($type_page || $role_fixed);
+    if (!empty($group_role->type) && $group_type = group_type_load($group_role->type)) {
       $disabled = $disabled || entity_has_status('group_type', $group_type, ENTITY_FIXED);
     }
 
@@ -125,7 +127,7 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
 
     // Add the role names to the table.
     $form['roles'][$rname] = array(
-      '#markup' => check_plain($role->label),
+      '#markup' => check_plain($group_role->label),
       '#tree' => TRUE,
     );
   }
@@ -150,8 +152,8 @@ function group_permission_form($form, &$form_state, $type, $role = NULL) {
  * Saves the (de)selected permissions for a group type.
  */
 function group_permission_form_submit($form, &$form_state) {
-  foreach ($form_state['values']['roles'] as $rname => $role) {
-    $role->changePermissions($form_state['values'][$rname]);
+  foreach ($form_state['values']['roles'] as $rname => $group_role) {
+    $group_role->changePermissions($form_state['values'][$rname]);
   }
 
   drupal_set_message(t('The changes have been saved.'));

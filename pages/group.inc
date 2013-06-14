@@ -26,7 +26,7 @@ function group_autocomplete($search = '') {
  * This function will search for all existing groups the user
  * has view access to, optionally filtered by group type.
  *
- * @param GroupType $type
+ * @param GroupType $group_type
  *   The group type to retrieve suggestions for. The search will
  *   traverse all known group types when no type is provided.
  * @param string $search
@@ -37,7 +37,7 @@ function group_autocomplete($search = '') {
  *
  * @todo Individual group access check.
  */
-function group_autocomplete_by_type($type, $search = '') {
+function group_autocomplete_by_type($group_type, $search = '') {
   $matches = array();
 
   if ($search) {
@@ -47,15 +47,15 @@ function group_autocomplete_by_type($type, $search = '') {
     $query->condition('title', db_like($search) . '%', 'LIKE');
     $query->range(0, 10);
 
-    if (!empty($type)) {
-      $query->condition('type', $type->name);
+    if (!empty($group_type)) {
+      $query->condition('type', $group_type->name);
     }
 
     // Retrieve the suffix configuration.
     $suffix = variable_get('group_autocomplete_suffix');
 
     // Get the right suffix configuration key.
-    $s_key = !empty($type) ? $type->name : 'general';
+    $s_key = !empty($group_type) ? $group_type->name : 'general';
 
     foreach ($query->execute()->fetchAllKeyed() as $gid => $title) {
       $title = check_plain($title);

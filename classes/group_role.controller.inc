@@ -16,8 +16,8 @@ class GroupRoleController extends EntityAPIControllerExportable {
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
     // Flag parent type as ENTITY_CUSTOM.
-    foreach (group_roles($ids) as $role) {
-      $role->flagTypeCustom();
+    foreach (group_roles($ids) as $group_role) {
+      $group_role->flagTypeCustom();
     }
 
     parent::delete($ids, $transaction);

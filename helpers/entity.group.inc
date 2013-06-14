@@ -70,8 +70,8 @@ function group_load_by_type($type) {
  */
 function group_load_by_member($uid, $type = NULL) {
   $groups = array();
-  foreach (group_membership_load_by_user($uid) as $membership) {
-    $groups[] = $membership->gid;
+  foreach (group_membership_load_by_user($uid) as $group_membership) {
+    $groups[] = $group_membership->gid;
   }
 
   return group_load_multiple($groups);

@@ -60,13 +60,13 @@ class GroupUIController extends EntityDefaultUIController {
       'file path' => drupal_get_path('module', 'group'),
     );
 
-    foreach (group_types() as $name => $type) {
+    foreach (group_types() as $name => $group_type) {
       $group = entity_create('group', array('type' => $name));
 
       $items["group/add/$name"] = array(
-        'title' => $type->label,
+        'title' => $group_type->label,
         'title callback' => 'check_plain',
-        'description' => "Create $type->label",
+        'description' => "Create $group_type->label",
         'page callback' => 'entity_ui_get_form',
         'page arguments' => array('group', $group, 'add'),
         'access callback' => 'group_entity_access',

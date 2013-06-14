@@ -44,15 +44,15 @@ function group_type_import($export) {
 /**
  * Save a group type.
  */
-function group_type_save($type) {
-  return entity_save('group_type', $type);
+function group_type_save($group_type) {
+  return entity_save('group_type', $group_type);
 }
 
 /**
  * Delete a group type.
  */
-function group_type_delete($type) {
-  entity_delete('group_type', entity_id('group_type', $type));
+function group_type_delete($group_type) {
+  entity_delete('group_type', entity_id('group_type', $group_type));
 }
 
 /**

@@ -18,7 +18,7 @@ class GroupType extends Entity {
    * @see group_roles()
    */
   public function getRoles() {
-    $roles = array();
+    $group_roles = array();
 
     // @todo Add the anonymous and member role as a GroupRole.
 
@@ -30,7 +30,7 @@ class GroupType extends Entity {
     $result = $query->execute();
 
     if (isset($result['group_role'])) {
-      $roles += group_roles(array_keys($result['group_role']));
+      $group_roles += group_roles(array_keys($result['group_role']));
     }
 
     // Add global roles.
@@ -41,10 +41,10 @@ class GroupType extends Entity {
     $result = $query->execute();
 
     if (isset($result['group_role'])) {
-      $roles += group_roles(array_keys($result['group_role']));
+      $group_roles += group_roles(array_keys($result['group_role']));
     }
 
-    return $roles;
+    return $group_roles;
   }
 
   /**
@@ -57,9 +57,9 @@ class GroupType extends Entity {
   public function removeRoles() {
     $roles = array();
 
-    foreach ($this->getRoles() as $name => $role) {
+    foreach ($this->getRoles() as $name => $group_role) {
       // Skip anonymous, member and global roles.
-      if (in_array($name, array('anonymous', 'member')) || $role->global) {
+      if (in_array($name, array('anonymous', 'member')) || $group_role->global) {
         continue;
       }
 

@@ -219,17 +219,17 @@ class Group extends Entity {
    * @todo: Verify the roles are valid for this group type.
    */
   public function addMember($uid, $roles = array()) {
-    if (!($membership = $this->getMember($uid))) {
+    if (!($group_membership = $this->getMember($uid))) {
       $values = array('gid' => $this->gid, 'uid' => $uid);
-      $membership = entity_create('group_membership', $values);
+      $group_membership = entity_create('group_membership', $values);
     }
 
     if (!empty($roles)) {
-      $membership->roles = array_merge($membership->roles, $roles);
-      array_unique($membership->roles);
+      $group_membership->roles = array_merge($group_membership->roles, $roles);
+      array_unique($group_membership->roles);
     }
 
-    $membership->save();
+    $group_membership->save();
   }
 
   /**
@@ -239,8 +239,8 @@ class Group extends Entity {
    *   The uid of the member.
    */
   public function removeMember($uid) {
-    if ($membership = $this->getMember($uid)) {
-      group_membership_delete($membership);
+    if ($group_membership = $this->getMember($uid)) {
+      group_membership_delete($group_membership);
     }
   }
 
@@ -356,8 +356,8 @@ class Group extends Entity {
   public function userPermissions($uid) {
     $permissions = array();
 
-    foreach ($this->userRoles($uid) as $role) {
-      foreach ($role->permissions as $permission) {
+    foreach ($this->userRoles($uid) as $group_role) {
+      foreach ($group_role->permissions as $permission) {
         $permissions[] = $permission;
       }
     }

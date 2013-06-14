@@ -23,8 +23,8 @@ function group_roles($names = FALSE) {
  * Load a group role by name.
  */
 function group_role_load($name) {
-  $roles = group_roles(array($name));
-  return reset($roles);
+  $group_roles = group_roles(array($name));
+  return reset($group_roles);
 }
 
 /**
@@ -44,15 +44,15 @@ function group_role_import($export) {
 /**
  * Save a group role.
  */
-function group_role_save($role) {
-  return entity_save('group_role', $role);
+function group_role_save($group_role) {
+  return entity_save('group_role', $group_role);
 }
 
 /**
  * Delete a group role.
  */
-function group_role_delete($role) {
-  entity_delete('group_role', entity_id('group_role', $role));
+function group_role_delete($group_role) {
+  entity_delete('group_role', entity_id('group_role', $group_role));
 }
 
 /**

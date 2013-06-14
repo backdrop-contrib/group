@@ -39,8 +39,8 @@ function group_memberships($filters = array()) {
  * Load a group membership by group and user id.
  */
 function group_membership_load($gid, $uid) {
-  $memberships = group_memberships(array('gid' => $gid, 'uid' => $uid));
-  return reset($memberships);
+  $group_memberships = group_memberships(array('gid' => $gid, 'uid' => $uid));
+  return reset($group_memberships);
 }
 
 /**
@@ -60,15 +60,15 @@ function group_membership_load_by_user($uid) {
 /**
  * Save a group.
  */
-function group_membership_save($membership) {
-  entity_save('group_membership', $membership);
+function group_membership_save($group_membership) {
+  entity_save('group_membership', $group_membership);
 }
 
 /**
  * Delete a group.
  */
-function group_membership_delete($membership) {
-  entity_delete('group_membership', entity_id('group_membership', $membership));
+function group_membership_delete($group_membership) {
+  entity_delete('group_membership', entity_id('group_membership', $group_membership));
 }
 
 /**

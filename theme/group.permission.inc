@@ -31,10 +31,10 @@ function theme_group_permission_description($variables) {
  */
 function theme_group_permission_form($variables) {
   $form = $variables['form'];
-  $roles = $form['roles']['#value'];
+  $group_roles = $form['roles']['#value'];
 
   // Shortcircuit when no roles are defined.
-  if (empty($roles)) {
+  if (empty($group_roles)) {
     return '<p>' . t('You have not created any roles for this group type yet. Go to the <a href="@create-role">group role creation page</a> to add a new group role.', array('@create-role' => url('admin/group/role/add'))) . '</p>';
   }
 
@@ -61,7 +61,7 @@ function theme_group_permission_form($variables) {
 
       foreach (element_children($form['checkboxes']) as $rname) {
         // Title content for both the label as the checkbox itself.
-        $title = $roles[$rname]->label . ': ' . $form['permissions'][$pname]['#markup'];
+        $title = $group_roles[$rname]->label . ': ' . $form['permissions'][$pname]['#markup'];
 
         $form['checkboxes'][$rname][$pname]['#title'] = $title;
         $form['checkboxes'][$rname][$pname]['#title_display'] = 'invisible';

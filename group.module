@@ -137,12 +137,12 @@ function group_entity_info() {
  * Informs Drupal that our group types are bundles for groups.
  */
 function group_entity_info_alter(&$entity_info) {
-  foreach (group_types() as $type => $info) {
-    $entity_info['group']['bundles'][$type] = array(
+  foreach (group_types() as $name => $group_type) {
+    $entity_info['group']['bundles'][$name] = array(
       'label' => $info->label,
       'admin' => array(
         'path' => 'admin/group/type/manage/%group_type',
-        'real path' => 'admin/group/type/manage/' . $type,
+        'real path' => 'admin/group/type/manage/' . $name,
         'bundle argument' => 4,
         'access arguments' => array('administer group types'),
       ),
@@ -193,15 +193,15 @@ function group_entity_property_info() {
   );
 
   // Properties for GroupType entities.
-  $type = &$info['group_type']['properties'];
-  $type['tid'] = array(
+  $group_type = &$info['group_type']['properties'];
+  $group_type['tid'] = array(
     'label' => t('Group type ID'),
     'description' => t('The unique group type ID.'),
     'type' => 'integer',
     'schema_field' => 'tid',
   );
 
-  $type['name'] = array(
+  $group_type['name'] = array(
     'label' => t('Machine name'),
     'description' => t('The machine readable name for the type.'),
     'type' => 'token',
@@ -209,7 +209,7 @@ function group_entity_property_info() {
     'schema_field' => 'name',
   );
 
-  $type['label'] = array(
+  $group_type['label'] = array(
     'label' => t('Label'),
     'description' => t('The human readable name for the type.'),
     'type' => 'text',
@@ -217,7 +217,7 @@ function group_entity_property_info() {
     'schema_field' => 'label',
   );
 
-  $type['weight'] = array(
+  $group_type['weight'] = array(
     'label' => t('Weight'),
     'description' => t('The weight of the type compared to others.'),
     'type' => 'integer',
@@ -225,14 +225,14 @@ function group_entity_property_info() {
     'schema_field' => 'weight',
   );
 
-  $type['status'] = array(
+  $group_type['status'] = array(
     'label' => t('Entity status'),
     'description' => t('The entity status of the type.'),
     'type' => 'integer',
     'schema_field' => 'status',
   );
 
-  $type['module'] = array(
+  $group_type['module'] = array(
     'label' => t('Providing module'),
     'description' => t('The module providing the entity.'),
     'type' => 'text',
@@ -240,15 +240,15 @@ function group_entity_property_info() {
   );
 
   // Properties for GroupRole entities.
-  $role = &$info['group_role']['properties'];
-  $role['rid'] = array(
+  $group_role = &$info['group_role']['properties'];
+  $group_role['rid'] = array(
     'label' => t('Group role ID'),
     'description' => t('The unique group role ID.'),
     'type' => 'integer',
     'schema_field' => 'rid',
   );
 
-  $role['type'] = array(
+  $group_role['type'] = array(
     'label' => t('Group type name'),
     'description' => t('The name of the group type the role is coupled to.'),
     'type' => 'token',
@@ -257,7 +257,7 @@ function group_entity_property_info() {
     'schema_field' => 'type',
   );
 
-  $role['group_type'] = array(
+  $group_role['group_type'] = array(
     'label' => t('Group type'),
     'description' => t('The group type the role is coupled to.'),
     'type' => 'group_type',
@@ -267,7 +267,7 @@ function group_entity_property_info() {
     'clear' => array('type'),
   );
 
-  $role['name'] = array(
+  $group_role['name'] = array(
     'label' => t('Machine name'),
     'description' => t('The machine readable name for the role.'),
     'type' => 'token',
@@ -275,7 +275,7 @@ function group_entity_property_info() {
     'schema_field' => 'name',
   );
 
-  $role['label'] = array(
+  $group_role['label'] = array(
     'label' => t('Label'),
     'description' => t('The human readable name for the role.'),
     'type' => 'text',
@@ -283,7 +283,7 @@ function group_entity_property_info() {
     'schema_field' => 'label',
   );
 
-  $role['global'] = array(
+  $group_role['global'] = array(
     'label' => t('Global status'),
     'description' => t('Whether the role is global or not.'),
     'type' => 'boolean',
@@ -291,7 +291,7 @@ function group_entity_property_info() {
     'schema_field' => 'global',
   );
 
-  $role['permissions'] = array(
+  $group_role['permissions'] = array(
     'label' => t('Permissions'),
     'description' => t('The permissions for the role.'),
     'type' => 'list<text>',
@@ -299,7 +299,7 @@ function group_entity_property_info() {
     //'options list' => '',
   );
 
-  $role['weight'] = array(
+  $group_role['weight'] = array(
     'label' => t('Weight'),
     'description' => t('The weight of the role compared to others.'),
     'type' => 'integer',
@@ -307,14 +307,14 @@ function group_entity_property_info() {
     'schema_field' => 'weight',
   );
 
-  $role['status'] = array(
+  $group_role['status'] = array(
     'label' => t('Entity status'),
     'description' => t('The entity status of the role.'),
     'type' => 'integer',
     'schema_field' => 'status',
   );
 
-  $role['module'] = array(
+  $group_role['module'] = array(
     'label' => t('Providing module'),
     'description' => t('The module providing the entity.'),
     'type' => 'text',
@@ -322,15 +322,15 @@ function group_entity_property_info() {
   );
 
   // Properties for GroupMembership entities.
-  $membership = &$info['group_membership']['properties'];
-  $membership['mid'] = array(
+  $group_membership = &$info['group_membership']['properties'];
+  $group_membership['mid'] = array(
     'label' => t('Group membership ID'),
     'description' => t('The unique group membership ID.'),
     'type' => 'integer',
     'schema_field' => 'mid',
   );
 
-  $membership['gid'] = array(
+  $group_membership['gid'] = array(
     'label' => t('Group ID'),
     'description' => t('The ID of the group the membership belongs to.'),
     'type' => 'integer',
@@ -339,7 +339,7 @@ function group_entity_property_info() {
     'schema field' => 'gid',
   );
 
-  $membership['group'] = array(
+  $group_membership['group'] = array(
     'label' => t('Group'),
     'description' => t('The group the membership belongs to.'),
     'type' => 'group',
@@ -349,7 +349,7 @@ function group_entity_property_info() {
     'clear' => array('gid'),
   );
 
-  $membership['uid'] = array(
+  $group_membership['uid'] = array(
     'label' => t('User ID'),
     'description' => t('The ID of the user the membership belongs to.'),
     'type' => 'integer',
@@ -358,7 +358,7 @@ function group_entity_property_info() {
     'schema_field' => 'uid',
   );
 
-  $membership['user'] = array(
+  $group_membership['user'] = array(
     'label' => t('User'),
     'description' => t('The user the membership belongs to.'),
     'type' => 'user',
@@ -368,7 +368,7 @@ function group_entity_property_info() {
     'clear' => array('uid'),
   );
 
-  $membership['roles'] = array(
+  $group_membership['roles'] = array(
     'label' => t('Roles'),
     'description' => t('The group roles for the membership.'),
     'type' => 'list<group_role>',
@@ -491,9 +491,9 @@ function group_permission() {
   );
 
   // Generate standard node permissions for all applicable node types.
-  foreach (group_types() as $name => $type) {
+  foreach (group_types() as $name => $group_type) {
     $permissions["create $name group"] = array(
-      'title' => t('%type_name: Create new group', array('%type_name' => $type->label)),
+      'title' => t('%type_name: Create new group', array('%type_name' => $group_type->label)),
     );
   }
 
@@ -524,8 +524,8 @@ function group_entity_access($op, $group, $account = NULL, $entity_type = NULL, 
  * Access callback: Checks whether the user has permission to add a group.
  */
 function _group_add_access() {
-  foreach (group_types() as $type) {
-    if (group_entity_access('create', NULL, NULL, 'group', $type->name)) {
+  foreach (group_types() as $group_type) {
+    if (group_entity_access('create', NULL, NULL, 'group', $group_type->name)) {
       return TRUE;
     }
   }

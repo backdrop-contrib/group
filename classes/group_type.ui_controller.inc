@@ -123,10 +123,10 @@ class GroupTypeUIController extends EntityDefaultUIController {
 
     $rows = $weights = array();
     if (isset($result['group_type'])) {
-      $types = group_types(array_keys($result['group_type']));
+      $group_types = group_types(array_keys($result['group_type']));
 
-      foreach ($types as $name => $type) {
-        $row = $this->typeTableRow($name, $type);
+      foreach ($group_types as $name => $group_type) {
+        $row = $this->typeTableRow($name, $group_type);
         $rows[$name] = $row;
 
         $weights[$name] = array(
@@ -201,9 +201,9 @@ class GroupTypeUIController extends EntityDefaultUIController {
   /**
    * Generates the row for the passed type.
    */
-  protected function typeTableRow($name, $type) {
+  protected function typeTableRow($name, $group_type) {
     // Check if the group type is ENTITY_FIXED.
-    $type_fixed = entity_has_status('group_type', $type, ENTITY_FIXED);
+    $type_fixed = entity_has_status('group_type', $group_type, ENTITY_FIXED);
 
     // Create the row container array.
     $row = array(
@@ -222,7 +222,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
         '#type' => 'weight',
         '#title' => t('Weight'),
         '#title_display' => 'invisible',
-        '#default_value' => $type->weight,
+        '#default_value' => $group_type->weight,
         '#parents' => array('weights', $name),
         '#attributes' => array(
           'class' => array('group-type-weight'),
@@ -232,7 +232,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
     );
 
     // Add the type label.
-    $row['data']['label'] = check_plain($type->label);
+    $row['data']['label'] = check_plain($group_type->label);
 
     // Permissions related links.
     $what = $type_fixed ? t('view permissions') : t('edit permissions');
@@ -246,7 +246,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
         $row['data']['status'] = array(
           'data' => array(
             '#theme' => 'entity_status',
-            '#status' => $type->status,
+            '#status' => $group_type->status,
           )
         );
       }
@@ -272,14 +272,14 @@ class GroupTypeUIController extends EntityDefaultUIController {
       $row['data']['clone'] = l(t('clone'), "$this->path/manage/$name/clone");
 
       // Don't show delete action for fixed or default types.
-      if ($type_fixed || $type->status == ENTITY_IN_CODE) {
+      if ($type_fixed || $group_type->status == ENTITY_IN_CODE) {
         $row['data']['delete'] = '';
       }
 
       // Add the delete/revert action.
       else {
         // Show revert action for overridden roles.
-        if (entity_has_status('group_type', $type, ENTITY_OVERRIDDEN)) {
+        if (entity_has_status('group_type', $group_type, ENTITY_OVERRIDDEN)) {
           $what = t('revert');
           $path = "$this->path/manage/$name/revert";
         }
