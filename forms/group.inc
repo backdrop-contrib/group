@@ -82,32 +82,12 @@ function group_form_submit_delete($form, &$form_state) {
  * Generates the group member form.
  */
 function group_member_form($form, &$form_state, $group) {
-  $entries = $rows = array();
+  $rows = array();
 
-  // Prevent having to call Group::userRoles() for every user.
-  foreach ($group->getMembers() as $role => $members) {
-    if (empty($members)) {
-      continue;
-    }
-
-    // @todo Change this when member role is implemented.
-    if ($role != 'member') {
-      $group_role = group_role_load($role);
-
-      foreach ($members as $uid) {
-        $entries[$uid]['roles'][$role] = $group_role->label;
-      }
-    }
-
-    foreach (user_load_multiple(array_keys($members)) as $uid => $member) {
-      $entries[$uid]['user'] = $member;
-    }
-  }
-
-  foreach ($entries as $uid => $entry) {
-    $rows[$uid] = array(
-      empty($entry['user']) ? array() : $entry['user']->name,
-      empty($entry['roles']) ? array() : implode(', ', $entry['roles']),
+  foreach ($group->getMembers() as $group_membership) {
+    $rows[$group_membership->mid] = array(
+      user_load($group_membership->uid)->name,
+      implode(', ', $group_membership->roles),
     );
   }
 
