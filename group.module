@@ -217,6 +217,22 @@ function group_entity_property_info() {
     'schema_field' => 'label',
   );
 
+  $group_type['outsider_permissions'] = array(
+    'label' => t('Outsider permissions'),
+    'description' => t('The outsider permissions for the group type.'),
+    'type' => 'list<text>',
+    'setter callback' => 'entity_property_verbatim_set',
+    //'options list' => '',
+  );
+
+  $group_type['member_permissions'] = array(
+    'label' => t('Member permissions'),
+    'description' => t('The member permissions for the group type.'),
+    'type' => 'list<text>',
+    'setter callback' => 'entity_property_verbatim_set',
+    //'options list' => '',
+  );
+
   $group_type['weight'] = array(
     'label' => t('Weight'),
     'description' => t('The weight of the type compared to others.'),

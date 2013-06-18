@@ -12,8 +12,6 @@
  * @param GroupRole $group_role
  *   (optional) A single group role to show the page for.
  *   When $group_role is provided, $group_type is ignored.
- *
- * @todo Implement anonymous / registered.
  */
 function group_permission_form($form, &$form_state, $group_type, $group_role = NULL) {
   // Define whether we're on a group type overview page or not.

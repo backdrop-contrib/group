@@ -29,6 +29,18 @@ class GroupRoleController extends EntityAPIControllerExportable {
    * @see EntityAPIController::save()
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
+    // If we save a special group role (outsider or member), we don't actually
+    // save the role but attach its permissions back onto the group type.
+    if (in_array($entity->name, array('outsider', 'member'))) {
+      $key = $entity->name . '_permissions';
+
+      $group_type = group_type_load($entity->type);
+      $group_type->$key = $entity->permissions;
+      group_type_save($group_type);
+
+      return;
+    }
+
     // If we save a group role we call GroupRole::flagTypeCustom() which in turn
     // will check whether or not there is a parent group type that needs to be
     // flagged as ENTITY_CUSTOM.

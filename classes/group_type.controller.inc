@@ -80,6 +80,8 @@ class GroupTypeController extends EntityAPIControllerExportable {
     $values += array(
       'name' => '',
       'label' => '',
+      'outsider_permissions' => array(),
+      'member_permissions' => array(),
     );
 
     return parent::create($values);
@@ -102,14 +104,9 @@ class GroupTypeController extends EntityAPIControllerExportable {
       $entity->roles = array();
 
       // Add group roles to the group type.
-      foreach ($entity->getRoles() as $group_role) {
+      foreach ($entity->getRoles(FALSE) as $group_role) {
         // Global group roles are never exported along with a group type.
         if ($group_role->global) {
-          continue;
-        }
-
-        // @todo Remove this and figure out what to do with anonymous and member.
-        if (in_array($group_role->name, array('anonymous', 'member'))) {
           continue;
         }
 

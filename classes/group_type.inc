@@ -12,15 +12,36 @@ class GroupType extends Entity {
   /**
    * Retrieve all possible roles for a group type.
    *
+   * @param bool $special
+   *   Include special roles 'outsider' and 'member'. Defaults to TRUE.
+   *
    * @return array
    *   A list of GroupRole entities.
    *
    * @see group_roles()
    */
-  public function getRoles() {
+  public function getRoles($special = TRUE) {
     $group_roles = array();
 
-    // @todo Add the anonymous and member role as a GroupRole.
+    if ($special) {
+      // We're about to fake two type specific roles: outsider and member.
+      $values = array('type' => $this->name, 'global' => 0);
+
+      // Fake the outsider role.
+      $values['name'] = 'outsider';
+      $values['label'] = t('Outsider');
+      $values['permissions'] = $this->outsider_permissions;
+      $group_roles['outsider'] = entity_create('group_role', $values);
+
+      // Fake the member role.
+      $values['name'] = 'member';
+      $values['label'] = t('Member');
+      $values['permissions'] = $this->member_permissions;
+      $group_roles['member'] = entity_create('group_role', $values);
+
+      // Unset the is_new flags to avoid confusion.
+      unset($group_roles['outsider']->is_new, $group_roles['member']->is_new);
+    }
 
     // Add the local roles for this group type.
     $query = new EntityFieldQuery();
@@ -50,19 +71,14 @@ class GroupType extends Entity {
   /**
    * Delete all possible roles for a group type.
    *
-   * Does not delete global roles, nor the special roles anonymous and member.
+   * Does not delete global or special (outsider or member) roles.
    *
    * @see group_roles()
    */
   public function removeRoles() {
     $roles = array();
 
-    foreach ($this->getRoles() as $name => $group_role) {
-      // Skip anonymous, member and global roles.
-      if (in_array($name, array('anonymous', 'member')) || $group_role->global) {
-        continue;
-      }
-
+    foreach ($this->getRoles(FALSE) as $name => $group_role) {
       $roles[] = $name;
     }
 

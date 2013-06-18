@@ -85,6 +85,18 @@ function group_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'outsider_permissions' => array(
+        'description' => 'The outsider permissions for this group type.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+      'member_permissions' => array(
+        'description' => 'The member permissions for this group type.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
       'weight' => array(
         'description' => 'The weight of this group type in relation to others.',
         'type' => 'int',

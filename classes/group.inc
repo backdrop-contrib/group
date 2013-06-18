@@ -354,15 +354,7 @@ class Group extends Entity {
    *   An array of group permission names.
    */
   public function userPermissions($uid) {
-    $permissions = array();
-
-    foreach ($this->userRoles($uid) as $group_role) {
-      foreach ($group_role->permissions as $permission) {
-        $permissions[] = $permission;
-      }
-    }
-
-    return array_unique($permissions);
+    return $this->getMember($uid)->getPermissions();
   }
 
   /**
