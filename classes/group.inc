@@ -225,8 +225,8 @@ class Group extends Entity {
     }
 
     if (!empty($roles)) {
-      $group_membership->roles = array_merge($group_membership->roles, $roles);
-      array_unique($group_membership->roles);
+      $roles = array_merge($group_membership->roles, $roles);
+      $group_membership->roles = array_values(array_unique($roles));
     }
 
     $group_membership->save();

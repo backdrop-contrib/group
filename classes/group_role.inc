@@ -35,8 +35,8 @@ class GroupRole extends Entity {
    *   A list of permission names to grant.
    */
   public function grantPermissions(array $permissions) {
-    $this->permissions = array_merge($this->permissions, $permissions);
-    array_unique($this->permissions);
+    $permissions = array_merge($this->permissions, $permissions);
+    $this->permissions = array_values(array_unique($permissions));
 
     group_role_save($this);
   }
