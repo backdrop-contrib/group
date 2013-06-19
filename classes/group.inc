@@ -326,7 +326,11 @@ class Group extends Entity {
    *   An array of GroupRole objects, keyed by their machine name.
    */
   public function userRoles($uid) {
-    return $this->getMember($uid)->getRoles();
+    if ($group_membership = $this->getMember($uid)) {
+      return $group_membership->getRoles();
+    }
+
+    return array();
   }
 
   /**
@@ -354,7 +358,9 @@ class Group extends Entity {
    *   An array of group permission names.
    */
   public function userPermissions($uid) {
-    return $this->getMember($uid)->getPermissions();
+    return ($group_membership = $this->getMember($uid))
+      ? $group_membership->getPermissions()
+      : group_type_load($this->type)->outsider_permissions;
   }
 
   /**
