@@ -49,3 +49,52 @@ function hook_group_permission() {
     ),
   );
 }
+
+/**
+ * Add mass group operations.
+ *
+ * This hook enables modules to inject custom operations into the mass
+ * operations dropdown found at admin/group, by associating a callback
+ * function with the operation, which is called when the form is submitted.
+ *
+ * The callback function receives one initial argument, which is an array of
+ * the selected groups. If it is a form callback, it receives the form and
+ * form state as well.
+ *
+ * @return array
+ *   An array of operations. Each operation is an associative array that may
+ *   contain the following key-value pairs:
+ *   - label: (required) The label for the operation, displayed in the dropdown
+ *     menu.
+ *   - callback: (required) The function to call for the operation.
+ *   - callback arguments: (optional) An array of additional arguments to pass
+ *     to the callback function.
+ *   - form callback: (optional) Whether the callback is a form builder. Set
+ *     to TRUE to have the callback build a form such as a confirmation form.
+ *     This form will then replace the group overview form, see the 'delete'
+ *     operation for an example.
+ */
+function hook_node_operations() {
+  // Acts upon selected groups but shows overview form right after.
+  $operations['close'] = array(
+    'label' => t('Close selected groups'),
+    'callback' => 'mymodule_open_or_close_groups',
+    'callback arguments' => array('close'),
+  );
+
+  // Acts upon selected groups but shows overview form right after.
+  $operations['open'] = array(
+    'label' => t('Open selected groups'),
+    'callback' => 'mymodule_open_or_close_groups',
+    'callback arguments' => array('open'),
+  );
+
+  // Shows a different form when this operation is selected.
+  $operations['delete'] = array(
+    'label' => t('Delete selected groups'),
+    'callback' => 'group_multiple_delete_confirm',
+    'form callback' => TRUE,
+  );
+
+  return $operations;
+}

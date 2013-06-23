@@ -29,17 +29,17 @@ function group_filters() {
 }
 
 /**
- * Builds the group administration filter.
+ * Builds the group administration filters.
  */
-function group_filter_form() {
+function group_filters_form() {
   $filters = group_filters();
 
-  $session = isset($_SESSION['group_overview_filter'])
-    ? $_SESSION['group_overview_filter']
+  $session = isset($_SESSION['group_overview_filters'])
+    ? $_SESSION['group_overview_filters']
     : array();
 
   $i = 0;
-  $form['filters'] = array(
+  $fs_filters = array(
     '#type' => 'fieldset',
     '#title' => t('Show only groups where'),
     '#theme' => 'exposed_filters__group',
@@ -54,7 +54,7 @@ function group_filter_form() {
       '%value' => $value,
     );
 
-    $form['filters']['current'][] = ($i++)
+    $fs_filters['current'][] = ($i++)
       ? array('#markup' => t('and where %property is %value', $t_args))
       : array('#markup' => t('where %property is %value', $t_args));
 
@@ -63,20 +63,20 @@ function group_filter_form() {
   }
 
   if (count($filters)) {
-    $form['filters']['status'] = array(
+    $fs_filters['status'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('clearfix')),
       '#prefix' => ($i ? '<div class="additional-filters">' . t('and where') . '</div>' : ''),
     );
   }
 
-  $form['filters']['status']['filters'] = array(
+  $fs_filters['status']['filters'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('filters')),
   );
 
   foreach ($filters as $key => $filter) {
-    $form['filters']['status']['filters'][$key] = array(
+    $fs_filters['status']['filters'][$key] = array(
       '#type' => 'select',
       '#options' => $filter['options'],
       '#title' => $filter['title'],
@@ -84,37 +84,37 @@ function group_filter_form() {
     );
   }
 
-  $form['filters']['status']['actions'] = array(
+  $fs_filters['status']['actions'] = array(
     '#type' => 'actions',
     '#attributes' => array('class' => array('container-inline')),
   );
 
   if (count($filters)) {
-    $form['filters']['status']['actions']['submit'] = array(
+    $fs_filters['status']['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => count($session) ? t('Refine') : t('Filter'),
     );
   }
 
   if (count($session)) {
-    $form['filters']['status']['actions']['undo'] = array(
+    $fs_filters['status']['actions']['undo'] = array(
       '#type' => 'submit',
       '#value' => t('Undo'),
     );
 
-    $form['filters']['status']['actions']['reset'] = array(
+    $fs_filters['status']['actions']['reset'] = array(
       '#type' => 'submit',
       '#value' => t('Reset'),
     );
   }
 
-  return $form;
+  return $fs_filters;
 }
 
 /**
  * Filter form submit callback.
  */
-function group_filter_form_submit($form, &$form_state) {
+function group_filters_form_submit($form, &$form_state) {
   $filters = group_filters();
 
   switch ($form_state['values']['op']) {
@@ -128,18 +128,213 @@ function group_filter_form_submit($form, &$form_state) {
 
           // Only accept valid selections offered on the dropdown, block bad input.
           if (isset($flat_options[$form_state['values'][$filter]])) {
-            $_SESSION['group_overview_filter'][$filter] = $form_state['values'][$filter];
+            $_SESSION['group_overview_filters'][$filter] = $form_state['values'][$filter];
           }
         }
       }
       break;
     case t('Undo'):
-      array_pop($_SESSION['group_overview_filter']);
+      array_pop($_SESSION['group_overview_filters']);
       break;
     case t('Reset'):
-      $_SESSION['group_overview_filter'] = array();
+      $_SESSION['group_overview_filters'] = array();
       break;
   }
+}
+
+/**
+ * Builds the group administration options.
+ *
+ * @todo hook_group_operations()
+ */
+function group_options_form() {
+  $fs_options = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update options'),
+    '#attributes' => array('class' => array('container-inline')),
+  );
+
+  if (!user_access('bypass group access')) {
+    $fs_options['#access'] = FALSE;
+  }
+  else {
+    $options = array();
+    foreach (module_invoke_all('group_operations') as $operation => $array) {
+      $options[$operation] = $array['label'];
+    }
+
+    $fs_options['operation'] = array(
+      '#type' => 'select',
+      '#title' => t('Operation'),
+      '#title_display' => 'invisible',
+      '#options' => $options,
+      '#default_value' => 'approve',
+    );
+
+    $fs_options['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Update'),
+      '#validate' => array('group_options_form_validate'),
+      '#submit' => array('group_options_form_submit'),
+    );
+  }
+
+  return $fs_options;
+}
+
+/**
+ * Options form validate callback.
+ */
+function group_options_form_validate($form, &$form_state) {
+  // Error if there are no groups selected.
+  if (!is_array($form_state['values']['groups']) || !count(array_filter($form_state['values']['groups']))) {
+    form_set_error('', t('No groups selected.'));
+  }
+}
+
+/**
+ * Options form submit callback.
+ */
+function group_options_form_submit($form, &$form_state) {
+  $operations = module_invoke_all('group_operations');
+  $operation = $operations[$form_state['values']['operation']];
+
+  // Get all selected groups.
+  $groups = array_filter($form_state['values']['groups']);
+
+  // Build the arguments for the operation callback.
+  $args = array($groups);
+  if (isset($operation['callback arguments'])) {
+    $args = array_merge($args, $operation['callback arguments']);
+  }
+
+  if (empty($operation['form callback'])) {
+    call_user_func_array($operation['callback'], $args);
+  }
+  else {
+    // Pass the operation form details.
+    $form_state['rebuild_info']['callback'] = $operation['callback'];
+    $form_state['rebuild_info']['args'] = $args;
+
+    // We need to rebuild the form to be able to show the operation form.
+    $form_state['rebuild'] = TRUE;
+  }
+}
+
+/**
+ * Builds the group administration overview table.
+ *
+ * @param int $pager_limit
+ *   The pager limit for the result page.
+ *
+ * @todo Individual group access check on query.
+ */
+function group_groups_form($pager_limit) {
+  // Retrieve the destination url for any 'edit' or 'delete' link only once.
+  $destination = drupal_get_destination();
+
+  $options = array();
+  $header = array(
+    'title' => array(
+      'data' => t('Group name'),
+      'field' => 'title',
+      'sort' => 'asc',
+    ),
+    'type' => array(
+      'data' => t('Group type'),
+      'field' => 'type',
+    ),
+    'members' => array(
+      'data' => t('Members'),
+      'field' => 'members',
+    ),
+    'operations' => t('Operations'),
+  );
+
+  // Below we build a query that is used to retrieve group ids based on
+  // filters, a pager and group access. Additionally, we add a 'fake' field
+  // that lists the amount of members so we can sort on that too.
+  $query = db_select('groups', 'g')->extend('PagerDefault')->extend('TableSort');
+  $query->leftJoin('group_membership', 'gm', 'g.gid=gm.gid');
+  $query->addField('g', 'gid');
+  $query->addExpression('COUNT(distinct gm.uid)', 'members');
+  $query->groupBy('g.gid');
+  $query->orderByHeader($header);
+  $query->limit($pager_limit);
+
+  // Retrieve all active filters and add them to the query.
+  $filters = isset($_SESSION['group_overview_filters']) ? $_SESSION['group_overview_filters'] : array();
+  foreach ($filters as $property => $value) {
+    $query->condition($property, $value);
+  }
+
+  // Add the groups to the table.
+  foreach (group_load_multiple($query->execute()->fetchCol()) as $group) {
+    $options[$group->gid] = array(
+      'title' => l($group->title, "group/$group->gid"),
+      'type' => group_type_load($group->type)->label,
+      'members' => $group->getMemberCount(),
+    );
+
+    $operations = array();
+    // Add an 'edit' link if available.
+    if (group_access('update', $group)) {
+      $operations['edit'] = array(
+        'title' => t('edit'),
+        'href' => "group/$group->gid/edit",
+        'query' => $destination,
+      );
+    }
+
+    // Add a 'delete' link if available.
+    if (group_access('delete', $group)) {
+      $operations['delete'] = array(
+        'title' => t('delete'),
+        'href' => "group/$group->gid/delete",
+        'query' => $destination,
+      );
+    }
+
+    $options[$group->gid]['operations'] = array();
+    if (count($operations) > 1) {
+      // Render an unordered list of operations links.
+      $options[$group->gid]['operations'] = array(
+        'data' => array(
+          '#theme' => 'links__group_operations',
+          '#links' => $operations,
+          '#attributes' => array('class' => array('links', 'inline')),
+        ),
+      );
+    }
+    elseif (!empty($operations)) {
+      // Render the first and only operation as a link.
+      $link = reset($operations);
+      $options[$group->gid]['operations'] = array(
+        'data' => array(
+          '#type' => 'link',
+          '#title' => $link['title'],
+          '#href' => $link['href'],
+          '#options' => array('query' => $link['query']),
+        ),
+      );
+    }
+  }
+
+  $form['groups'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $options,
+    '#empty' => t('No groups available'),
+  );
+
+  // Transform into a table if the user can't perform any operations.
+  if (!user_access('bypass group access')) {
+    unset($form['groups']['#type'], $form['groups']['#options']);
+    $form['groups']['#theme'] = 'table';
+    $form['groups']['#rows'] = $options;
+  }
+
+  return $form;
 }
 
 /**
@@ -189,80 +384,4 @@ function group_multiple_delete_confirm_submit($form, &$form_state) {
     watchdog('groups', 'Deleted @count groups.', array('@count' => $count));
     drupal_set_message(format_plural($count, 'Deleted 1 group.', 'Deleted @count groups.'));
   }
-
-  $form_state['redirect'] = 'admin/group';
-}
-
-/**
- * Builds the group administration overview.
- *
- * @todo Copy node_admin_nodes().
- * @todo Dynamic pager amount.
- * @todo Individual group access check.
- */
-function group_admin_groups() {
-  $options = array();
-  $header = array(
-    'title' => array(
-      'data' => t('Group name'),
-      'field' => 'title',
-      'sort' => 'asc',
-    ),
-    'type' => array(
-      'data' => t('Group type'),
-      'field' => 'type',
-    ),
-    'members' => array(
-      'data' => t('Members'),
-      'field' => 'members',
-    ),
-  );
-
-  // We do not use an EntityFieldQuery because it does not support joins.
-  $query = db_select('groups', 'g')
-    ->extend('PagerDefault')
-    ->extend('TableSort');
-
-  // Add what we need from {groups} to the result set.
-  $query->addField('g', 'gid');
-  $query->addField('g', 'type');
-  $query->addField('g', 'title');
-
-  // Add the member count to the result set.
-  $query->leftJoin('group_membership', 'gm', 'g.gid=gm.gid');
-  $query->addExpression('COUNT(distinct gm.uid)', 'members');
-
-  // Group by gid to ensure the member count is correct.
-  $query->groupBy('g.gid');
-
-  // Retrieve all active filters and add them to the query.
-  $filters = isset($_SESSION['group_overview_filter'])
-    ? $_SESSION['group_overview_filter']
-    : array();
-
-  foreach ($filters as $property => $value) {
-    $query->condition($property, $value);
-  }
-
-  // Add the pager and tablesort functionality.
-  $query->limit(20);
-  $query->orderByHeader($header);
-
-  // Add the records to the table.
-  foreach ($query->execute() as $record) {
-    $options[] = array(
-      'title' => l($record->title, "group/$record->gid"),
-      'type' => group_type_load($record->type)->label,
-      'members' => $record->members,
-    );
-  }
-
-  $render = array(
-    '#type' => 'tableselect',
-    '#header' => $header,
-    '#options' => $options,
-    '#empty' => t('No groups available'),
-  );
-
-  return $render;
 }

@@ -624,3 +624,16 @@ function group_admin_paths() {
     return $paths;
   }
 }
+
+/**
+ * Implements hook_group_operations().
+ */
+function group_group_operations() {
+  $operations['delete'] = array(
+    'label' => t('Delete selected groups'),
+    'callback' => 'group_multiple_delete_confirm',
+    'form callback' => TRUE,
+  );
+
+  return $operations;
+}

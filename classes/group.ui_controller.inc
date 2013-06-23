@@ -136,17 +136,25 @@ class GroupUIController extends EntityDefaultUIController {
 
   /**
    * Builds the group overview form.
+   *
+   * @todo Dynamic pager amount.
    */
   public function overviewForm($form, &$form_state) {
-    ctools_include('group', 'group', 'admin');
+    // Load the file holding most of the form part builders.
+    form_load_include($form_state, 'inc', 'group', 'admin/group');
 
-    if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
-      $groups = array_filter($form_state['values']['groups']);
-      return group_multiple_delete_confirm($form, $form_state, $groups);
+    // If the form was rebuilt from an operation, we show that form instead.
+    if ($form_state['rebuild']) {
+      $args = array_merge(array($form, &$form_state), $form_state['rebuild_info']['args']);
+      $function = $form_state['rebuild_info']['callback'];
+
+      return call_user_func_array($form_state['rebuild_info']['callback'], $args);
     }
 
-    $form['filter'] = group_filter_form();
-    $form['admin'] = group_admin_groups();
+    $form['filters'] = group_filters_form();
+    $form['options'] = group_options_form();
+    $form['groups'] = group_groups_form($this->overviewPagerLimit);
+    $form['pager'] = array('#markup' => theme('pager'));
 
     return $form;
   }
@@ -156,7 +164,7 @@ class GroupUIController extends EntityDefaultUIController {
    */
   public function overviewFormSubmit($form, &$form_state) {
     ctools_include('group', 'group', 'admin');
-    group_filter_form_submit($form, $form_state);
+    group_filters_form_submit($form, $form_state);
   }
 
   /**
