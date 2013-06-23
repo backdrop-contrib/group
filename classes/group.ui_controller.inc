@@ -20,6 +20,7 @@ class GroupUIController extends EntityDefaultUIController {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_overview_form', 'group'),
       'access arguments' => array('access group overview'),
+      'file' => 'includes/entity.ui.inc',
       'weight' => -9,
     );
 
