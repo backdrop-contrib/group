@@ -189,6 +189,9 @@ function group_schema() {
         'not null' => FALSE,
       ),
     ),
+    'indexes' => array(
+      'type' => array('type'),
+    ),
     'unique keys' => array(
       'name' => array('name'),
     ),
@@ -282,13 +285,16 @@ function group_schema() {
         'default' => '',
       ),
     ),
+    'indexes' => array(
+      'entity' => array('entity_type', 'entity_id'),
+    ),
     'foreign keys' => array(
       'group' => array(
         'table' => 'groups',
         'columns' => array('gid' => 'gid'),
       ),
     ),
-    'primary key' => array('gid', 'entity_id', 'entity_type'),
+    'primary key' => array('gid', 'entity_type', 'entity_id'),
   );
 
   return $schema;
