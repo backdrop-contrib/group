@@ -7,11 +7,11 @@
 /**
  * Load our helper functions without polluting the .module file.
  */
-ctools_include('entity.group', 'group', 'helpers');
-ctools_include('entity.group_membership', 'group', 'helpers');
-ctools_include('entity.group_role', 'group', 'helpers');
-ctools_include('entity.group_type', 'group', 'helpers');
-ctools_include('group', 'group', 'helpers');
+module_load_include('inc', 'group', 'helpers/entity.group');
+module_load_include('inc', 'group', 'helpers/entity.group_membership');
+module_load_include('inc', 'group', 'helpers/entity.group_role');
+module_load_include('inc', 'group', 'helpers/entity.group_type');
+module_load_include('inc', 'group', 'helpers/group');
 
 /**
  * Implements hook_hook_info().

@@ -163,7 +163,7 @@ class GroupUIController extends EntityDefaultUIController {
    * Overview form submit callback.
    */
   public function overviewFormSubmit($form, &$form_state) {
-    ctools_include('group', 'group', 'admin');
+    module_load_include('inc', 'group', 'admin/group');
     group_filters_form_submit($form, $form_state);
   }
 

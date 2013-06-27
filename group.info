@@ -3,7 +3,6 @@ description = Allows you to group users and content
 core = 7.x
 package = Group
 
-dependencies[] = ctools
 dependencies[] = entity
 
 files[] = classes/group.inc
