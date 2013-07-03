@@ -375,6 +375,6 @@ class Group extends Entity {
    *   Whether the user has the specified permission.
    */
   public function userHasPermission($uid, $permission) {
-    return $uid === 1 || in_array($permission, $this->userPermissions($uid));
+    return $uid == 1 || in_array($permission, $this->userPermissions($uid));
   }
 }
