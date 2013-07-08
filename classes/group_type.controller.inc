@@ -15,10 +15,19 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * @see EntityAPIController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
-    // Clean up local roles before deletion.
+    $gids = array();
+
     foreach (group_types($ids) as $group_type) {
+      // Clean up local roles before deletion.
       $group_type->removeRoles();
+
+      // Gather the group ids of all groups of the deleted types.
+      $groups = group_load_by_type($group_type->name);
+      $gids = array_merge($gids, array_keys($groups));
     }
+
+    // Delete all groups of the deleted types.
+    group_delete_multiple($gids);
 
     parent::delete($ids, $transaction);
 

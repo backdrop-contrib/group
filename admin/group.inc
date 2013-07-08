@@ -341,6 +341,8 @@ function group_groups_form($pager_limit) {
  * Multiple group deletion confirmation form.
  */
 function group_multiple_delete_confirm($form, &$form_state, $groups) {
+  $form['#submit'][] = 'group_multiple_delete_confirm_submit';
+
   $form['groups'] = array(
     '#prefix' => '<ul>',
     '#suffix' => '</ul>',
@@ -357,16 +359,15 @@ function group_multiple_delete_confirm($form, &$form_state, $groups) {
     );
   }
 
-  $form['operation'] = array(
-    '#type' => 'hidden',
-    '#value' => 'delete',
+  $form['info'] = array(
+    '#markup' => t('By deleting a group you will delete all of its subgroups and content as well.'),
+    '#suffix' => '<br />',
   );
 
-  $form['#submit'][] = 'group_multiple_delete_confirm_submit';
-
-  $question = count($groups)
-    ? t('Are you sure you want to delete this group?')
-    : t('Are you sure you want to delete these groups?');
+  $question = format_plural(count($groups),
+    'Are you sure you want to delete this group?',
+    'Are you sure you want to delete these groups?'
+  );
 
   return confirm_form($form, $question, 'admin/group', NULL, t('Delete'));
 }

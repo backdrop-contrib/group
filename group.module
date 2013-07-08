@@ -426,6 +426,30 @@ function group_set_properties(&$data, $name, $value, $langcode, $type, $info) {
 }
 
 /**
+ * Implements hook_entity_delete().
+ */
+function group_entity_delete($entity, $type) {
+  // Delete group entity mappings for any deleted entity that isn't some sort
+  // of group configuration.
+  if (!in_array($type, array('group_type', 'group_role', 'group_membership'), TRUE)) {
+    list($entity_id, $revision_id, $bundle) = entity_extract_ids($type, $entity);
+
+    // Delete group memberships.
+    if ($type === 'user') {
+      $mids = array_keys(group_membership_load_by_user($entity_id));
+      group_membership_delete_multiple($mids);
+    }
+
+    // Delete this entity's record as a group entity.
+    else {
+      foreach (group_get_entity_groups($type, $entity_id) as $group) {
+        $group->removeEntity($entity_id, $type);
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_theme().
  */
 function group_theme() {

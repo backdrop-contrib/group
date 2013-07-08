@@ -102,6 +102,28 @@ class GroupTypeUIController extends EntityDefaultUIController {
   }
 
   /**
+   * Builds the operation form.
+   */
+  public function operationForm($form, &$form_state, $entity, $op) {
+    if ($op == 'delete') {
+      $form['info'] = array(
+        '#markup' => t('By deleting this group type you will delete all groups of that type, including their content.'),
+        '#suffix' => '<br />',
+      );
+
+      $message = 'Are you sure you want to delete the group type %label and all of its groups?';
+      $replace = array(
+        '%label' => entity_label($this->entityType, $entity),
+      );
+
+      return confirm_form($form, t($message, $replace), $this->path, NULL, t('Delete'));
+    }
+
+    // Call parent method for other operations.
+    return parent::operationForm($form, $form_state, $entity, $op);
+  }
+
+  /**
    * Generates the render array for an overview table for group types.
    *
    * Builds a tabledrag without having to write a theme function for it.

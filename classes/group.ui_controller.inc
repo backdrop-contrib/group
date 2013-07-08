@@ -174,8 +174,17 @@ class GroupUIController extends EntityDefaultUIController {
    */
   public function operationForm($form, &$form_state, $group, $op) {
     if ($op == 'delete') {
-      $confirm_question = t('Are you sure you want to delete %title?', array('%title' => $group->title));
-      return confirm_form($form, $confirm_question, "group/$group->gid");
+      $form['info'] = array(
+        '#markup' => t('By deleting this group you will delete all of its subgroups and content as well.'),
+        '#suffix' => '<br />',
+      );
+
+      $message = 'Are you sure you want to delete the group %label?';
+      $replace = array(
+        '%label' => $group->title,
+      );
+
+      return confirm_form($form, t($message, $replace), "group/$group->gid", NULL, t('Delete'));
     }
 
     drupal_not_found();
