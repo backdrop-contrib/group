@@ -14,6 +14,11 @@ module_load_include('inc', 'group', 'helpers/entity.group_type');
 module_load_include('inc', 'group', 'helpers/group');
 
 /**
+ * Load module implementations without polluting the .module file.
+ */
+module_load_include('inc', 'group', 'implementations/group.node');
+
+/**
  * Implements hook_hook_info().
  *
  * Makes sure this module automatically finds exported Group
@@ -493,7 +498,7 @@ function group_group_permission() {
   $permissions = array(
     'administer group' => array(
       'title' => t('Administer group'),
-      'description' => t('Administer the group, its users and permissions'),
+      'description' => t('Administer the group, its content and members'),
       'restrict access' => TRUE,
     ),
     'view group' => array(
