@@ -65,16 +65,23 @@ function group_load_by_type($type) {
  *
  * @return array
  *   An array of Group entities, keyed by their group ids.
- *
- * @todo Optionally by type.
  */
 function group_load_by_member($uid, $type = NULL) {
-  $groups = array();
+  $gids = array();
   foreach (group_membership_load_by_user($uid) as $group_membership) {
-    $groups[] = $group_membership->gid;
+    $gids[] = $group_membership->gid;
   }
 
-  return group_load_multiple($groups);
+  $groups = group_load_multiple($gids);
+  if ($type) {
+    foreach ($groups as $gid => $group) {
+      if ($group->type !== $type) {
+        unset($groups[$gid]);
+      }
+    }
+  }
+
+  return $groups;
 }
 
 /**
