@@ -151,20 +151,16 @@ class GroupUIController extends EntityDefaultUIController {
       return call_user_func_array($form_state['rebuild_info']['callback'], $args);
     }
 
+    // The primary submit handler for this form is the filter.
+    $form['#submit'] = array('group_filters_form_submit');
+
+    // Build the overview form with filters and bulk operations.
     $form['filters'] = group_filters_form();
     $form['options'] = group_options_form();
     $form['groups'] = group_groups_form($this->overviewPagerLimit);
     $form['pager'] = array('#markup' => theme('pager'));
 
     return $form;
-  }
-
-  /**
-   * Overview form submit callback.
-   */
-  public function overviewFormSubmit($form, &$form_state) {
-    module_load_include('inc', 'group', 'admin/group');
-    group_filters_form_submit($form, $form_state);
   }
 
   /**

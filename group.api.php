@@ -58,7 +58,7 @@ function hook_group_permission() {
  * function with the operation, which is called when the form is submitted.
  *
  * The callback function receives one initial argument, which is an array of
- * the selected groups. If it is a form callback, it receives the form and
+ * the selected group ids. If it is a form callback, it receives the form and
  * form state as well.
  *
  * @return array
@@ -74,7 +74,7 @@ function hook_group_permission() {
  *     This form will then replace the group overview form, see the 'delete'
  *     operation for an example.
  */
-function hook_node_operations() {
+function hook_group_operations() {
   // Acts upon selected groups but shows overview form right after.
   $operations['close'] = array(
     'label' => t('Close selected groups'),

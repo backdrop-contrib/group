@@ -29,7 +29,7 @@ function group_filters() {
 }
 
 /**
- * Builds the group administration filters.
+ * Builds the group overview filters.
  */
 function group_filters_form() {
   $filters = group_filters();
@@ -144,8 +144,6 @@ function group_filters_form_submit($form, &$form_state) {
 
 /**
  * Builds the group administration options.
- *
- * @todo hook_group_operations()
  */
 function group_options_form() {
   $fs_options = array(
@@ -200,10 +198,10 @@ function group_options_form_submit($form, &$form_state) {
   $operation = $operations[$form_state['values']['operation']];
 
   // Get all selected groups.
-  $groups = array_filter($form_state['values']['groups']);
+  $gids = array_filter($form_state['values']['groups']);
 
   // Build the arguments for the operation callback.
-  $args = array($groups);
+  $args = array($gids);
   if (isset($operation['callback arguments'])) {
     $args = array_merge($args, $operation['callback arguments']);
   }
@@ -222,7 +220,7 @@ function group_options_form_submit($form, &$form_state) {
 }
 
 /**
- * Builds the group administration overview table.
+ * Builds the group overview table.
  *
  * @param int $pager_limit
  *   The pager limit for the result page.
@@ -340,7 +338,7 @@ function group_groups_form($pager_limit) {
 /**
  * Multiple group deletion confirmation form.
  */
-function group_multiple_delete_confirm($form, &$form_state, $groups) {
+function group_multiple_delete_confirm($form, &$form_state, $gids) {
   $form['#submit'][] = 'group_multiple_delete_confirm_submit';
 
   $form['groups'] = array(
@@ -349,7 +347,7 @@ function group_multiple_delete_confirm($form, &$form_state, $groups) {
     '#tree' => TRUE,
   );
 
-  foreach ($groups as $gid => $value) {
+  foreach ($groups as $gid) {
     $title = db_query('SELECT title FROM {groups} WHERE gid = :gid', array(':gid' => $gid))->fetchField();
     $form['groups'][$gid] = array(
       '#type' => 'hidden',
@@ -377,11 +375,10 @@ function group_multiple_delete_confirm($form, &$form_state, $groups) {
  */
 function group_multiple_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
-    $groups = $form_state['values']['groups'];
+    $gids = array_keys($form_state['values']['groups']);
+    $count = count($gids);
 
-    group_delete_multiple(array_keys($groups));
-
-    $count = count($groups);
+    group_delete_multiple($gids);
     watchdog('groups', 'Deleted @count groups.', array('@count' => $count));
     drupal_set_message(format_plural($count, 'Deleted 1 group.', 'Deleted @count groups.'));
   }
