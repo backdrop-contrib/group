@@ -73,6 +73,29 @@ function group_autocomplete_result_gid($result) {
 }
 
 /**
+ * Get the ids of the groups a user is an outsider to.
+ *
+ * @param int $uid
+ *   The id of the user to retrieve group ids for.
+ * @param string $type
+ *   (optional) Filters the results for a given group type.
+ *
+ * @return array
+ *   An array of group ids (gids).
+ */
+function group_outsider_gids($uid, $type = '') {
+  $query = db_select('groups', 'g');
+  $query->addField('g', 'gid');
+  $query->where('g.gid NOT IN (SELECT gid FROM {group_membership} WHERE uid = :uid)', array(':uid' => $uid));
+
+  if ($type) {
+    $query->condition('g.type', $type);
+  }
+
+  return $query->execute()->fetchCol();
+}
+
+/**
  * Check whether a group role machine name exists.
  */
 function group_role_exists($name) {

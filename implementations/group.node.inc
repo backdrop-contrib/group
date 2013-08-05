@@ -68,30 +68,22 @@ function group_node_access($node, $op, $account) {
         return NODE_ACCESS_ALLOW;
       }
 
-      // Gather all groups the user is a member of.
-      $member_groups = group_load_by_member($account->uid);
-
-      // Gather all groups an outsider can create nodes of the given type in.
-      $outsider_groups = array();
+      // Check for all group types if an outsider can create nodes of the given
+      // node type in them.
       foreach (group_types() as $type => $group_type) {
         $has_access = in_array('administer group', $group_type->outsider_permissions);
         $has_access = $has_access || in_array("create $node", $group_type->outsider_permissions);
 
-        if ($has_access) {
-          $outsider_groups += group_load_by_type($type);
+        // If the group type allows access to outsiders and the provided user
+        // has as at least one group of this type he is an outsider to, we
+        // allow access.
+        if ($has_access && group_outsider_gids($account->uid, $type)) {
+          return NODE_ACCESS_ALLOW;
         }
       }
 
-      // If any group in $outsider_groups is not present in $member_groups,
-      // it means that the user is indeed an outsider for that group. Seeing
-      // as all groups in $outsider_groups should allow access to outsiders,
-      // we allow access for the provided user.
-      if (array_diff_key($outsider_groups, $member_groups)) {
-        return NODE_ACCESS_ALLOW;
-      }
-
       // Check the user's groups for creation rights.
-      foreach ($member_groups as $group) {
+      foreach (group_load_by_member($account->uid) as $group) {
         $has_access = group_access('administer group', $group, $account);
         $has_access = $has_access || group_access("create $node", $group, $account);
 
@@ -121,15 +113,9 @@ function group_node_grants($account, $op) {
   // Gather the machine names of all node types.
   $node_types = array_keys(node_type_get_types());
 
-  // Gather all groups the user is a member of.
-  $member_groups = group_load_by_member($account->uid);
-
   // Provide grants for groups the user is an outsider to.
   foreach (group_types() as $type => $group_type) {
-    $outsider_groups = group_load_by_type($type);
-    $outsider_gids = array_diff_key($outsider_groups, $member_groups);
-
-    if ($outsider_gids) {
+    if ($outsider_gids = group_outsider_gids($account->uid, $type)) {
       // If the user is an admin, he requires no further specific grants.
       if (in_array('administer group', $group_type->outsider_permissions)) {
         foreach ($outsider_gids as $gid) {
@@ -177,7 +163,7 @@ function group_node_grants($account, $op) {
   }
 
   // Provide grants for groups the user is a member of.
-  foreach ($member_groups as $group) {
+  foreach (group_load_by_member($account->uid) as $group) {
     // If the user is an admin, he requires no further specific grants.
     if (group_access('administer group', $group, $account)) {
       $grants['group:administer'][] = $group->gid;
@@ -371,32 +357,26 @@ function group_form_node_form_alter(&$form, $form_state) {
   global $user;
   $node_type = $form['#node']->type;
 
-  // Gather all groups the user is a member of.
-  $member_groups = group_load_by_member($user->uid);
-
-  // Gather all groups an outsider can create nodes of the given type in.
-  $outsider_groups = array();
+  // Gather all group ids an outsider can create nodes of the given type in.
+  $outsider_gids = array();
   foreach (group_types() as $type => $group_type) {
     $has_access = $user->uid == 1;
     $has_access = $has_access || in_array('administer group', $group_type->outsider_permissions);
     $has_access = $has_access || in_array("create $node_type", $group_type->outsider_permissions);
 
     if ($has_access) {
-      $outsider_groups += group_load_by_type($type);
+      $outsider_gids = array_merge($outsider_gids, group_outsider_gids($user->uid, $type));
     }
   }
 
-  // If any group in $outsider_groups is not present in $member_groups,
-  // it means that the user is indeed an outsider for that group. Seeing
-  // as all groups in $outsider_groups should allow access to outsiders,
-  // we allow access for the provided user.
-  $user_groups = array_diff_key($outsider_groups, $member_groups);
-  foreach ($user_groups as $gid => $group) {
+  // Allow access to all outsider groups of a group type with access.
+  $user_groups = array();
+  foreach (group_load_multiple($outsider_gids) as $gid => $group) {
     $user_groups[$gid] = check_plain($group->title);
   }
 
   // Check the user's groups for creation rights and add them to $user_groups.
-  foreach ($member_groups as $group) {
+  foreach (group_load_by_member($user->uid) as $group) {
     $has_access = $group->userHasPermission($user->uid, "create $node_type");
     $has_access = $has_access || $group->userHasPermission($user->uid, 'administer group');
 
