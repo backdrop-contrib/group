@@ -10,6 +10,20 @@
 class Group extends Entity {
 
   /**
+   * Static cache of entities.
+   *
+   * @var array
+   */
+  protected $entityCache = array();
+
+  /**
+   * Resets the internal, static entity cache.
+   */
+  public function resetCache() {
+    $this->entityCache = array();
+  }
+
+  /**
    * Specifies the default uri, which is picked up by uri() by default.
    */
   protected function defaultURI() {
@@ -55,6 +69,9 @@ class Group extends Entity {
     );
 
     $query->execute();
+
+    // Reset the internal cache.
+    $this->resetCache();
   }
 
   /**
@@ -76,6 +93,9 @@ class Group extends Entity {
     $query->condition('entity_id', $entity_id);
     $query->condition('entity_type', $entity_type);
     $query->execute();
+
+    // Reset the internal cache.
+    $this->resetCache();
   }
 
   /**
@@ -83,46 +103,50 @@ class Group extends Entity {
    *
    * @param bool $flat
    *   Whether or not to flatten the result array.
+   * @param bool $reset
+   *   Whether to reset the internal cache.
    *
    * @return array
    *   An array of child entities, keyed by their type, bundle and entity id.
    *   When $flat is set to TRUE, the return value is one big array of
    *   entities, which are keyed numerically and not by their entity id!
-   *
-   * @todo Statically cache the result.
    */
-  public function getEntities($flat = FALSE) {
-    $entities = array(
-      'flat' => array(),
-      'full' => array(),
-    );
+  public function getEntities($flat = FALSE, $reset = FALSE) {
+    if (empty($this->entityCache) || $reset) {
+      $entities = array(
+        'flat' => array(),
+        'full' => array(),
+      );
 
-    $query = db_select('group_entity', 'ge');
-    $query->condition('ge.gid', $this->gid);
-    $query->addField('ge', 'entity_type');
-    $query->addField('ge', 'entity_id');
-    $query->addField('ge', 'bundle');
+      $query = db_select('group_entity', 'ge');
+      $query->condition('ge.gid', $this->gid);
+      $query->addField('ge', 'entity_type');
+      $query->addField('ge', 'entity_id');
+      $query->addField('ge', 'bundle');
 
-    // Divide the retrieved entity ids by type and bundle.
-    foreach ($query->execute() as $record) {
-      $entities['full'][$record->entity_type][$record->bundle][] = $record->entity_id;
-    }
-
-    // Actually load the retrieved entities.
-    foreach ($entities['full'] as $type => $bundles) {
-      foreach ($bundles as $bundle => $ids) {
-        $entities['full'][$type][$bundle] = entity_load($type, $ids);
-
-        // We run the entity_load() result through array_values() to prevent
-        // people from making the false assumption that we still return the
-        // entity ids as array keys.
-        $entities['flat'] = array_merge($entities['flat'], array_values($entities['full'][$type][$bundle]));
+      // Divide the retrieved entity ids by type and bundle.
+      foreach ($query->execute() as $record) {
+        $entities['full'][$record->entity_type][$record->bundle][] = $record->entity_id;
       }
+
+      // Actually load the retrieved entities.
+      foreach ($entities['full'] as $type => $bundles) {
+        foreach ($bundles as $bundle => $ids) {
+          $entities['full'][$type][$bundle] = entity_load($type, $ids);
+
+          // We run the entity_load() result through array_values() to prevent
+          // people from making the false assumption that we still return the
+          // entity ids as array keys.
+          $entities['flat'] = array_merge($entities['flat'], array_values($entities['full'][$type][$bundle]));
+        }
+      }
+
+      $this->entityCache = $entities;
     }
 
     return $flat
-      ? $entities['flat']
-      : $entities['full'];
+        ? $this->entityCache['flat']
+        : $this->entityCache['full'];
   }
 
   /**

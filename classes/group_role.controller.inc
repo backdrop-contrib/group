@@ -15,9 +15,14 @@ class GroupRoleController extends EntityAPIControllerExportable {
    * @see EntityAPIController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
-    // Flag parent type as ENTITY_CUSTOM.
-    foreach (group_roles($ids) as $group_role) {
-      $group_role->flagTypeCustom();
+    if (!empty($ids)) {
+      // Invalidate the parent group type's GroupRole cache.
+      $entity->invalidateTypeCache();
+
+      // Flag parent type as ENTITY_CUSTOM.
+      foreach (group_roles($ids) as $group_role) {
+        $group_role->flagTypeCustom();
+      }
     }
 
     parent::delete($ids, $transaction);
@@ -29,9 +34,21 @@ class GroupRoleController extends EntityAPIControllerExportable {
    * @see EntityAPIController::save()
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
+    $is_new = !empty($entity->is_new);
+    $is_special = in_array($entity->name, array('outsider', 'member'));
+
+    // Invalidate the parent type's GroupRole cache whenever we save a new
+    // group role or alter a special group role (outsider or member). The
+    // latter case is required because special group roles are never actually
+    // saved to the db and thus need to be rebuilt after every change to avoid
+    // serving outdated special roles from the cache.
+    if ($is_new || $is_special) {
+      $entity->invalidateTypeCache();
+    }
+
     // If we save a special group role (outsider or member), we don't actually
     // save the role but attach its permissions back onto the group type.
-    if (in_array($entity->name, array('outsider', 'member'))) {
+    if ($is_special) {
       $key = $entity->name . '_permissions';
 
       $group_type = group_type_load($entity->type);

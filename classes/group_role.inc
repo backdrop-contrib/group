@@ -10,6 +10,31 @@
 class GroupRole extends Entity {
 
   /**
+   * Invalidate the parent group type's GroupRole cache.
+   *
+   * GroupType entities keep an internal cache of associated GroupRole
+   * entities. When saving or deleting a GroupRole, we need to invalidate said
+   * cache to ensure we do not work with outdated lists.
+   */
+  public function invalidateTypeCache() {
+    // Only invalidate the parent type's cache for local roles.
+    if (empty($this->global)) {
+      // If the type cannot be loaded, it should mean that this function was
+      // run while we are still building an imported type. We therefore do not
+      // need to invalidate the cache.
+      if ($group_type = group_type_load($this->type)) {
+        $group_type->resetCache();
+      }
+    }
+    // If the role is global, we invalidate all caches.
+    else {
+      foreach (group_types() as $group_type) {
+        $group_type->resetCache();
+      }
+    }
+  }
+
+  /**
    * Flag the parent group type as ENTITY_CUSTOM.
    *
    * If the group role belongs to a group type, the group type it belongs
