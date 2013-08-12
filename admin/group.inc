@@ -137,7 +137,12 @@ function group_options_form() {
   else {
     $options = array();
     foreach (module_invoke_all('group_operations') as $operation => $array) {
-      $options[$operation] = $array['label'];
+      if (!empty($array['optgroup'])) {
+        $options[$array['optgroup']][$operation] = $array['label'];
+      }
+      else {
+        $options[$operation] = $array['label'];
+      }
     }
 
     $fs_options['operation'] = array(

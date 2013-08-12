@@ -159,8 +159,13 @@ function group_member_options_form(Group $group) {
   }
   else {
     $options = array();
-    foreach (module_invoke_all('group_member_operations') as $operation => $array) {
-      $options[$operation] = $array['label'];
+    foreach (module_invoke_all('group_member_operations', $group) as $operation => $array) {
+      if (!empty($array['optgroup'])) {
+        $options[$array['optgroup']][$operation] = $array['label'];
+      }
+      else {
+        $options[$operation] = $array['label'];
+      }
     }
 
     $fs_options['operation'] = array(
@@ -196,7 +201,7 @@ function group_member_options_form_validate($form, &$form_state) {
  * Options form submit callback.
  */
 function group_member_options_form_submit($form, &$form_state) {
-  $operations = module_invoke_all('group_member_operations');
+  $operations = module_invoke_all('group_member_operations', $form_state['build_info']['args'][0]);
   $operation = $operations[$form_state['values']['operation']];
 
   // Get all selected memberships.
@@ -371,5 +376,27 @@ function group_membership_multiple_delete_confirm_submit($form, &$form_state) {
     group_membership_delete_multiple($mids);
     watchdog('group', 'Removed @count members.', array('@count' => $count));
     drupal_set_message(format_plural($count, 'Removed 1 member.', 'Removed @count members.'));
+  }
+}
+
+/**
+ * Group membership add role callback.
+ */
+function group_membership_add_role($mids, $role) {
+  $roles = array($role);
+
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    $group_membership->addRoles($roles);
+  }
+}
+
+/**
+ * Group membership remove role callback.
+ */
+function group_membership_remove_role($mids, $role) {
+  $roles = array($role);
+
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    $group_membership->removeRoles($roles);
   }
 }

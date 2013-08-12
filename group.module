@@ -765,13 +765,31 @@ function group_group_member_filters() {
 
 /**
  * Implements hook_group_member_operations().
+ *
+ * Callbacks are situated in forms/group.members.inc.
  */
-function group_group_member_operations() {
+function group_group_member_operations($group) {
   $operations['remove'] = array(
     'label' => t('Remove selected members'),
     'callback' => 'group_membership_multiple_delete_confirm',
     'form callback' => TRUE,
   );
+
+  foreach (group_type_load($group->type)->getRoles(FALSE) as $group_role) {
+    $operations["add-$group_role->name"] = array(
+      'label' => $group_role->label,
+      'callback' => 'group_membership_add_role',
+      'callback arguments' => array($group_role->name),
+      'optgroup' => t('Add role to selected members'),
+    );
+
+    $operations["remove-$group_role->name"] = array(
+      'label' => $group_role->label,
+      'callback' => 'group_membership_remove_role',
+      'callback arguments' => array($group_role->name),
+      'optgroup' => t('Remove role from selected members'),
+    );
+  }
 
   return $operations;
 }

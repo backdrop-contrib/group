@@ -105,6 +105,9 @@ function hook_group_filters() {
  *     to TRUE to have the callback build a form such as a confirmation form.
  *     This form will then replace the group overview form, see the 'delete'
  *     operation for an example.
+ *   - optgroup: (optional) The label of the <optgroup> this operation should
+ *     be placed under. This will put the operation in the same <optgroup> as
+ *     all other operations that specify the same label.
  */
 function hook_group_operations() {
   // Acts upon selected groups but shows overview form right after.
@@ -112,6 +115,7 @@ function hook_group_operations() {
     'label' => t('Close selected groups'),
     'callback' => 'mymodule_open_or_close_groups',
     'callback arguments' => array('close'),
+    'optgroup' => t('Open or close'),
   );
 
   // Acts upon selected groups but shows overview form right after.
@@ -119,6 +123,7 @@ function hook_group_operations() {
     'label' => t('Open selected groups'),
     'callback' => 'mymodule_open_or_close_groups',
     'callback arguments' => array('open'),
+    'optgroup' => t('Open or close'),
   );
 
   // Shows a different form when this operation is selected.
@@ -212,6 +217,9 @@ function hook_group_member_filters() {
  * the selected membership ids. If it is a form callback, it receives the form
  * and form state as well.
  *
+ * @param Group $group
+ *   The group to show member operations for.
+ *
  * @return array
  *   An array of operations. Each operation is an associative array that may
  *   contain the following key-value pairs:
@@ -224,10 +232,13 @@ function hook_group_member_filters() {
  *     to TRUE to have the callback build a form such as a confirmation form.
  *     This form will then replace the member overview form, see the 'delete'
  *     operation for an example.
+ *   - optgroup: (optional) The label of the <optgroup> this operation should
+ *     be placed under. This will put the operation in the same <optgroup> as
+ *     all other operations that specify the same label.
  *
  * @see group_member_options_form()
  */
-function hook_group_member_operations() {
+function hook_group_member_operations($group) {
   // Acts upon selected members but shows overview form right after.
   $operations['block'] = array(
     'label' => t('Block selected members'),
