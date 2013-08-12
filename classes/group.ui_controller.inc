@@ -122,10 +122,10 @@ class GroupUIController extends EntityDefaultUIController {
     $items['group/%group/members'] = array(
       'title' => 'Members',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('group_member_form', 1),
+      'page arguments' => array('group_member_overview_form', 1),
       'access callback' => 'group_access',
-      'access arguments' => array('view members', 1),
-      'file' => 'forms/group.inc',
+      'access arguments' => array('access member overview', 1),
+      'file' => 'forms/group.members.inc',
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
       'weight' => 0,

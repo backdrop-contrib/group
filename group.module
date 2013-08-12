@@ -501,6 +501,14 @@ function group_group_permission() {
       'description' => t('Administer the group, its content and members'),
       'restrict access' => TRUE,
     ),
+    'administer members' => array(
+      'title' => t('Administer group members'),
+      'description' => t('Administer the group members'),
+      'restrict access' => TRUE,
+    ),
+    'access member overview' => array(
+      'title' => t('Access the member overview page'),
+    ),
     'view group' => array(
       'title' => t('View group'),
     ),
@@ -646,6 +654,7 @@ function group_admin_paths() {
     $paths = array(
       'group/*/edit' => TRUE,
       'group/*/delete' => TRUE,
+      'group/*/members' => TRUE,
       'group/add' => TRUE,
       'group/add/*' => TRUE,
     );
@@ -665,4 +674,82 @@ function group_group_operations() {
   );
 
   return $operations;
+}
+
+/**
+ * Implements hook_group_member_filters().
+ */
+function group_group_member_filters() {
+  // Build a status filter.
+  $filters['status'] = array(
+    'title' => t('Status'),
+    'options' => array(
+      '[any]' => t('any'),
+      1 => t('active'),
+      0 => t('blocked'),
+    ),
+  );
+
+  return $filters;
+}
+
+/**
+ * Implements hook_group_member_operations().
+ */
+function group_group_member_operations() {
+  $operations['remove'] = array(
+    'label' => t('Remove selected members'),
+    'callback' => 'group_membership_multiple_delete_confirm',
+    'form callback' => TRUE,
+  );
+
+  return $operations;
+}
+
+/**
+ * Implements hook_group_member_operation_links().
+ *
+ * @todo Actually implement the two links below.
+ */
+function group_group_member_operation_links($group_membership) {
+  $operations = array();
+
+  // Retrieve the destination url.
+  $destination = drupal_get_destination();
+
+  // Add membership management links.
+  if (group_access('administer members', group_load($group_membership->gid))) {
+    $operations['edit-membership'] = array(
+      'title' => t('edit'),
+      'href' => 'group/member/' . $group_membership->mid . '/edit',
+      'query' => $destination,
+    );
+
+    $operations['cancel-membership'] = array(
+      'title' => t('cancel'),
+      'href' => 'group/member/' . $group_membership->mid . '/cancel',
+      'query' => $destination,
+    );
+  }
+
+  return $operations;
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * Alters the query that generates the member overview table on the
+ * group/%/members page by using the selected filters. You can find the
+ * full query in group_members_form().
+ *
+ * @see hook_group_member_filters()
+ * @see group_members_form()
+ */
+function group_query_group_member_overview_alter(QueryAlterableInterface $query) {
+  // Retrieve the selected filters.
+  $filters = $query->getMetaData('filters');
+
+  if (isset($filters['status']) && in_array($filters['status'], array('0', '1'))) {
+    $query->condition('u.status', $filters['status']);
+  }
 }

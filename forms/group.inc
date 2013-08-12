@@ -77,25 +77,3 @@ function group_form_submit($form, &$form_state) {
 function group_form_submit_delete($form, &$form_state) {
   $form_state['redirect'] = 'group/' . $form_state['group']->gid . '/delete';
 }
-
-/**
- * Generates the group member form.
- */
-function group_member_form($form, &$form_state, $group) {
-  $rows = array();
-
-  foreach ($group->getMembers() as $group_membership) {
-    $rows[$group_membership->mid] = array(
-      user_load($group_membership->uid)->name,
-      implode(', ', $group_membership->roles),
-    );
-  }
-
-  $form['members'] = array(
-    '#theme' => 'table',
-    '#header' => array(t('Name'), t('Roles')),
-    '#rows' => $rows,
-  );
-
-  return $form;
-}

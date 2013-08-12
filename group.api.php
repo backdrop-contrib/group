@@ -98,3 +98,113 @@ function hook_group_operations() {
 
   return $operations;
 }
+
+/**
+ * Add filters to the group member overview page.
+ *
+ * This hook is used to provide additional filters to the member overview page
+ * found at group/%/members. The filters should always be something that can be
+ * used in a select element.
+ *
+ * Keep in mind that this only adds the filters to the user interface. To
+ * actually have them do something, you need to write a hook_query_TAG_alter()
+ * implementation for the 'group_member_overview' tag.
+ *
+ * @see group_member_filters_form()
+ * @see group_query_group_member_overview_alter()
+ */
+function hook_group_member_filters() {
+  // Build a status filter.
+  $filters['status'] = array(
+    'title' => t('Status'),
+    'options' => array(
+      '[any]' => t('any'),
+      1 => t('active'),
+      0 => t('blocked'),
+    ),
+  );
+
+  return $filters;
+}
+
+/**
+ * Add mass group member operations.
+ *
+ * This hook enables modules to inject custom operations into the mass
+ * operations dropdown found at group/%/members by associating a callback
+ * function with the operation, which is called when the form is submitted.
+ *
+ * The callback function receives one initial argument, which is an array of
+ * the selected membership ids. If it is a form callback, it receives the form
+ * and form state as well.
+ *
+ * @return array
+ *   An array of operations. Each operation is an associative array that may
+ *   contain the following key-value pairs:
+ *   - label: (required) The label for the operation, displayed in the dropdown
+ *     menu.
+ *   - callback: (required) The function to call for the operation.
+ *   - callback arguments: (optional) An array of additional arguments to pass
+ *     to the callback function.
+ *   - form callback: (optional) Whether the callback is a form builder. Set
+ *     to TRUE to have the callback build a form such as a confirmation form.
+ *     This form will then replace the member overview form, see the 'delete'
+ *     operation for an example.
+ *
+ * @see group_member_options_form()
+ */
+function hook_group_member_operations() {
+  // Acts upon selected members but shows overview form right after.
+  $operations['block'] = array(
+    'label' => t('Block selected members'),
+    'callback' => 'mymodule_block_members',
+  );
+
+  // Shows a different form when this operation is selected.
+  $operations['remove'] = array(
+    'label' => t('Remove selected members'),
+    'callback' => 'group_membership_multiple_delete_confirm',
+    'form callback' => TRUE,
+  );
+
+  return $operations;
+}
+
+/**
+ * Add group member operation links.
+ *
+ * This hook enables modules to inject custom operations into the operations
+ * column of the table found at group/%/members by associating a callback
+ * function with the operation, which is called when the form is submitted.
+ *
+ * The callback function receives the GroupMembership of the table row and
+ * should return an array of links to display in the operations column.
+ *
+ * @param GroupMembership
+ *   The membership to format links for.
+ *
+ * @return array
+ *   An array of links, declared as in theme_links(). At the very least, the
+ *   'title' and 'href' keys should be defined.
+ *
+ * @see group_members_form()
+ * @see theme_links()
+ */
+function hook_group_member_operation_links($group_membership) {
+  $operations = array();
+
+  // Add membership management links.
+  if (group_access('administer members', group_load($group_membership->gid))) {
+    $operations['edit-membership'] = array(
+      'title' => t('edit'),
+      'href' => 'group/member/' . $group_membership->mid . '/edit'
+    );
+
+    $operations['cancel-membership'] = array(
+      'title' => t('cancel'),
+      'href' => 'group/member/' . $group_membership->mid . '/cancel'
+    );
+  }
+
+  return $operations;
+}
