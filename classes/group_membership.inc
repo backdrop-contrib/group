@@ -10,6 +10,30 @@
 class GroupMembership extends Entity {
 
   /**
+   * Add a role to a group membership.
+   *
+   * @param array $roles
+   *   An array of group role machine names.
+   *
+   * @todo Validation of added roles.
+   */
+  public function addRoles($roles) {
+    $this->roles = array_unique(array_merge($this->roles, $roles));
+    $this->save();
+  }
+
+  /**
+   * Remove a role from a group membership.
+   *
+   * @param array $roles
+   *   An array of group role machine names.
+   */
+  public function removeRoles($roles) {
+    $this->roles = array_diff($this->roles, $roles);
+    $this->save();
+  }
+
+  /**
    * Get all roles for a group membership.
    *
    * @return array

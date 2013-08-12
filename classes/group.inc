@@ -216,8 +216,6 @@ class Group extends Entity {
    * @param array $roles
    *   (optional) The machine names of the group roles to assign to this
    *   membership. Leave blank to make the user 'just a member'.
-   *
-   * @todo: Verify the roles are valid for this group type.
    */
   public function addMember($uid, $roles = array()) {
     if (!($group_membership = $this->getMember($uid))) {
@@ -225,12 +223,7 @@ class Group extends Entity {
       $group_membership = entity_create('group_membership', $values);
     }
 
-    if (!empty($roles)) {
-      $roles = array_merge($group_membership->roles, $roles);
-      $group_membership->roles = array_values(array_unique($roles));
-    }
-
-    $group_membership->save();
+    $group_membership->addRoles($roles);
   }
 
   /**
