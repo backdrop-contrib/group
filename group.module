@@ -664,6 +664,27 @@ function group_admin_paths() {
 }
 
 /**
+ * Implements hook_group_filters().
+ */
+function group_group_filters() {
+  // Get a list of all group types.
+  $group_types = array();
+  foreach (group_types() as $name => $group_type) {
+    $group_types[$name] = $group_type->label;
+  }
+
+  // Build a group type filter.
+  $filters['type'] = array(
+    'title' => t('Group type'),
+    'options' => array(
+      '[any]' => t('any'),
+    ) + $group_types,
+  );
+
+  return $filters;
+}
+
+/**
  * Implements hook_group_operations().
  */
 function group_group_operations() {
@@ -674,6 +695,55 @@ function group_group_operations() {
   );
 
   return $operations;
+}
+
+/**
+ * Implements hook_group_operation_links().
+ */
+function group_group_operation_links($group) {
+  $operations = array();
+
+  // Retrieve the destination url.
+  $destination = drupal_get_destination();
+
+  // Add an 'edit' link if available.
+  if (group_access('update', $group)) {
+    $operations['edit'] = array(
+      'title' => t('edit'),
+      'href' => "group/$group->gid/edit",
+      'query' => $destination,
+    );
+  }
+
+  // Add a 'delete' link if available.
+  if (group_access('delete', $group)) {
+    $operations['delete'] = array(
+      'title' => t('delete'),
+      'href' => "group/$group->gid/delete",
+      'query' => $destination,
+    );
+  }
+
+  return $operations;
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * Alters the query that generates the group overview table on the
+ * admin/group page by using the selected filters. You can find the
+ * full query in group_groups_form().
+ *
+ * @see hook_group_filters()
+ * @see group_groups_form()
+ */
+function group_query_group_overview_alter(QueryAlterableInterface $query) {
+  // Retrieve the selected filters.
+  $filters = $query->getMetaData('filters');
+
+  if (isset($filters['type'])) {
+    $query->condition('g.type', $filters['type']);
+  }
 }
 
 /**

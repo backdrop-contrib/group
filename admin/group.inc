@@ -8,31 +8,10 @@
  */
 
 /**
- * Returns the filter options for the overview page.
- */
-function group_filters() {
-  // Get a list of all group types.
-  $group_types = array();
-  foreach (group_types() as $name => $group_type) {
-    $group_types[$name] = $group_type->label;
-  }
-
-  // Build a group type filter.
-  $filters['type'] = array(
-    'title' => t('Group type'),
-    'options' => array(
-      '[any]' => t('any'),
-    ) + $group_types,
-  );
-
-  return $filters;
-}
-
-/**
  * Builds the group overview filters.
  */
 function group_filters_form() {
-  $filters = group_filters();
+  $filters = module_invoke_all('group_filters');
 
   $session = isset($_SESSION['group_overview_filters'])
     ? $_SESSION['group_overview_filters']
@@ -115,7 +94,7 @@ function group_filters_form() {
  * Filter form submit callback.
  */
 function group_filters_form_submit($form, &$form_state) {
-  $filters = group_filters();
+  $filters = module_invoke_all('group_filters');
 
   switch ($form_state['values']['op']) {
     case t('Filter'):
@@ -228,9 +207,6 @@ function group_options_form_submit($form, &$form_state) {
  * @todo Individual group access check on query.
  */
 function group_groups_form($pager_limit) {
-  // Retrieve the destination url for any 'edit' or 'delete' link only once.
-  $destination = drupal_get_destination();
-
   $options = array();
   $header = array(
     'title' => array(
@@ -260,11 +236,12 @@ function group_groups_form($pager_limit) {
   $query->orderByHeader($header);
   $query->limit($pager_limit);
 
-  // Retrieve all active filters and add them to the query.
+  // Retrieve all active filters.
   $filters = isset($_SESSION['group_overview_filters']) ? $_SESSION['group_overview_filters'] : array();
-  foreach ($filters as $property => $value) {
-    $query->condition($property, $value);
-  }
+
+  // Allow other modules to alter the query by passing on the filters.
+  $query->addTag('group_overview');
+  $query->addMetaData('filters', $filters);
 
   // Add the groups to the table.
   foreach (group_load_multiple($query->execute()->fetchCol()) as $group) {
@@ -274,31 +251,17 @@ function group_groups_form($pager_limit) {
       'members' => $group->getMemberCount(),
     );
 
-    $operations = array();
-    // Add an 'edit' link if available.
-    if (group_access('update', $group)) {
-      $operations['edit'] = array(
-        'title' => t('edit'),
-        'href' => "group/$group->gid/edit",
-        'query' => $destination,
-      );
-    }
-
-    // Add a 'delete' link if available.
-    if (group_access('delete', $group)) {
-      $operations['delete'] = array(
-        'title' => t('delete'),
-        'href' => "group/$group->gid/delete",
-        'query' => $destination,
-      );
-    }
-
+    // Start with an empty operations array.
     $options[$group->gid]['operations'] = array();
+
+    // Gather all operation links.
+    $operations = module_invoke_all('group_operation_links', $group);
+
     if (count($operations) > 1) {
       // Render an unordered list of operations links.
       $options[$group->gid]['operations'] = array(
         'data' => array(
-          '#theme' => 'links__group_operations',
+          '#theme' => 'links__group_operation_links',
           '#links' => $operations,
           '#attributes' => array('class' => array('links', 'inline')),
         ),
@@ -307,14 +270,9 @@ function group_groups_form($pager_limit) {
     elseif (!empty($operations)) {
       // Render the first and only operation as a link.
       $link = reset($operations);
-      $options[$group->gid]['operations'] = array(
-        'data' => array(
-          '#type' => 'link',
-          '#title' => $link['title'],
-          '#href' => $link['href'],
-          '#options' => array('query' => $link['query']),
-        ),
-      );
+
+      // Pass in $link as $options, they share the same keys.
+      $options[$group->gid]['operations'] = l($link['title'], $link['href'], $link);
     }
   }
 

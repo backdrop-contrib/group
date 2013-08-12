@@ -51,10 +51,42 @@ function hook_group_permission() {
 }
 
 /**
+ * Add filters to the group overview page.
+ *
+ * This hook is used to provide additional filters to the group overview page
+ * found at admin/group. The filters should always be something that can be
+ * used in a select element.
+ *
+ * Keep in mind that this only adds the filters to the user interface. To
+ * actually have them do something, you need to write a hook_query_TAG_alter()
+ * implementation for the 'group_overview' tag.
+ *
+ * @see group_filters_form()
+ * @see group_query_group_overview_alter()
+ */
+function hook_group_filters() {
+  // Get a list of all group types.
+  $group_types = array();
+  foreach (group_types() as $name => $group_type) {
+    $group_types[$name] = $group_type->label;
+  }
+
+  // Build a group type filter.
+  $filters['type'] = array(
+    'title' => t('Group type'),
+    'options' => array(
+      '[any]' => t('any'),
+    ) + $group_types,
+  );
+
+  return $filters;
+}
+
+/**
  * Add mass group operations.
  *
  * This hook enables modules to inject custom operations into the mass
- * operations dropdown found at admin/group, by associating a callback
+ * operations dropdown found at admin/group by associating a callback
  * function with the operation, which is called when the form is submitted.
  *
  * The callback function receives one initial argument, which is an array of
@@ -95,6 +127,48 @@ function hook_group_operations() {
     'callback' => 'group_multiple_delete_confirm',
     'form callback' => TRUE,
   );
+
+  return $operations;
+}
+
+/**
+ * Add group operation links.
+ *
+ * This hook enables modules to inject custom operations into the operations
+ * column of the table found at admin/group by associating a callback function
+ * with the operation, which is called when the form is submitted.
+ *
+ * The callback function receives the Group of the table row and should return
+ * an array of links to display in the operations column.
+ *
+ * @param Group
+ *   The group to format links for.
+ *
+ * @return array
+ *   An array of links, declared as in theme_links(). At the very least, the
+ *   'title' and 'href' keys should be defined.
+ *
+ * @see group_groups_form()
+ * @see theme_links()
+ */
+function hook_group_operation_links($group) {
+  $operations = array();
+
+  // Add an 'edit' link if available.
+  if (group_access('update', $group)) {
+    $operations['edit'] = array(
+      'title' => t('edit'),
+      'href' => "group/$group->gid/edit",
+    );
+  }
+
+  // Add a 'delete' link if available.
+  if (group_access('delete', $group)) {
+    $operations['delete'] = array(
+      'title' => t('delete'),
+      'href' => "group/$group->gid/delete",
+    );
+  }
 
   return $operations;
 }
