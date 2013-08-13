@@ -301,48 +301,6 @@ function group_node_access_records($node) {
 }
 
 /**
- * Implements hook_node_prepare().
- */
-function group_node_prepare($node) {
-  if (empty($node->group)) {
-    $groups = isset($node->nid) ? group_get_entity_groups('node', $node->nid) : array();
-
-    // Nodes can only have one group.
-    $node->group = !empty($groups) ? key($groups) : 0;
-  }
-}
-
-/**
- * Implements hook_node_insert().
- */
-function group_node_insert($node) {
-  group_node_save($node);
-}
-
-/**
- * Implements hook_node_update().
- */
-function group_node_update($node) {
-  // Delete all existing links.
-  $query = db_delete('group_entity');
-  $query->condition('entity_id', $node->nid);
-  $query->condition('entity_type', 'node');
-  $query->execute();
-
-  // Saving takes care of creating new links.
-  group_node_save($node);
-}
-
-/**
- * Helper for hook_node_insert() and hook_node_update().
- */
-function group_node_save($node) {
-  if (!empty($node->group)) {
-    group_load($node->group)->addEntity($node->nid, 'node', $node->type);
-  }
-}
-
-/**
  * Implements hook_form_BASE_FORM_ID_alter().
  *
  * Adds a Group vertical tab to the node form.

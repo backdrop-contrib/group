@@ -27,10 +27,34 @@ class GroupController extends EntityAPIController {
     $mids = array();
 
     foreach (group_load_multiple($ids) as $group) {
-      // Delete child entities, including subgroups.
       foreach ($group->getEntities() as $entity_type => $bundles) {
+        // It is safe to assume that 'group entity' is either 'single' or
+        // 'multiple' because the entities could not belong to a group if
+        // 'group entity' were set to FALSE.
+        $entity_info = entity_get_info($entity_type);
+        $single = $entity_info['group entity'] == 'single';
+
         foreach ($bundles as $bundle => $entities) {
-          entity_delete_multiple($entity_type, array_keys($entities));
+          // Keep track of the entities we want to delete along with the group.
+          $delete_ids = array();
+
+          // If the entities can only belong to one group, we are safe to just
+          // delete all of them along with the group.
+          if ($single) {
+            $delete_ids = array_keys($entities);
+          }
+          // If the entity can belong to multiple groups, we need to check
+          // on a per-entity basis whether this is the last group that had
+          // the entity as its child.
+          else {
+            foreach ($entities as $entity_id => $entity) {
+              if (count($entity->group) == 1) {
+                $delete_ids[] = $entity_id;
+              }
+            }
+          }
+
+          entity_delete_multiple($entity_type, $delete_ids);
         }
       }
 

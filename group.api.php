@@ -5,6 +5,37 @@
  */
 
 /**
+ * Provide entity metadata for the Group module.
+ *
+ * This is not a real hook but instead lists extra entity info keys you
+ * can use in hook_entity_info().
+ *
+ * The following extra keys are available:
+ * - group entity: Whether this entity can be attached to group entities. Note
+ *   that group_entity_info_alter() takes care of the node entity. User
+ *   entities are handled through group memberships. Defaults to FALSE,
+ *   available options are:
+ *   - FALSE: This entity may not be attached to groups.
+ *   - 'single': This entity may only be attached to one group at any given
+ *   time. The 'group' property of entities of this type will be a single group
+ *   id (integer value).
+ *   - 'multiple': This entity may be attached to multiple groups at the same
+ *   time. The 'group' property on entities of this type will be an array of
+ *   group ids.
+ *
+ * @see hook_entity_info()
+ * @see group_entity_info_alter()
+ */
+function hook_entity_info() {
+  $info['node'] = array(
+    // ...
+    'group entity' => 'single',
+  );
+
+  return $info;
+}
+
+/**
  * Define group permissions.
  *
  * This hook can supply permissions that the module defines, so that they

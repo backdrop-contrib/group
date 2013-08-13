@@ -45,6 +45,9 @@ class Group extends Entity {
   /**
    * Add an entity to a group.
    *
+   * You could also manipulate the 'group' property on the entity you wish to
+   * add. Upon saving that entity, it will automatically be added to the group.
+   *
    * @param int $entity_id
    *   The id of the entity.
    * @param string $entity_type
@@ -53,8 +56,10 @@ class Group extends Entity {
    *   The bundle of the entity.
    */
   public function addEntity($entity_id, $entity_type, $bundle) {
-    if ($entity_type === 'user') {
-      $this->addMember($entity_id);
+    $entity_info = entity_get_info($type);
+
+    // Can't add entities that aren't group entities.
+    if ($entity_info['group entity'] === FALSE) {
       return;
     }
 
@@ -70,6 +75,11 @@ class Group extends Entity {
 
     $query->execute();
 
+    // Remove the entity from its controller's internal cache. This way it will
+    // have to be loaded again next time it's requested and will thus receive
+    // an updated 'group' property.
+    entity_get_controller($entity_type)->resetCache(array($entity_id));
+
     // Reset the internal cache.
     $this->resetCache();
   }
@@ -77,22 +87,26 @@ class Group extends Entity {
   /**
    * Remove an entity from a group.
    *
+   * You could also manipulate the 'group' property on the entity you wish to
+   * remove. Upon saving that entity, it will automatically be removed from the
+   * group.
+   *
    * @param int $entity_id
    *   The id of the entity.
    * @param string $entity_type
    *   The type of the entity.
    */
   public function removeEntity($entity_id, $entity_type) {
-    if ($entity_type === 'user') {
-      $this->removeMember($entity_id);
-      return;
-    }
-
     $query = db_delete('group_entity');
     $query->condition('gid', $this->gid);
     $query->condition('entity_id', $entity_id);
     $query->condition('entity_type', $entity_type);
     $query->execute();
+
+    // Remove the entity from its controller's internal cache. This way it will
+    // have to be loaded again next time it's requested and will thus receive
+    // an updated 'group' property.
+    entity_get_controller($entity_type)->resetCache(array($entity_id));
 
     // Reset the internal cache.
     $this->resetCache();

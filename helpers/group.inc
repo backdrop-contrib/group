@@ -33,7 +33,7 @@ function group_access($permission, $group, $account = NULL) {
 }
 
 /**
- * Get the groups a group entity belongs to.
+ * Get the group ids of the groups an entity belongs to.
  *
  * @param string $entity_type
  *   The entity type of the group entity.
@@ -41,15 +41,15 @@ function group_access($permission, $group, $account = NULL) {
  *   The entity id of the group entity.
  *
  * @return array
- *   A list of all groups that the entity belongs to.
+ *   A list of all group ids that the entity belongs to.
  */
-function group_get_entity_groups($entity_type, $entity_id) {
+function group_get_entity_group_ids($entity_type, $entity_id) {
   $query = db_select('group_entity', 'ge');
   $query->condition('ge.entity_type', $entity_type);
   $query->condition('ge.entity_id', $entity_id);
   $query->addfield('ge', 'gid');
 
-  return group_load_multiple($query->execute()->fetchCol());
+  return $query->execute()->fetchCol();
 }
 
 /**

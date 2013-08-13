@@ -68,6 +68,7 @@ function group_entity_info() {
       'file' => 'forms/group.inc',
       'controller class' => 'GroupUIController',
     ),
+    'group entity' => 'single',
   );
 
   $info['group_type'] = array(
@@ -138,10 +139,9 @@ function group_entity_info() {
 
 /**
  * Implements hook_entity_info_alter().
- *
- * Informs Drupal that our group types are bundles for groups.
  */
 function group_entity_info_alter(&$entity_info) {
+  // Informs Drupal that group types are bundles for groups.
   foreach (group_types() as $name => $group_type) {
     $entity_info['group']['bundles'][$name] = array(
       'label' => $group_type->label,
@@ -151,6 +151,16 @@ function group_entity_info_alter(&$entity_info) {
         'bundle argument' => 4,
         'access arguments' => array('administer group types'),
       ),
+    );
+  }
+
+  // Nodes can only have one group parent.
+  $entity_info['node']['group entity'] = 'single';
+
+  // Other entities default to FALSE.
+  foreach ($entity_info as $entity => $data) {
+    $entity_info[$entity] += array(
+      'group entity' => FALSE,
     );
   }
 }
@@ -431,25 +441,110 @@ function group_set_properties(&$data, $name, $value, $langcode, $type, $info) {
 }
 
 /**
+ * Implements hook_entity_load().
+ *
+ * Add the 'group' key to entity objects that can belong to a group.
+ */
+function group_entity_load($entities, $type) {
+  $entity_info = entity_get_info($type);
+
+  if ($entity_info['group entity'] !== FALSE) {
+    $single = $entity_info['group entity'] == 'single';
+
+    foreach ($entities as $entity_id => $entity) {
+      $gids = group_get_entity_group_ids($type, $entity_id);
+      $entity->group = $single ? reset($gids) : $gids;
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function group_entity_insert($entity, $type) {
+  $entity_info = entity_get_info($type);
+
+  if ($entity_info['group entity'] !== FALSE) {
+    group_node_save($entity, $type);
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function group_entity_update($entity, $type) {
+  $entity_info = entity_get_info($type);
+
+  if ($entity_info['group entity'] !== FALSE) {
+    // Retrieve the entity id and bundle.
+    list($entity_id, $revision_id, $bundle) = entity_extract_ids($type, $entity);
+
+    // Load the original entity to detect changes.
+    $original = entity_load_unchanged($type, $entity_id);
+
+    // Gather the group ids the entity no longer belongs to.
+    $gids = $entity_info['group entity'] == 'single'
+      ? array_diff((array) $original->group, (array) $entity->group)
+      : array_diff($original->group, $entity->group);
+
+    // Remove the entity from groups it no longer belongs to.
+    if ($gids) {
+      foreach (group_load_multiple($gids) as $group) {
+        $group->removeEntity($entity_id, $type);
+      };
+    }
+
+    // Saving takes care of creating new links.
+    group_node_save($entity, $type);
+  }
+}
+
+/**
+ * Helper for hook_entity_insert() and hook_entity_update().
+ */
+function group_entity_save($entity, $type) {
+  if (!empty($entity->group)) {
+    $entity_info = entity_get_info($type);
+
+    // Retrieve the entity id and bundle.
+    list($entity_id, $revision_id, $bundle) = entity_extract_ids($type, $entity);
+
+    // Load the original entity to detect changes.
+    $original = entity_load_unchanged($type, $entity_id);
+
+    // Gather the group ids the entity didn't belong to earlier.
+    $gids = $entity_info['group entity'] == 'single'
+      ? array_diff((array) $entity->group, (array) $original->group)
+      : array_diff($entity->group, $original->group);
+
+    // Add the entity to groups that it didn't belong to earlier.
+    if ($gids) {
+      foreach (group_load_multiple($gids) as $group) {
+        $group->addEntity($entity_id, $type, $bundle);
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_entity_delete().
  */
 function group_entity_delete($entity, $type) {
-  // Delete group entity mappings for any deleted entity that isn't some sort
-  // of group configuration.
-  if (!in_array($type, array('group_type', 'group_role', 'group_membership'), TRUE)) {
-    list($entity_id, $revision_id, $bundle) = entity_extract_ids($type, $entity);
+  $entity_info = entity_get_info($type);
 
-    // Delete group memberships.
-    if ($type === 'user') {
-      $mids = array_keys(group_membership_load_by_user($entity_id));
-      group_membership_delete_multiple($mids);
-    }
+  // Retrieve the entity id and bundle.
+  list($entity_id, $revision_id, $bundle) = entity_extract_ids($type, $entity);
 
-    // Delete this entity's record as a group entity.
-    else {
-      foreach (group_get_entity_groups($type, $entity_id) as $group) {
-        $group->removeEntity($entity_id, $type);
-      }
+  // Delete group memberships.
+  if ($type === 'user') {
+    $mids = array_keys(group_membership_load_by_user($entity_id));
+    group_membership_delete_multiple($mids);
+  }
+
+  // Delete group entity mappings.
+  if ($entity_info['group entity'] !== FALSE) {
+    foreach (group_load_multiple((array) $entity->group) as $group) {
+      $group->removeEntity($entity_id, $type);
     }
   }
 }
