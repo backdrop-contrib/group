@@ -16,11 +16,11 @@ class GroupRoleController extends EntityAPIControllerExportable {
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
     if (!empty($ids)) {
-      // Invalidate the parent group type's GroupRole cache.
-      $entity->invalidateTypeCache();
-
-      // Flag parent type as ENTITY_CUSTOM.
       foreach (group_roles($ids) as $group_role) {
+        // Invalidate the parent group type's GroupRole cache.
+        $group_role->invalidateTypeCache();
+
+        // Flag parent type as ENTITY_CUSTOM.
         $group_role->flagTypeCustom();
       }
     }
