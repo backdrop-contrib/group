@@ -440,7 +440,7 @@ function group_set_properties(&$data, $name, $value, $langcode, $type, $info) {
 function group_entity_load($entities, $type) {
   $entity_info = entity_get_info($type);
 
-  if ($entity_info['group entity'] !== FALSE) {
+  if (!empty($entity_info['group entity'])) {
     $single = $entity_info['group entity'] == 'single';
 
     foreach ($entities as $entity_id => $entity) {
@@ -456,7 +456,7 @@ function group_entity_load($entities, $type) {
 function group_entity_insert($entity, $type) {
   $entity_info = entity_get_info($type);
 
-  if ($entity_info['group entity'] !== FALSE) {
+  if (!empty($entity_info['group entity'])) {
     group_entity_save($entity, $type);
   }
 }
@@ -467,7 +467,7 @@ function group_entity_insert($entity, $type) {
 function group_entity_update($entity, $type) {
   $entity_info = entity_get_info($type);
 
-  if ($entity_info['group entity'] !== FALSE) {
+  if (!empty($entity_info['group entity'])) {
     // Retrieve the entity id and bundle.
     list($entity_id, $revision_id, $bundle) = entity_extract_ids($type, $entity);
 
@@ -534,7 +534,7 @@ function group_entity_delete($entity, $type) {
   }
 
   // Delete group entity mappings.
-  if ($entity_info['group entity'] !== FALSE) {
+  if (!empty($entity_info['group entity'])) {
     foreach (group_load_multiple((array) $entity->group) as $group) {
       $group->removeEntity($entity_id, $type);
     }
