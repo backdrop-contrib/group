@@ -157,7 +157,7 @@ function group_entity_info_alter(&$entity_info) {
   // Nodes can only have one group parent.
   $entity_info['node']['group entity'] = 'single';
 
-  // Other entities default to FALSE.
+  // Entities default to not being group entities.
   foreach ($entity_info as $entity => $data) {
     $entity_info[$entity] += array(
       'group entity' => FALSE,
@@ -465,7 +465,7 @@ function group_entity_insert($entity, $type) {
   $entity_info = entity_get_info($type);
 
   if ($entity_info['group entity'] !== FALSE) {
-    group_node_save($entity, $type);
+    group_entity_save($entity, $type);
   }
 }
 
@@ -495,7 +495,7 @@ function group_entity_update($entity, $type) {
     }
 
     // Saving takes care of creating new links.
-    group_node_save($entity, $type);
+    group_entity_save($entity, $type);
   }
 }
 
@@ -638,7 +638,7 @@ function group_permission() {
     ),
   );
 
-  // Generate standard node permissions for all applicable node types.
+  // Generate group creation permissions.
   foreach (group_types() as $name => $group_type) {
     $permissions["create $name group"] = array(
       'title' => t('%type_name: Create new group', array('%type_name' => $group_type->label)),
