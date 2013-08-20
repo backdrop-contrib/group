@@ -14,11 +14,6 @@ module_load_include('inc', 'group', 'helpers/entity.group_type');
 module_load_include('inc', 'group', 'helpers/group');
 
 /**
- * Load module implementations without polluting the .module file.
- */
-module_load_include('inc', 'group', 'implementations/group.node');
-
-/**
  * Implements hook_hook_info().
  *
  * Makes sure this module automatically finds exported Group
@@ -153,9 +148,6 @@ function group_entity_info_alter(&$entity_info) {
       ),
     );
   }
-
-  // Nodes can only have one group parent.
-  $entity_info['node']['group entity'] = 'single';
 
   // Entities default to not being group entities.
   foreach ($entity_info as $entity => $data) {
