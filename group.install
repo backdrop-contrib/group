@@ -10,8 +10,6 @@
 function group_install() {
   variable_set('group_admin_theme', '1');
   variable_set('group_autocomplete_suffix', array('general' => 0));
-
-  node_access_needs_rebuild(TRUE);
 }
 
 /**

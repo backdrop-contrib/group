@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the Group Node project.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function gnode_install() {
+  node_access_needs_rebuild(TRUE);
+}
