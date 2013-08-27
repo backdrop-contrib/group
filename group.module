@@ -443,9 +443,13 @@ function group_entity_load($entities, $type) {
   if (!empty($entity_info['group entity'])) {
     $single = $entity_info['group entity'] == 'single';
 
+    // Load group ids outside the loop for performance reasons.
+    $gids = group_get_entities_group_ids($type, array_keys($entities));
+
     foreach ($entities as $entity_id => $entity) {
-      $gids = group_get_entity_group_ids($type, $entity_id);
-      $entity->group = $single ? reset($gids) : $gids;
+      if (!empty($gids[$entity_id])) {
+        $entity->group = $single ? reset($gids[$entity_id]) : $gids[$entity_id];
+      }
     }
   }
 }
@@ -474,13 +478,12 @@ function group_entity_update($entity, $type) {
     // Load the original entity to detect changes.
     $original = entity_load_unchanged($type, $entity_id);
 
-    // Gather the group ids the entity no longer belongs to.
-    $gids = $entity_info['group entity'] == 'single'
-      ? array_diff((array) $original->group, (array) $entity->group)
-      : array_diff($original->group, $entity->group);
+    // Gather the original and updated group ids as arrays.
+    $original_gids = (isset($original->group)) ? (array) $original->group : array();
+    $updated_gids = (isset($entity->group)) ? (array) $entity->group : array();
 
     // Remove the entity from groups it no longer belongs to.
-    if ($gids) {
+    if ($gids = array_diff($original_gids, $updated_gids)) {
       foreach (group_load_multiple($gids) as $group) {
         $group->removeEntity($entity_id, $type);
       };
@@ -504,13 +507,12 @@ function group_entity_save($entity, $type) {
     // Load the original entity to detect changes.
     $original = entity_load_unchanged($type, $entity_id);
 
-    // Gather the group ids the entity didn't belong to earlier.
-    $gids = $entity_info['group entity'] == 'single'
-      ? array_diff((array) $entity->group, (array) $original->group)
-      : array_diff($entity->group, $original->group);
+    // Gather the original and updated group ids as arrays.
+    $original_gids = (isset($original->group)) ? (array) $original->group : array();
+    $updated_gids = (isset($entity->group)) ? (array) $entity->group : array();
 
     // Add the entity to groups that it didn't belong to earlier.
-    if ($gids) {
+    if ($gids = array_diff($updated_gids, $original_gids)) {
       foreach (group_load_multiple($gids) as $group) {
         $group->addEntity($entity_id, $type, $bundle);
       }
@@ -534,7 +536,7 @@ function group_entity_delete($entity, $type) {
   }
 
   // Delete group entity mappings.
-  if (!empty($entity_info['group entity'])) {
+  if (!empty($entity_info['group entity']) && !empty($entity->group)) {
     foreach (group_load_multiple((array) $entity->group) as $group) {
       $group->removeEntity($entity_id, $type);
     }

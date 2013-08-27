@@ -371,7 +371,7 @@ function gnode_form_node_form_alter(&$form, $form_state) {
     '#options' => $user_groups,
     '#empty_option' => t('- No group -'),
     '#empty_value' => 0,
-    '#default_value' => $form['#node']->group,
+    '#default_value' => !empty($form['#node']->group) ? $form['#node']->group : 0,
     // If the user can't create this node outside of a group, he is not allowed
     // to move it to the sitewide scope either.
     '#required' => !user_access("create $node_type"),

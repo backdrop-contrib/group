@@ -33,7 +33,32 @@ function group_access($permission, $group, $account = NULL) {
 }
 
 /**
- * Get the group ids of the groups an entity belongs to.
+ * Retrieve group ids for a list of group entities.
+ *
+ * @param string $entity_type
+ *   The entity type of the group entities.
+ * @param array $entity_ids
+ *   The entity ids of the group entities.
+ *
+ * @return array
+ *   A list of group ids that the entities belong to, keyed by entity id.
+ */
+function group_get_entities_group_ids($entity_type, $entity_ids) {
+  $query = db_select('group_entity', 'ge');
+  $query->fields('ge', array('entity_id', 'gid'));
+  $query->condition('ge.entity_type', $entity_type);
+  $query->condition('ge.entity_id', $entity_ids, 'IN');
+
+  $gids = array();
+  foreach ($query->execute() as $record) {
+    $gids[$record->entity_id][] = $record->gid;
+  }
+
+  return $gids;
+}
+
+/**
+ * Retrieve group ids for a single group entity.
  *
  * @param string $entity_type
  *   The entity type of the group entity.
@@ -41,15 +66,11 @@ function group_access($permission, $group, $account = NULL) {
  *   The entity id of the group entity.
  *
  * @return array
- *   A list of all group ids that the entity belongs to.
+ *   A list of group ids that the entity belongs to.
  */
 function group_get_entity_group_ids($entity_type, $entity_id) {
-  $query = db_select('group_entity', 'ge');
-  $query->condition('ge.entity_type', $entity_type);
-  $query->condition('ge.entity_id', $entity_id);
-  $query->addfield('ge', 'gid');
-
-  return $query->execute()->fetchCol();
+  $gids = group_get_entities_group_ids($entity_type, array($entity_id));
+  return !empty($gids[$entity_id]) ? $gids[$entity_id] : array();
 }
 
 /**

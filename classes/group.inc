@@ -56,10 +56,10 @@ class Group extends Entity {
    *   The bundle of the entity.
    */
   public function addEntity($entity_id, $entity_type, $bundle) {
-    $entity_info = entity_get_info($type);
+    $entity_info = entity_get_info($entity_type);
 
     // Can't add entities that aren't group entities.
-    if ($entity_info['group entity'] === FALSE) {
+    if (empty($entity_info['group entity'])) {
       return;
     }
 
