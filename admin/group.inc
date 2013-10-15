@@ -310,7 +310,7 @@ function group_multiple_delete_confirm($form, &$form_state, $gids) {
     '#tree' => TRUE,
   );
 
-  foreach ($groups as $gid) {
+  foreach ($gids as $gid) {
     $title = db_query('SELECT title FROM {groups} WHERE gid = :gid', array(':gid' => $gid))->fetchField();
     $form['groups'][$gid] = array(
       '#type' => 'hidden',
@@ -325,7 +325,7 @@ function group_multiple_delete_confirm($form, &$form_state, $gids) {
     '#suffix' => '<br />',
   );
 
-  $question = format_plural(count($groups),
+  $question = format_plural(count($gids),
     'Are you sure you want to delete this group?',
     'Are you sure you want to delete these groups?'
   );
