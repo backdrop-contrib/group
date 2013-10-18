@@ -9,6 +9,11 @@
  */
 
 /**
+ * Load our router functions without polluting the .module file.
+ */
+module_load_include('inc', 'gnode', 'gnode.router');
+
+/**
  * Implements hook_entity_info_alter().
  */
 function gnode_entity_info_alter(&$entity_info) {
@@ -129,6 +134,38 @@ function gnode_node_access($node, $op, $account) {
 }
 
 /**
+ * Adds group data to the node add form.
+ *
+ * @param Group $group
+ *   The group to create the node for.
+ * @param string $node_type
+ *   The type of node to create for the group.
+ *
+ * @return array
+ *   Returns the node editing form.
+ *
+ * @see node_add()
+ */
+function gnode_node_add($group, $node_type) {
+  global $user;
+
+  module_load_include('inc', 'node', 'node.pages');
+
+  $types = node_type_get_types();
+  $node = (object) array(
+    'uid' => $user->uid,
+    'name' => (isset($user->name) ? $user->name : ''),
+    'type' => $node_type,
+    'language' => LANGUAGE_NONE,
+    'group' => $group->gid,
+  );
+  drupal_set_title(t('Create @name', array('@name' => $types[$node_type]->name)), PASS_THROUGH);
+  $output = drupal_get_form($node_type . '_node_form', $node);
+
+  return $output;
+}
+
+/**
  * Implements hook_form_BASE_FORM_ID_alter().
  *
  * Adds a Group vertical tab to the node form.
@@ -137,70 +174,97 @@ function gnode_node_access($node, $op, $account) {
  * It would not make sense if someone could move nodes to a group where he does
  * not have creation rights.
  *
+ * @see gnode_node_validate()
  * @see gnode_node_submit()
  */
 function gnode_form_node_form_alter(&$form, $form_state) {
   global $user;
-  $node_type = $form['#node']->type;
 
-  // @todo Rework this: drop the select and use autocomplete for admins only.
-  // Gather all group ids an outsider can create nodes of the given type in.
-  $outsider_gids = array();
-  foreach (group_types() as $type => $group_type) {
-    $has_access = user_access('bypass group access');
-    $has_access = $has_access || in_array('administer group', $group_type->outsider_permissions);
-    $has_access = $has_access || in_array("create $node_type", $group_type->outsider_permissions);
+  $node = $form_state['node'];
+  $gid = !empty($node->group) ? $node->group : 0;
 
-    if ($has_access) {
-      $outsider_gids = array_merge($outsider_gids, group_outsider_gids($user->uid, $type));
+  // Fix group for people that can't bypass access.
+  if (!user_access('bypass group access')) {
+    $form['gid'] = array(
+      '#type' => 'value',
+      '#value' => $gid,
+      '#parents' => array('group_settings', 'group'),
+    );
+  }
+
+  // Fill in the selected group but allow changes.
+  else {
+    $group_name = '';
+
+    if ($gid) {
+      // Retrieve the suffix configuration.
+      $suffix = variable_get('group_autocomplete_suffix');
+
+      // Retrieve the default value for the autocomplete field.
+      $title = group_load($gid)->title;
+      $group_name = empty($suffix['general']) ? $title : "$title (GID: $gid)";
+    }
+
+    // Add a vertical tab with an autocomplete field.
+    $form['group_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Group settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#group' => 'additional_settings',
+      '#attributes' => array(
+        'class' => array('node-form-group-information'),
+      ),
+      '#attached' => array(
+        'js' => array(drupal_get_path('module', 'gnode') . '/misc/gnode.js'),
+      ),
+      '#tree' => TRUE,
+      '#weight' => -50,
+    );
+
+    $form['group_settings']['group'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Parent group'),
+      '#autocomplete_path' => 'group/autocomplete',
+      '#default_value' => $group_name,
+      '#description' => t("Enter the name of the group to attach this node to. Leave blank for no group.<br /><strong>By selecting a group, the node will inherit the group's access control</strong>."),
+      // If the user can't create this node outside of a group, he is not allowed
+      // to move it to the sitewide scope either.
+      '#required' => !user_access("create $node->type"),
+    );
+  }
+}
+
+/**
+ * Implements hook_node_validate().
+ *
+ * Validates and processes the 'parent group' field.
+ *
+ * @see gnode_form_node_form_alter()
+ */
+function gnode_node_validate($node, $form, &$form_state) {
+  $values = $form_state['values']['group_settings'];
+
+  // Validate the entered name for the autocomplete widget.
+  if (!empty($values['group'])) {
+    $suffix = variable_get('group_autocomplete_suffix');
+
+    // Act on results without a suffix.
+    if (empty($suffix['general'])) {
+      $groups = group_load_by_name($values['group']);
+
+      if (empty($groups)) {
+        form_set_error('group_settings][group', t('Group name not found'));
+      }
+      else {
+        $form_state['values']['group_settings']['gid'] = reset($groups)->gid;
+      }
+    }
+    // Retrieve the group id from the name suffix.
+    else {
+      $form_state['values']['group_settings']['gid'] = group_autocomplete_result_gid($values['group']);
     }
   }
-
-  // Allow access to all outsider groups of a group type with access.
-  $user_groups = array();
-  foreach (group_load_multiple($outsider_gids) as $gid => $group) {
-    $user_groups[$gid] = check_plain($group->title);
-  }
-
-  // Check the user's groups for creation rights and add them to $user_groups.
-  foreach (group_load_by_member($user->uid) as $group) {
-    $has_access = $group->userHasPermission($user->uid, "create $node_type");
-    $has_access = $has_access || $group->userHasPermission($user->uid, 'administer group');
-
-    if ($has_access) {
-      $user_groups[$group->gid] = check_plain($group->title);
-    }
-  }
-
-  $form['group_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Group settings'),
-    '#access' => !empty($user_groups),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-    '#group' => 'additional_settings',
-    '#attributes' => array(
-      'class' => array('node-form-group-information'),
-    ),
-    '#attached' => array(
-      'js' => array(drupal_get_path('module', 'group') . '/misc/group.js'),
-    ),
-    '#tree' => TRUE,
-    '#weight' => -50,
-  );
-
-  $form['group_settings']['group'] = array(
-    '#type' => 'select',
-    '#title' => t('Select a group to attach this node to.'),
-    '#description' => t("By selecting a group, the node will inherit the group's access control."),
-    '#options' => $user_groups,
-    '#empty_option' => t('- No group -'),
-    '#empty_value' => 0,
-    '#default_value' => !empty($form['#node']->group) ? $form['#node']->group : 0,
-    // If the user can't create this node outside of a group, he is not allowed
-    // to move it to the sitewide scope either.
-    '#required' => !user_access("create $node_type"),
-  );
 }
 
 /**
@@ -208,9 +272,12 @@ function gnode_form_node_form_alter(&$form, $form_state) {
  *
  * @see gnode_form_node_form_alter()
  */
-function gnode_node_submit($node, $form, $form_state) {
-  if (!empty($form_state['values']['group_settings']['group'])) {
-    $node->group = $form_state['values']['group_settings']['group'];
+function gnode_node_submit($node, $form, &$form_state) {
+  if (!empty($form_state['values']['group_settings']['gid'])) {
+    $node->group = $form_state['values']['group_settings']['gid'];
+  }
+  elseif (isset($node->group)) {
+    unset($node->group);
   }
 }
 

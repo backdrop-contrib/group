@@ -3,10 +3,10 @@
 Drupal.behaviors.groupFieldsetSummaries = {
   attach: function (context) {
     $('fieldset.node-form-group-information', context).drupalSetSummary(function (context) {
-      var option = $('.form-item-group-settings-group option:selected', context);
+      var input = $('#edit-group-settings-group', context).val();
 
-      if (option.val() != '0') {
-        return $.trim(option.text());
+      if (input != '') {
+        return $.trim(input);
       }
 
       return Drupal.t('Not a group node');
