@@ -8,5 +8,8 @@
  * Implements hook_install().
  */
 function gnode_install() {
-  node_access_needs_rebuild(TRUE);
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'gnode')
+    ->execute();
 }
