@@ -43,7 +43,6 @@ class GroupUIController extends EntityDefaultUIController {
 
     $items['group/autocomplete/type/%group_type'] = array(
       'title' => 'Group type specific autocomplete',
-      'title callback' => 'check_plain',
       'page callback' => 'group_autocomplete_by_type',
       'page arguments' => array(3),
       // TRUE because of individual 'view' access checks on every group.
