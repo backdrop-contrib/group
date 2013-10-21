@@ -7,10 +7,10 @@
 /**
  * Load our helper functions without polluting the .module file.
  */
-module_load_include('inc', 'group', 'helpers/entity.group');
-module_load_include('inc', 'group', 'helpers/entity.group_membership');
-module_load_include('inc', 'group', 'helpers/entity.group_role');
-module_load_include('inc', 'group', 'helpers/entity.group_type');
+module_load_include('inc', 'group', 'helpers/group.entity');
+module_load_include('inc', 'group', 'helpers/group_membership.entity');
+module_load_include('inc', 'group', 'helpers/group_role.entity');
+module_load_include('inc', 'group', 'helpers/group_type.entity');
 module_load_include('inc', 'group', 'helpers/group');
 
 /**
