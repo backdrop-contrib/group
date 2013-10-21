@@ -403,6 +403,27 @@ function group_entity_property_info() {
 }
 
 /**
+ * Implements hook_entity_property_info_alter().
+ */
+function group_entity_property_info_alter(&$info) {
+  // Add the 'group' property to every group entity.
+  foreach (entity_get_info() as $type => $e_info) {
+    if (!empty($e_info['group entity'])) {
+      $properties = &$info[$type]['properties'];
+
+      $properties['group'] = array(
+        'label' => t('Group'),
+        'description' => t('The group(s) the entity belongs to.'),
+        'type' => $e_info['group entity'] == 'single' ? 'group' : 'list<group>',
+        'getter callback' => 'entity_property_verbatim_get',
+        'setter callback' => 'entity_property_verbatim_set',
+        'computed' => TRUE,
+      );
+    }
+  }
+}
+
+/**
  * Callback for getting only-in-code group properties.
  */
 function group_get_properties($data, $options, $name, $type, $info) {
