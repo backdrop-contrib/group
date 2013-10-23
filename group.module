@@ -157,7 +157,8 @@ function group_admin_paths() {
     $paths = array(
       'group/*/edit' => TRUE,
       'group/*/delete' => TRUE,
-      'group/*/members' => TRUE,
+      'group/*/member' => TRUE,
+      'group/*/member/*/*' => TRUE,
       'group/add' => TRUE,
       'group/add/*' => TRUE,
     );
