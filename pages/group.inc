@@ -99,19 +99,6 @@ function group_add_page() {
 }
 
 /**
- * Returns the group title.
- *
- * @param Group $group
- *   The group object.
- *
- * @return string
- *   An unsanitized string that is the title of the group.
- */
-function group_page_title($group) {
-  return $group->title;
-}
-
-/**
  * Generates the front page of a group.
  *
  * @param Group $group

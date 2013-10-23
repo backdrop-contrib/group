@@ -74,3 +74,12 @@ function _group_add_access() {
 function group_type_add_role_access($group_type) {
   return user_access('administer group types') && !entity_has_status('group_type', $group_type, ENTITY_FIXED);
 }
+
+/**
+ * Title callback: Returns the group title.
+ *
+ * @see GroupUiController::hook_menu()
+ */
+function group_page_title($group) {
+  return check_plain($group->title);
+}
