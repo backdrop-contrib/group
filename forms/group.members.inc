@@ -400,3 +400,41 @@ function group_membership_remove_role($mids, $role) {
     $group_membership->removeRoles($roles);
   }
 }
+
+/**
+ * Group membership cancel form.
+ */
+function group_membership_cancel_form($form, &$form_state, $group, $account) {
+  global $user;
+
+  $unsubscribe_self = $user->uid == $account->uid;
+
+  $message = $unsubscribe_self
+    ? 'Are you sure you want to unsubscribe from %group?'
+    : 'Are you sure you want to unsubscribe %user from %group?';
+
+  $confirm = $unsubscribe_self
+    ? 'Yes, cancel my membership'
+    : 'Yes, cancel the membership';
+
+  $replace = array(
+    '%user' => $account->name,
+    '%group' => $group->title,
+  );
+
+  $redirect = $unsubscribe_self
+    ? "group/$group->gid"
+    : "group/$group->gid/member";
+
+  return confirm_form($form, t($message, $replace), $redirect, NULL, t($confirm), t('No, take me back!'));
+}
+
+/**
+ * Group membership cancel submit callback.
+ */
+function group_membership_cancel_form_submit($form, &$form_state) {
+  list($group, $account) = $form_state['build_info']['args'];
+  $group->removeMember($account->uid);
+
+  drupal_set_message(t('The membership was cancelled.'));
+}

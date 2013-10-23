@@ -133,6 +133,17 @@ class GroupUIController extends EntityDefaultUIController {
       'weight' => 0,
     );
 
+    $items['group/%group/member/%user/cancel'] = array(
+      'title' => 'Cancel membership',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('group_membership_cancel_form', 1, 3),
+      'access callback' => 'group_membership_cancel_access',
+      'access arguments' => array(1, 3),
+      'file' => 'forms/group.members.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_CALLBACK,
+    );
+
     return $items;
   }
 

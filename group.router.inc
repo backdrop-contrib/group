@@ -76,6 +76,25 @@ function group_type_add_role_access($group_type) {
 }
 
 /**
+ * Access callback: Checks if a user may cancel his membership.
+ *
+ * @see GroupUiController::hook_menu()
+ */
+function group_membership_cancel_access($group, $account) {
+  global $user;
+
+  // Short-circuit if the current user can administer all members or bypass
+  // group access.
+  if (group_access('administer members', $group, $user)) {
+    return TRUE;
+  }
+
+  // Check if the current user is the subject of the membership and is allowed
+  // to cancel it.
+  return $user->uid == $account->uid && group_access('unsubscribe', $group, $user);
+}
+
+/**
  * Title callback: Returns the group title.
  *
  * @see GroupUiController::hook_menu()

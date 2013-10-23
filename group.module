@@ -300,7 +300,7 @@ function group_group_member_operations($group) {
 /**
  * Implements hook_group_member_operation_links().
  *
- * @todo Actually implement the two links below.
+ * @todo Actually implement the edit link below.
  */
 function group_group_member_operation_links($group_membership) {
   $operations = array();
@@ -312,13 +312,13 @@ function group_group_member_operation_links($group_membership) {
   if (group_access('administer members', group_load($group_membership->gid))) {
     $operations['edit-membership'] = array(
       'title' => t('edit'),
-      'href' => 'group/member/' . $group_membership->mid . '/edit',
+      'href' => 'group/' . $group_membership->gid . '/member/' . $group_membership->uid . '/edit',
       'query' => $destination,
     );
 
     $operations['cancel-membership'] = array(
       'title' => t('cancel'),
-      'href' => 'group/member/' . $group_membership->mid . '/cancel',
+      'href' => 'group/' . $group_membership->gid . '/member/' . $group_membership->uid . '/cancel',
       'query' => $destination,
     );
   }
