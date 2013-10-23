@@ -33,13 +33,18 @@ class Group extends Entity {
   /**
    * Retrieve all possible roles for a group.
    *
+   * @param bool $special
+   *   Include special roles 'outsider' and 'member'. Defaults to TRUE.
+   * @param bool $reset
+   *   Whether to reset the internal cache.
+   *
    * @return array
    *   A list of group_role entities.
    *
    * @see GroupType::getRoles()
    */
-  public function getRoles() {
-    return group_type_load($this->type)->getRoles();
+  public function getRoles($special = TRUE, $reset = FALSE) {
+    return group_type_load($this->type)->getRoles($special, $reset);
   }
 
   /**
