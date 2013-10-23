@@ -25,7 +25,7 @@ class GroupUIController extends EntityDefaultUIController {
     );
 
     // Make this an entry in the Management menu.
-    $items["$this->path/groups"] = array(
+    $items["$this->path/overview"] = array(
       'title' => 'Groups',
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -10,
@@ -118,7 +118,10 @@ class GroupUIController extends EntityDefaultUIController {
       'type' => MENU_CALLBACK,
     );
 
-    $items['group/%group/members'] = array(
+    // Below are router definitions for group memberships. They are put here
+    // because they are inherently tied to groups. It would not make sense to
+    // write a separate admin UI for all group memberships within a site.
+    $items['group/%group/member'] = array(
       'title' => 'Members',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_member_overview_form', 1),
