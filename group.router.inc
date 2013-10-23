@@ -100,5 +100,5 @@ function group_membership_cancel_access($group, $account) {
  * @see GroupUiController::hook_menu()
  */
 function group_page_title($group) {
-  return check_plain($group->title);
+  return $group->title;
 }
