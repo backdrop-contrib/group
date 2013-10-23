@@ -118,6 +118,12 @@ function group_group_permission() {
     'view members' => array(
       'title' => t('View group members'),
     ),
+    'subscribe' => array(
+      'title' => t('Subscribe to group'),
+    ),
+    'unsubscribe' => array(
+      'title' => t('Unsubscribe from group'),
+    ),
   );
 
   return $permissions;
