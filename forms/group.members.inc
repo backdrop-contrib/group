@@ -402,6 +402,51 @@ function group_membership_remove_role($mids, $role) {
 }
 
 /**
+ * Group membership edit form.
+ */
+function group_membership_edit_form($form, &$form_state, $group, $account) {
+  $group_membership = $group->getMember($account->uid);
+
+  $message = 'Edit membership for %user in %group';
+  $replace = array(
+    '%user' => $account->name,
+    '%group' => $group->title,
+  );
+  drupal_set_title(t($message, $replace), PASS_THROUGH);
+
+  $roles = array();
+  foreach ($group->getRoles(FALSE) as $group_role) {
+    $roles[$group_role->name] = $group_role->label;
+  }
+
+  $form['roles'] = array(
+    '#title' => t('Group roles'),
+    '#type' => 'checkboxes',
+    '#options' => $roles,
+    '#default_value' => $group_membership->roles,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Edit membership'),
+  );
+
+  return $form;
+}
+
+/**
+ * Group membership edit submit callback.
+ */
+function group_membership_edit_form_submit($form, &$form_state) {
+  list($group, $account) = $form_state['build_info']['args'];
+
+  $group_membership = $group->getMember($account->uid);
+  $group_membership->changeRoles($form_state['values']['roles']);
+
+  drupal_set_message(t('The membership was edited.'));
+}
+
+/**
  * Group membership cancel form.
  */
 function group_membership_cancel_form($form, &$form_state, $group, $account) {

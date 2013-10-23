@@ -300,8 +300,6 @@ function group_group_member_operations($group) {
 
 /**
  * Implements hook_group_member_operation_links().
- *
- * @todo Actually implement the edit link below.
  */
 function group_group_member_operation_links($group_membership) {
   $operations = array();
