@@ -6,31 +6,79 @@
 
 /**
  * Main class for group memberships.
+ *
+ * @todo Validation of added roles.
  */
 class GroupMembership extends Entity {
 
   /**
-   * Add a role to a group membership.
+   * Grant roles for a membership.
    *
    * @param array $roles
-   *   An array of group role machine names.
+   *   A list of role names to grant.
    *
-   * @todo Validation of added roles.
    */
-  public function addRoles($roles) {
-    $this->roles = array_unique(array_merge($this->roles, $roles));
+  public function grantRoles(array $roles) {
+    $roles = array_merge($this->roles, $roles);
+    $this->roles = array_values(array_unique($roles));
+
     $this->save();
   }
 
   /**
-   * Remove a role from a group membership.
+   * Revoke roles from a membership.
    *
    * @param array $roles
-   *   An array of group role machine names.
+   *   (optional) A list of role names to revoke. Will revoke all roles
+   *   from the group membership if $permissions is left blank.
    */
-  public function removeRoles($roles) {
-    $this->roles = array_diff($this->roles, $roles);
+  public function revokeRoles(array $roles = array()) {
+    $this->roles = !empty($roles)
+      ? array_values(array_diff($this->roles, $roles))
+      : array();
+
     $this->save();
+  }
+
+  /**
+   * Change roles for a membership.
+   *
+   * This function may be used to grant and revoke multiple roles at once. For
+   * example, when a form exposes checkboxes to configure roles for a
+   * membership, the form submit handler may directly pass the submitted values
+   * for the checkboxes form element to this function.
+   *
+   * @param $roles
+   *   An associative array, where the key holds the role name and the value
+   *   determines whether to grant or revoke that role. Any value that
+   *   evaluates to TRUE will cause the role to be granted. Any value that
+   *   evaluates to FALSE will cause the role to be revoked.
+   *   @code
+   *     array(
+   *       'group_admin' => 0,         // Revoke 'group_admin'
+   *       'group_admin' => FALSE,     // Revoke 'group_admin'
+   *       'sub_admin' => 1,           // Grant 'sub_admin'
+   *       'sub_admin' => TRUE,        // Grant 'sub_admin'
+   *       'sub_admin' => 'sub_admin', // Grant 'sub_admin'
+   *     )
+   *   @endcode
+   *   Existing roles are not changed, unless specified in $roles.
+   *
+   * @see GroupMembership::grantRoles()
+   * @see GroupMembership::revokeRoles()
+   */
+  public function changeRoles(array $roles) {
+    // Grant new roles for the membership.
+    $grant = array_filter($roles);
+    if (!empty($grant)) {
+      $this->grantRoles(array_keys($grant));
+    }
+
+    // Revoke roles from the membership.
+    $revoke = array_diff_assoc($roles, $grant);
+    if (!empty($revoke)) {
+      $this->revokeRoles(array_keys($revoke));
+    }
   }
 
   /**

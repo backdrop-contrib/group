@@ -386,7 +386,7 @@ function group_membership_add_role($mids, $role) {
   $roles = array($role);
 
   foreach (group_membership_load_multiple($mids) as $group_membership) {
-    $group_membership->addRoles($roles);
+    $group_membership->grantRoles($roles);
   }
 }
 
@@ -397,7 +397,7 @@ function group_membership_remove_role($mids, $role) {
   $roles = array($role);
 
   foreach (group_membership_load_multiple($mids) as $group_membership) {
-    $group_membership->removeRoles($roles);
+    $group_membership->revokeRoles($roles);
   }
 }
 

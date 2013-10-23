@@ -251,7 +251,7 @@ class Group extends Entity {
   /**
    * Add a user to a group.
    *
-   * If the user was already a member of the group, the specified role
+   * If the user was already a member of the group, the specified roles
    * will be added to the user's active membership.
    *
    * @param int $uid
@@ -266,7 +266,8 @@ class Group extends Entity {
       $group_membership = entity_create('group_membership', $values);
     }
 
-    $group_membership->addRoles($roles);
+    // Granting roles saves the membership.
+    $group_membership->grantRoles($roles);
   }
 
   /**

@@ -63,7 +63,7 @@ class GroupRole extends Entity {
     $permissions = array_merge($this->permissions, $permissions);
     $this->permissions = array_values(array_unique($permissions));
 
-    group_role_save($this);
+    $this->save();
   }
 
   /**
@@ -78,7 +78,7 @@ class GroupRole extends Entity {
       ? array_values(array_diff($this->permissions, $permissions))
       : array();
 
-    group_role_save($this);
+    $this->save();
   }
 
   /**
