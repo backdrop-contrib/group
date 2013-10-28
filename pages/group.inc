@@ -130,10 +130,17 @@ function group_page($group) {
   );
   drupal_add_html_head_link($attributes, TRUE);
 
-  // Start building the actual render array.
-  $page['stub'] = array(
-    '#markup' => t('Work in progress'),
-  );
+  // @todo We build the group page below, this should perhaps be delegated to
+  // some sort of group_view() function that accepts a langcode and view mode.
+
+  // Get the content language code.
+  global $language_content;
+  $langcode = $language_content->language;
+
+  // Build fields content.
+  field_attach_prepare_view('group', array($group->gid => $group), 'full', $langcode);
+  entity_prepare_view('group', array($group->gid => $group), $langcode);
+  $page = field_attach_view('group', $group, 'full', $langcode);
 
   return $page;
 }
