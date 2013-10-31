@@ -37,6 +37,7 @@ function group_entity_info() {
       'file' => 'forms/group.inc',
       'controller class' => 'GroupUIController',
     ),
+    'extra fields controller class' => 'GroupExtraFieldsController',
     'group entity' => 'single',
   );
 

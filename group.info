@@ -8,6 +8,7 @@ dependencies[] = entity
 files[] = classes/group.inc
 files[] = classes/group.controller.inc
 files[] = classes/group.ui_controller.inc
+files[] = classes/group.extra_fields_controller.inc
 files[] = classes/group_membership.inc
 files[] = classes/group_membership.controller.inc
 files[] = classes/group_role.inc
