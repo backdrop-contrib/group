@@ -363,6 +363,9 @@ function _gnode_node_access_info($account, $op) {
 
   // Check access for groups the user is a member of.
   foreach (group_load_by_member($account->uid) as $group) {
+    // Store gid to keep code below concise.
+    $gid = $group->gid;
+
     // If you can administer the group, you have full access to every node
     // in that group. Add these group ids to 'full access'.
     if (group_access('administer group', $group, $account)) {
