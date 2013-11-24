@@ -188,7 +188,7 @@ function gnode_form_node_form_alter(&$form, $form_state) {
     $form['gid'] = array(
       '#type' => 'value',
       '#value' => $gid,
-      '#parents' => array('group_settings', 'group'),
+      '#parents' => array('group_settings', 'gid'),
     );
   }
 
