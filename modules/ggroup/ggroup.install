@@ -1,0 +1,15 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the Subgroup project.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function ggroup_install() {
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'ggroup')
+    ->execute();
+}

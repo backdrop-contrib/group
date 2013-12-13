@@ -38,7 +38,6 @@ function group_entity_info() {
       'controller class' => 'GroupUIController',
     ),
     'extra fields controller class' => 'GroupExtraFieldsController',
-    'group entity' => 'single',
   );
 
   $info['group_type'] = array(

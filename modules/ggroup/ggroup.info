@@ -1,0 +1,6 @@
+name = Subgroup
+description = Allows a group to belong to another group
+core = 7.x
+package = Group
+
+dependencies[] = group

@@ -1,0 +1,77 @@
+<?php
+/**
+ * @file
+ * Contains Subgroup functionality for the Group module.
+ *
+ * Please note that this only adds a UI and access checks for creating
+ * subgroups. Nothing stops you from still programatically creating
+ * subgroups with Group::addSubgroup(). Using both at the same time is
+ * strongly discouraged unless you know what you are doing.
+ */
+
+/**
+ * Load our router functions without polluting the .module file.
+ */
+module_load_include('inc', 'ggroup', 'ggroup.router');
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function ggroup_entity_info_alter(&$entity_info) {
+  // Groups can only have one group parent.
+  $entity_info['group']['group entity'] = 'single';
+}
+
+/**
+ * Implements hook_group_permission().
+ *
+ * Adds permissions for creating subgroups.
+ */
+function ggroup_group_permission() {
+  $permissions = array();
+
+  foreach (group_types() as $group_type) {
+    $replace = array('%group_type' => $group_type->label);
+
+    $permissions["create $group_type->name"] = array(
+      'title' => t('Create %group_type as a subgroup', $replace),
+    );
+  }
+
+  return $permissions;
+}
+
+/**
+ * Generate the subgroup creation form.
+ */
+function ggroup_add_subgroup_form($group, $group_type) {
+  $subgroup = entity_create('group', array(
+    'group' => $group->gid,
+    'type' => $group_type)
+  );
+
+  // Group creation / editing form lives in a separate file.
+  form_load_include($form_state, 'inc', 'group', 'forms/group');
+  return entity_ui_get_form('group', $subgroup, 'create', $form_state);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function ggroup_form_group_form_alter($form, &$form_state) {
+  $subgroup = $form_state['group'];
+
+  // If the group is a subgroup, add some magic.
+  if (!empty($subgroup->group)) {
+    $group = group_load($subgroup->group);
+    $group_type = group_type_load($subgroup->type);
+
+    $message = 'Create @group_type in @group';
+    $replace = array(
+      '@group_type' => $group_type->label,
+      '@group' => $group->title,
+    );
+
+    drupal_set_title(t($message, $replace));
+  }
+}
