@@ -14,14 +14,16 @@ function group_install() {
 
 /**
  * Implements hook_uninstall().
+ *
+ * @see hook_group_uninstall()
  */
 function group_uninstall() {
   variable_del('group_admin_theme');
   variable_del('group_autocomplete_suffix');
 
-  // Run every group's delete handler for cleanup purposes.
+  // Run hook_group_uninstall() to allow other modules to clean up.
   $gids = db_select('groups', 'g')->fields('g', array('gid'))->execute()->fetchCol();
-  group_delete_multiple($gids);
+  module_invoke_all('group_uninstall', $gids);
 }
 
 /**

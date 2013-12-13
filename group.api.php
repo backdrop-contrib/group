@@ -5,6 +5,23 @@
  */
 
 /**
+ * Act upon uninstallation of the Group module.
+ *
+ * This function differs from hook_modules_uninstalled() in a sense that it
+ * allows you to act upon the uninstallation of the Group module by using the
+ * group ids of all groups in your uninstallation logic. If you do not need
+ * such functionality, just use hook_modules_uninstalled() instead.
+ *
+ * @param array $gids
+ *   An array of group ids.
+ */
+function hook_group_uninstall($gids) {
+  db_delete('my_entity_table')
+    ->condition('my_entity_id_field', $gids, 'IN')
+    ->execute();
+}
+
+/**
  * Provide entity metadata for the Group module.
  *
  * This is not a real hook but instead lists extra entity info keys you
