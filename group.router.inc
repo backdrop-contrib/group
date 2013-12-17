@@ -12,14 +12,23 @@
  * @see GroupTypeUiController::hook_menu()
  */
 function group_menu() {
-  $items['admin/config/people/group'] = array(
-    'title' => 'Group settings',
-    'description' => 'Configure the Group module.',
+  $items['admin/group/config'] = array(
+    'title' => 'Configuration',
+    'description' => 'Configure the Group modules.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('group_config_form'),
     'access callback' => 'user_access',
     'access arguments' => array('configure group module'),
     'file' => 'admin/group.config.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+  );
+
+  $items['admin/group/config/group'] = array(
+    'title' => 'Groups',
+    'description' => 'Configuration regarding groups.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
   );
 
   return $items;

@@ -2,6 +2,7 @@ name = Group
 description = Allows you to group users and content
 core = 7.x
 package = Group
+configure = admin/group/config/group
 
 dependencies[] = entity
 
