@@ -16,7 +16,6 @@ class GroupMembership extends Entity {
    *
    * @param array $roles
    *   A list of role names to grant.
-   *
    */
   public function grantRoles(array $roles) {
     $roles = array_merge($this->roles, $roles);
