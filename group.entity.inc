@@ -38,6 +38,7 @@ function group_entity_info() {
       'controller class' => 'GroupUIController',
     ),
     'extra fields controller class' => 'GroupExtraFieldsController',
+    'views controller class' => 'EntityDefaultViewsController',
   );
 
   $info['group_type'] = array(
@@ -63,6 +64,7 @@ function group_entity_info() {
       'controller class' => 'GroupTypeUIController',
     ),
     'features controller class' => 'GroupTypeFeaturesController',
+    'views controller class' => 'EntityDefaultViewsController',
   );
 
   $info['group_role'] = array(
@@ -88,6 +90,7 @@ function group_entity_info() {
       'controller class' => 'GroupRoleUIController',
     ),
     'features controller class' => 'GroupRoleFeaturesController',
+    'views controller class' => 'EntityDefaultViewsController',
   );
 
   $info['group_membership'] = array(
@@ -103,6 +106,7 @@ function group_entity_info() {
     'module' => 'group',
     // The admin part of group memberships is tied to the group the membership
     // belongs to. Please refer to GroupUIController for these page callbacks.
+    'views controller class' => 'EntityDefaultViewsController',
   );
 
   return $info;
