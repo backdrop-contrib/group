@@ -197,12 +197,9 @@ function gnode_form_node_form_alter(&$form, $form_state) {
     $group_name = '';
 
     if ($gid) {
-      // Retrieve the suffix configuration.
-      $suffix = variable_get('group_autocomplete_suffix');
-
       // Retrieve the default value for the autocomplete field.
       $title = group_load($gid)->title;
-      $group_name = empty($suffix['general']) ? $title : "$title (GID: $gid)";
+      $group_name = "$title (GID: $gid)";
     }
 
     // Add a vertical tab with an autocomplete field.
@@ -245,24 +242,14 @@ function gnode_form_node_form_alter(&$form, $form_state) {
 function gnode_node_validate($node, $form, &$form_state) {
   $values = $form_state['values']['group_settings'];
 
-  // Validate the entered name for the autocomplete widget.
   if (!empty($values['group'])) {
-    $suffix = variable_get('group_autocomplete_suffix');
-
-    // Act on results without a suffix.
-    if (empty($suffix['general'])) {
-      $groups = group_load_by_name($values['group']);
-
-      if (empty($groups)) {
-        form_set_error('group_settings][group', t('Group name not found'));
-      }
-      else {
-        $form_state['values']['group_settings']['gid'] = reset($groups)->gid;
-      }
-    }
     // Retrieve the group id from the name suffix.
+    if ($gid = group_autocomplete_result_gid($values['group'])) {
+      $form_state['values']['group_settings']['gid'] = $gid;
+    }
+    // Throw an error if the gid could not be retrieved.
     else {
-      $form_state['values']['group_settings']['gid'] = group_autocomplete_result_gid($values['group']);
+      form_set_error('group_settings][group', t('Group name not found'));
     }
   }
 }

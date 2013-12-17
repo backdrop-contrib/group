@@ -9,7 +9,6 @@
  */
 function group_install() {
   variable_set('group_admin_theme', '1');
-  variable_set('group_autocomplete_suffix', array('general' => 0));
 }
 
 /**
@@ -19,7 +18,6 @@ function group_install() {
  */
 function group_uninstall() {
   variable_del('group_admin_theme');
-  variable_del('group_autocomplete_suffix');
 
   // Run hook_group_uninstall() to allow other modules to clean up.
   $gids = db_select('groups', 'g')->fields('g', array('gid'))->execute()->fetchCol();

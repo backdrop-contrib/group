@@ -51,15 +51,9 @@ function group_autocomplete_by_type($group_type, $search = '') {
       $query->condition('type', $group_type->name);
     }
 
-    // Retrieve the suffix configuration.
-    $suffix = variable_get('group_autocomplete_suffix');
-
-    // Get the right suffix configuration key.
-    $s_key = !empty($group_type) ? $group_type->name : 'general';
-
     foreach ($query->execute()->fetchAllKeyed() as $gid => $title) {
       $title = check_plain($title);
-      $match = empty($suffix[$s_key]) ? $title : "$title (GID: $gid)";
+      $match = "$title (GID: $gid)";
 
       $matches[$match] = $match;
     }
