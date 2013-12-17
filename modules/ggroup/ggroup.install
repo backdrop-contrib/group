@@ -8,8 +8,17 @@
  * Implements hook_install().
  */
 function ggroup_install() {
+  variable_set('ggroup_enabled_subgroups', array());
+
   db_update('system')
     ->fields(array('weight' => 1))
     ->condition('name', 'ggroup')
     ->execute();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function ggroup_uninstall() {
+  variable_del('ggroup_enabled_subgroups');
 }

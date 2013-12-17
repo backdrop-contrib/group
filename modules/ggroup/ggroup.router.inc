@@ -18,6 +18,18 @@ function ggroup_menu() {
     'access arguments' => array(1, 4),
   );
 
+  $items['admin/group/config/subgroup'] = array(
+    'title' => 'Subgroups',
+    'description' => 'Configuration regarding subgroups.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ggroup_config_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('configure group module'),
+    'file' => 'admin/ggroup.config.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -5,
+  );
+
   return $items;
 }
 
@@ -31,14 +43,20 @@ function ggroup_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   if ($root_path == 'group/%') {
     $gid = $router_item['original_map'][1];
 
-    foreach (group_types() as $group_type => $info) {
-      $item = menu_get_item("group/$gid/subgroup/add/$group_type");
+    // Retrieve the group types that can be subgroups.
+    $subgroups = array_filter(variable_get('ggroup_enabled_subgroups'));
 
-      if ($item['access']) {
-        $data['actions']['output'][] = array(
-          '#theme' => 'menu_local_action',
-          '#link' => $item,
-        );
+    // Set local actions for the enabled subgroup types.
+    foreach (group_types() as $group_type => $info) {
+      if (isset($subgroups[$group_type])) {
+        $item = menu_get_item("group/$gid/subgroup/add/$group_type");
+
+        if ($item['access']) {
+          $data['actions']['output'][] = array(
+            '#theme' => 'menu_local_action',
+            '#link' => $item,
+          );
+        }
       }
     }
   }
