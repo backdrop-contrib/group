@@ -389,6 +389,7 @@ function group_entity_property_info_alter(&$info) {
         'getter callback' => 'entity_property_verbatim_get',
         'setter callback' => 'entity_property_verbatim_set',
         'computed' => TRUE,
+        'entity views field' => TRUE,
       );
     }
   }
