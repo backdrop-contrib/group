@@ -172,26 +172,16 @@ function group_entity_property_info() {
     'label' => t('Group ID'),
     'description' => t('The unique group ID.'),
     'type' => 'integer',
-    'schema_field' => 'gid',
-  );
-
-  $group['type'] = array(
-    'label' => t('Group type name'),
-    'description' => t('The name of the group type.'),
-    'type' => 'token',
-    'setter callback' => 'entity_property_verbatim_set',
-    'clear' => array('group_type'),
-    'schema_field' => 'type',
+    'schema field' => 'gid',
   );
 
   $group['group_type'] = array(
     'label' => t('Group type'),
-    'description' => t('The group type.'),
+    'description' => t('The bundle of the group.'),
     'type' => 'group_type',
     'getter callback' => 'group_get_properties',
     'setter callback' => 'group_set_properties',
-    'computed' => TRUE,
-    'clear' => array('type'),
+    'schema field' => 'type',
   );
 
   $group['title'] = array(
@@ -199,7 +189,7 @@ function group_entity_property_info() {
     'description' => t('The title of the group.'),
     'type' => 'text',
     'setter callback' => 'entity_property_verbatim_set',
-    'schema_field' => 'title',
+    'schema field' => 'title',
   );
 
   // Properties for GroupType entities.
@@ -208,7 +198,7 @@ function group_entity_property_info() {
     'label' => t('Group type ID'),
     'description' => t('The unique group type ID.'),
     'type' => 'integer',
-    'schema_field' => 'tid',
+    'schema field' => 'tid',
   );
 
   $group_type['name'] = array(
@@ -216,7 +206,7 @@ function group_entity_property_info() {
     'description' => t('The machine readable name for the type.'),
     'type' => 'token',
     'setter callback' => 'entity_property_verbatim_set',
-    'schema_field' => 'name',
+    'schema field' => 'name',
   );
 
   $group_type['label'] = array(
@@ -224,7 +214,7 @@ function group_entity_property_info() {
     'description' => t('The human readable name for the type.'),
     'type' => 'text',
     'setter callback' => 'entity_property_verbatim_set',
-    'schema_field' => 'label',
+    'schema field' => 'label',
   );
 
   $group_type['outsider_permissions'] = array(
@@ -248,21 +238,21 @@ function group_entity_property_info() {
     'description' => t('The weight of the type compared to others.'),
     'type' => 'integer',
     'setter callback' => 'entity_property_verbatim_set',
-    'schema_field' => 'weight',
+    'schema field' => 'weight',
   );
 
   $group_type['status'] = array(
     'label' => t('Entity status'),
     'description' => t('The entity status of the type.'),
     'type' => 'integer',
-    'schema_field' => 'status',
+    'schema field' => 'status',
   );
 
   $group_type['module'] = array(
     'label' => t('Providing module'),
     'description' => t('The module providing the entity.'),
     'type' => 'text',
-    'schema_field' => 'module',
+    'schema field' => 'module',
   );
 
   // Properties for GroupRole entities.
@@ -271,16 +261,7 @@ function group_entity_property_info() {
     'label' => t('Group role ID'),
     'description' => t('The unique group role ID.'),
     'type' => 'integer',
-    'schema_field' => 'rid',
-  );
-
-  $group_role['type'] = array(
-    'label' => t('Group type name'),
-    'description' => t('The name of the group type the role is coupled to.'),
-    'type' => 'token',
-    'setter callback' => 'entity_property_verbatim_set',
-    'clear' => array('group_type'),
-    'schema_field' => 'type',
+    'schema field' => 'rid',
   );
 
   $group_role['group_type'] = array(
@@ -289,8 +270,7 @@ function group_entity_property_info() {
     'type' => 'group_type',
     'getter callback' => 'group_get_properties',
     'setter callback' => 'group_set_properties',
-    'computed' => TRUE,
-    'clear' => array('type'),
+    'schema field' => 'type',
   );
 
   $group_role['name'] = array(
@@ -298,7 +278,7 @@ function group_entity_property_info() {
     'description' => t('The machine readable name for the role.'),
     'type' => 'token',
     'setter callback' => 'entity_property_verbatim_set',
-    'schema_field' => 'name',
+    'schema field' => 'name',
   );
 
   $group_role['label'] = array(
@@ -306,7 +286,7 @@ function group_entity_property_info() {
     'description' => t('The human readable name for the role.'),
     'type' => 'text',
     'setter callback' => 'entity_property_verbatim_set',
-    'schema_field' => 'label',
+    'schema field' => 'label',
   );
 
   $group_role['global'] = array(
@@ -314,7 +294,7 @@ function group_entity_property_info() {
     'description' => t('Whether the role is global or not.'),
     'type' => 'boolean',
     'setter callback' => 'entity_property_verbatim_set',
-    'schema_field' => 'global',
+    'schema field' => 'global',
   );
 
   $group_role['permissions'] = array(
@@ -330,21 +310,21 @@ function group_entity_property_info() {
     'description' => t('The weight of the role compared to others.'),
     'type' => 'integer',
     'setter callback' => 'entity_property_verbatim_set',
-    'schema_field' => 'weight',
+    'schema field' => 'weight',
   );
 
   $group_role['status'] = array(
     'label' => t('Entity status'),
     'description' => t('The entity status of the role.'),
     'type' => 'integer',
-    'schema_field' => 'status',
+    'schema field' => 'status',
   );
 
   $group_role['module'] = array(
     'label' => t('Providing module'),
     'description' => t('The module providing the entity.'),
     'type' => 'text',
-    'schema_field' => 'module',
+    'schema field' => 'module',
   );
 
   // Properties for GroupMembership entities.
@@ -353,16 +333,7 @@ function group_entity_property_info() {
     'label' => t('Group membership ID'),
     'description' => t('The unique group membership ID.'),
     'type' => 'integer',
-    'schema_field' => 'mid',
-  );
-
-  $group_membership['gid'] = array(
-    'label' => t('Group ID'),
-    'description' => t('The ID of the group the membership belongs to.'),
-    'type' => 'integer',
-    'setter callback' => 'entity_property_verbatim_set',
-    'clear' => array('group'),
-    'schema field' => 'gid',
+    'schema field' => 'mid',
   );
 
   $group_membership['group'] = array(
@@ -371,17 +342,7 @@ function group_entity_property_info() {
     'type' => 'group',
     'getter callback' => 'group_get_properties',
     'setter callback' => 'group_set_properties',
-    'computed' => TRUE,
-    'clear' => array('gid'),
-  );
-
-  $group_membership['uid'] = array(
-    'label' => t('User ID'),
-    'description' => t('The ID of the user the membership belongs to.'),
-    'type' => 'integer',
-    'setter callback' => 'entity_property_verbatim_set',
-    'clear' => array('user'),
-    'schema_field' => 'uid',
+    'schema field' => 'gid',
   );
 
   $group_membership['user'] = array(
@@ -390,8 +351,7 @@ function group_entity_property_info() {
     'type' => 'user',
     'getter callback' => 'group_get_properties',
     'setter callback' => 'group_set_properties',
-    'computed' => TRUE,
-    'clear' => array('uid'),
+    'schema field' => 'uid',
   );
 
   $group_membership['roles'] = array(
