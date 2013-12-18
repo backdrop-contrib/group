@@ -103,6 +103,12 @@ function group_schema() {
         'not null' => TRUE,
         'serialize' => TRUE,
       ),
+      'subscription_type' => array(
+        'description' => 'The way users can become members of groups of this group type.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
       'weight' => array(
         'description' => 'The weight of this group type in relation to others.',
         'type' => 'int',

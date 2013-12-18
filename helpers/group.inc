@@ -124,6 +124,25 @@ function group_role_exists($name) {
 }
 
 /**
+ * Return the possible subscription types.
+ *
+ * @return array
+ *   An array where the keys are subscription type machine names and the values
+ *   are translated strings describing what the subscription type really means.
+ *
+ * @todo Expose this with hooks?
+ */
+function group_subscription_types() {
+  $types = array(
+    'public' => t('<strong>Public</strong>: Users can freely subscribe to a group with the click of a button.'),
+    'private' => t('<strong>Private</strong>: Users can issue a membership request which has to be approved.'),
+    'invite' => t('<strong>Invite only</strong>: Users can only become a member after invitation.'),
+  );
+
+  return $types;
+}
+
+/**
  * Return the possible group permissions.
  *
  * @return array

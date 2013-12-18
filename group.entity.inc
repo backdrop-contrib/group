@@ -239,6 +239,15 @@ function group_entity_property_info() {
     'options list' => 'group_permissions',
   );
 
+  $group_type['subscription_type'] = array(
+    'label' => t('Subscription type'),
+    'description' => t('The way users can become members of groups of this group type.'),
+    'type' => 'token',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'subscription_type',
+    'options list' => 'group_subscription_types',
+  );
+
   $group_type['weight'] = array(
     'label' => t('Weight'),
     'description' => t('The weight of the type compared to others.'),
