@@ -226,7 +226,8 @@ function group_entity_property_info() {
     'description' => t('The outsider permissions for the group type.'),
     'type' => 'list<text>',
     'setter callback' => 'entity_property_verbatim_set',
-    //'options list' => '',
+    'schema field' => 'outsider_permissions',
+    'options list' => 'group_permissions',
   );
 
   $group_type['member_permissions'] = array(
@@ -234,7 +235,8 @@ function group_entity_property_info() {
     'description' => t('The member permissions for the group type.'),
     'type' => 'list<text>',
     'setter callback' => 'entity_property_verbatim_set',
-    //'options list' => '',
+    'schema field' => 'member_permissions',
+    'options list' => 'group_permissions',
   );
 
   $group_type['weight'] = array(
@@ -306,7 +308,8 @@ function group_entity_property_info() {
     'description' => t('The permissions for the role.'),
     'type' => 'list<text>',
     'setter callback' => 'entity_property_verbatim_set',
-    //'options list' => '',
+    'schema field' => 'permissions',
+    'options list' => 'group_permissions',
   );
 
   $group_role['weight'] = array(
@@ -362,6 +365,7 @@ function group_entity_property_info() {
     'label' => t('Roles'),
     'description' => t('The group roles for the membership.'),
     'type' => 'list<group_role>',
+    'schema field' => 'roles',
     //'options list' => '',
   );
 

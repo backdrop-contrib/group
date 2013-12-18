@@ -122,3 +122,19 @@ function group_outsider_gids($uid, $type = '') {
 function group_role_exists($name) {
   return in_array($name, array('outsider', 'member')) || !!group_role_load($name);
 }
+
+/**
+ * Return the possible group permissions.
+ *
+ * @return array
+ *   An array where the keys are permission machine names and the values are
+ *   the permission 'title' attributes as set in hook_group_permission().
+ */
+function group_permissions() {
+  $permissions = module_invoke_all('group_permission');
+  foreach ($permissions as &$permission) {
+    $permission = $permission['title'];
+  }
+
+  return $permissions;
+}
