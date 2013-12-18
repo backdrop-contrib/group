@@ -73,7 +73,14 @@ function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
  */
 function group_type_form_submit(&$form, &$form_state) {
   $group_type = entity_ui_form_submit_build_entity($form, $form_state);
-  $group_type->save();
+  $saved = $group_type->save();
+
+  if ($saved == SAVED_UPDATED) {
+    // In case we update a group type, we need to reset the cache regarding
+    // extra fields. That way, any changes in the subscription_type property
+    // can be picked up by GroupExtraFieldsController::fieldExtraFields().
+    cache_clear_all("field_info:bundle_extra:group:$group_type->name", 'cache_field');
+  }
 
   $form_state['redirect'] = 'admin/group/type';
 }
