@@ -183,8 +183,7 @@ function group_entity_property_info() {
     'label' => t('Group type'),
     'description' => t('The bundle of the group.'),
     'type' => 'group_type',
-    'getter callback' => 'group_get_properties',
-    'setter callback' => 'group_set_properties',
+    'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'type',
   );
 
@@ -283,8 +282,7 @@ function group_entity_property_info() {
     'label' => t('Group type'),
     'description' => t('The group type the role is coupled to.'),
     'type' => 'group_type',
-    'getter callback' => 'group_get_properties',
-    'setter callback' => 'group_set_properties',
+    'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'type',
   );
 
@@ -356,8 +354,7 @@ function group_entity_property_info() {
     'label' => t('Group'),
     'description' => t('The group the membership belongs to.'),
     'type' => 'group',
-    'getter callback' => 'group_get_properties',
-    'setter callback' => 'group_set_properties',
+    'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'gid',
   );
 
@@ -365,8 +362,7 @@ function group_entity_property_info() {
     'label' => t('User'),
     'description' => t('The user the membership belongs to.'),
     'type' => 'user',
-    'getter callback' => 'group_get_properties',
-    'setter callback' => 'group_set_properties',
+    'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'uid',
   );
 
@@ -374,6 +370,7 @@ function group_entity_property_info() {
     'label' => t('Roles'),
     'description' => t('The group roles for the membership.'),
     'type' => 'list<group_role>',
+    'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'roles',
     //'options list' => '',
   );
@@ -399,43 +396,11 @@ function group_entity_property_info_alter(&$info) {
         'label' => $is_single ? t('Parent group') : t('Parent groups'),
         'description' => t($message, array('@entity' => $type)),
         'type' => $is_single ? 'group' : 'list<group>',
-        'getter callback' => 'entity_property_verbatim_get',
         'setter callback' => 'entity_property_verbatim_set',
         'computed' => TRUE,
         'entity views field' => TRUE,
       );
     }
-  }
-}
-
-/**
- * Callback for getting only-in-code group properties.
- */
-function group_get_properties($data, $options, $name, $type, $info) {
-  switch ($name) {
-    case 'group':
-      return $data->gid;
-    case 'group_type':
-      return $data->type;
-    case 'user':
-      return $data->uid;
-  }
-}
-
-/**
- * Callback for setting only-in-code group properties.
- */
-function group_set_properties(&$data, $name, $value, $langcode, $type, $info) {
-  switch ($name) {
-    case 'group':
-      $data->gid = $value;
-      break;
-    case 'group_type':
-      $data->type = $value;
-      break;
-    case 'user':
-      $data->uid = $value;
-      break;
   }
 }
 
