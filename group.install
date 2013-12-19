@@ -311,3 +311,15 @@ function group_schema() {
 
   return $schema;
 }
+
+/**
+ * Add the subscription_type column to {group_type}.
+ */
+function group_update_7001() {
+  db_add_field('group_type', 'subscription_type', array(
+    'description' => 'The way users can become members of groups of this group type.',
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+  ));
+}
