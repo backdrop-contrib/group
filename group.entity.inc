@@ -375,6 +375,15 @@ function group_entity_property_info() {
     //'options list' => '',
   );
 
+  $group_membership['status'] = array(
+    'label' => t('Membership status'),
+    'description' => t('The membership status.'),
+    'type' => 'integer',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'status',
+    'options list' => 'group_membership_statuses',
+  );
+
   return $info;
 }
 

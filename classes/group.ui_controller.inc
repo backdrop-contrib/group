@@ -155,6 +155,36 @@ class GroupUIController extends EntityDefaultUIController {
       'type' => MENU_CALLBACK,
     );
 
+    $items['group/%group/invite'] = array(
+      'title' => 'Invites',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('group_invite_by_user_form', 1),
+      'access callback' => 'group_access',
+      'access arguments' => array('invite members by user', 1),
+      'file' => 'forms/group.invites.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 5,
+    );
+
+    $items['group/%group/invite/user'] = array(
+      'title' => 'By user',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => 0,
+    );
+
+    $items['group/%group/invite/mail'] = array(
+      'title' => 'By mail',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('group_invite_by_mail_form', 1),
+      'access callback' => 'group_access',
+      'access arguments' => array('invite members by mail', 1),
+      'file' => 'forms/group.invites.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 5,
+    );
+
     return $items;
   }
 

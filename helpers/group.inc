@@ -143,6 +143,26 @@ function group_subscription_types() {
 }
 
 /**
+ * Return the possible membership statuses.
+ *
+ * @return array
+ *   An array where the keys are the integer constants that are saved to the
+ *   database and the values are translated strings describing what the status
+ *   code really means.
+ *
+ * @todo Expose this with hooks?
+ */
+function group_membership_statuses() {
+  $statuses = array(
+    GROUP_MEMBERSHIP_BLOCKED => t('Blocked'),
+    GROUP_MEMBERSHIP_ACTIVE  => t('Active'),
+    GROUP_MEMBERSHIP_INVITED => t('Invited'),
+  );
+
+  return $statuses;
+}
+
+/**
  * Return the possible group permissions.
  *
  * @return array

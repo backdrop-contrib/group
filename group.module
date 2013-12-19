@@ -5,6 +5,13 @@
  */
 
 /**
+ * Define group membership status constants.
+ */
+define('GROUP_MEMBERSHIP_BLOCKED', 0);
+define('GROUP_MEMBERSHIP_ACTIVE',  1);
+define('GROUP_MEMBERSHIP_INVITED', 2);
+
+/**
  * Load our helper functions without polluting the .module file.
  */
 module_load_include('inc', 'group', 'helpers/group.entity');
@@ -118,6 +125,16 @@ function group_group_permission() {
     'view members' => array(
       'title' => t('View group members'),
     ),
+    'invite members by user' => array(
+      'title' => t('Invite members by user'),
+      'description' => t('Invite members by their user name on the website'),
+      'warning' => t('You only get the autocomplete if you have the sitewide "View user profiles" permission.'),
+    ),
+    'invite members by mail' => array(
+      'title' => t('Invite members by mail'),
+      'description' => t('Invite members by their e-mail address'),
+      'warning' => t('Registered e-mail addresses will get a user invite instead.'),
+    ),
   );
 
   return $permissions;
@@ -151,6 +168,8 @@ function group_admin_paths() {
     $paths = array(
       'group/*/edit' => TRUE,
       'group/*/delete' => TRUE,
+      'group/*/invite' => TRUE,
+      'group/*/invite/*' => TRUE,
       'group/*/member' => TRUE,
       'group/*/member/*/*' => TRUE,
       'group/add' => TRUE,
@@ -251,11 +270,7 @@ function group_group_member_filters() {
   // Build a status filter.
   $filters['status'] = array(
     'title' => t('Status'),
-    'options' => array(
-      '[any]' => t('any'),
-      1 => t('active'),
-      0 => t('blocked'),
-    ),
+    'options' => array('[any]' => t('any')) + group_membership_statuses(),
   );
 
   return $filters;

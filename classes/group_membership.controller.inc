@@ -25,6 +25,7 @@ class GroupMembershipController extends EntityAPIController {
     // Provide defaults that are needed for the db.
     $values += array(
       'roles' => array(),
+      'status' => GROUP_MEMBERSHIP_ACTIVE,
     );
 
     return parent::create($values);

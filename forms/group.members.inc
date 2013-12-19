@@ -245,7 +245,7 @@ function group_members_form(Group $group, $pager_limit) {
     ),
     'status' => array(
       'data' => t('Status'),
-      'field' => 'u.status',
+      'field' => 'gm.status',
     ),
     'roles' => t('Roles'),
     'operations' => t('Operations'),
@@ -267,13 +267,16 @@ function group_members_form(Group $group, $pager_limit) {
   $query->addTag('group_member_overview');
   $query->addMetaData('filters', $filters);
 
+  // Retrieve the membership status options.
+  $statuses = group_membership_statuses();
+
   // Add the group memberships to the table.
   foreach (group_membership_load_multiple($query->execute()->fetchCol()) as $group_membership) {
     $wrapper = entity_metadata_wrapper('group_membership', $group_membership);
 
     $options[$group_membership->mid] = array(
       'membername' => l($wrapper->user->label(), "user/$group_membership->uid"),
-      'status' => $wrapper->user->status->value() ? t('active') : t('blocked'),
+      'status' => $statuses[$group_membership->status],
     );
 
     $member_roles = array();

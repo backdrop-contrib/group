@@ -247,10 +247,20 @@ function group_schema() {
         'not null' => TRUE,
         'serialize' => TRUE,
       ),
+      'status' => array(
+        'description' => 'The membership status.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+         // GROUP_MEMBERSHIP_ACTIVE
+        'default' => 1,
+      ),
     ),
     'indexes' => array(
       'gid' => array('gid'),
       'uid' => array('uid'),
+      'status' => array('status'),
     ),
     'unique keys' => array(
       'membership' => array('gid', 'uid'),
@@ -323,5 +333,20 @@ function group_update_7001() {
     'type' => 'varchar',
     'length' => 32,
     'not null' => TRUE,
+  ));
+}
+
+/**
+ * Add the status column to {group_membership}.
+ */
+function group_update_7002() {
+  db_add_field('group_membership', 'status', array(
+    'description' => 'The membership status.',
+    'type' => 'int',
+    'size' => 'tiny',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+     // GROUP_MEMBERSHIP_ACTIVE
+    'default' => 1,
   ));
 }
