@@ -69,6 +69,23 @@ function group_theme() {
 }
 
 /**
+ * Implements hook_init().
+ *
+ * Check for invites on every non-anonymous page load.
+ */
+function group_init() {
+  global $user;
+
+  if ($user->uid) {
+    if (GroupMembership::getUserInvites($user->uid)) {
+      $message = 'You have pending group invitations. <a href="@url">Visit your profile</a> to see them.';
+      $replace = array('@url' => url("user/$user->uid/group"));
+      drupal_set_message(t($message, $replace), 'warning', FALSE);
+    }
+  }
+}
+
+/**
  * Implements hook_permission().
  */
 function group_permission() {

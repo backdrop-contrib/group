@@ -12,6 +12,18 @@
  * @see GroupTypeUiController::hook_menu()
  */
 function group_menu() {
+  $items['user/%user/group'] = array(
+    'title' => 'Group',
+    'description' => 'Group info for a given user.',
+    'page callback' => 'group_user_page',
+    'page arguments' => array(1),
+    'access callback' => 'user_edit_access',
+    'access arguments' => array(1),
+    'file' => 'pages/group.user.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+  );
+
   $items['admin/group/config'] = array(
     'title' => 'Configuration',
     'description' => 'Configure the Group modules.',
@@ -85,22 +97,26 @@ function group_type_add_role_access($group_type) {
 }
 
 /**
- * Access callback: Checks if a user may cancel his membership.
+ * Access callback: Checks if a user has access to a membership.
+ *
+ * This is most commonly used for:
+ * - accepting invites
+ * - declining invites
+ * - cancelling a membership
+ *
+ * This should not be used for administrative tasks over a membership such as
+ * setting group roles or the blocking or unblocking of someone's membership.
+ * The group permission 'administer members' should be used for that.
  *
  * @see GroupUiController::hook_menu()
  */
-function group_membership_cancel_access($group, $account) {
+function group_membership_access($group, $account) {
   global $user;
 
-  // Short-circuit if the current user can administer all members or bypass
-  // group access.
-  if (group_access('administer members', $group, $user)) {
-    return TRUE;
-  }
-
-  // Check if the current user is the subject of the membership and is allowed
-  // to cancel it.
-  return $user->uid == $account->uid && group_access('unsubscribe', $group, $user);
+  // Short-circuit if the current user is the subject of the membership.
+  // Otherwise, check if the current user can administer all members or
+  // bypass group access.
+  return $user->uid == $account->uid || group_access('administer members', $group, $user);
 }
 
 /**

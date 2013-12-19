@@ -148,7 +148,7 @@ class GroupUIController extends EntityDefaultUIController {
       'title' => 'Cancel membership',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_membership_cancel_form', 1, 3),
-      'access callback' => 'group_membership_cancel_access',
+      'access callback' => 'group_membership_access',
       'access arguments' => array(1, 3),
       'file' => 'forms/group.members.inc',
       'file path' => drupal_get_path('module', 'group'),
@@ -183,6 +183,26 @@ class GroupUIController extends EntityDefaultUIController {
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
       'weight' => 5,
+    );
+
+    $items['group/%group/invite/%user/accept'] = array(
+      'page callback' => 'group_invite_accept_callback',
+      'page arguments' => array(1, 3),
+      'access callback' => 'group_membership_access',
+      'access arguments' => array(1, 3),
+      'file' => 'forms/group.invites.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_CALLBACK,
+    );
+
+    $items['group/%group/invite/%user/decline'] = array(
+      'page callback' => 'group_invite_decline_callback',
+      'page arguments' => array(1, 3),
+      'access callback' => 'group_membership_access',
+      'access arguments' => array(1, 3),
+      'file' => 'forms/group.invites.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_CALLBACK,
     );
 
     return $items;

@@ -108,4 +108,17 @@ class GroupMembership extends Entity {
 
     return array_values(array_unique($permissions));
   }
+
+  /**
+   * Get all pending membership invitations for a user.
+   *
+   * @param int $uid
+   *   The uid of the user to check invites for.
+   *
+   * @return array
+   *   An array of GroupMembership objects.
+   */
+  public static function getUserInvites($uid) {
+    return group_memberships(array('uid' => $uid, 'status' => GROUP_MEMBERSHIP_INVITED));
+  }
 }

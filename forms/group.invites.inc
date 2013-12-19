@@ -96,3 +96,19 @@ function group_invite_by_mail_form($form, &$form_state, Group $group) {
 
   return $form;
 }
+
+/**
+ * Act upon acccepting a group invitation from the user page.
+ */
+function group_invite_accept_callback(Group $group, $account) {
+  dpm('accepted');
+  drupal_goto("user/$account->uid/group");
+}
+
+/**
+ * Act upon declining a group invitation from the user page.
+ */
+function group_invite_decline_callback(Group $group, $account) {
+  dpm('declined');
+  drupal_goto("user/$account->uid/group");
+}
