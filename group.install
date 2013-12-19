@@ -122,7 +122,8 @@ function group_schema() {
         'size' => 'tiny',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => ENTITY_CUSTOM,
+        // ENTITY_CUSTOM
+        'default' => 0x01,
       ),
       'module' => array(
         'description' => 'The name of the providing module if the entity has been defined in code.',
@@ -192,7 +193,8 @@ function group_schema() {
         'size' => 'tiny',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => ENTITY_CUSTOM,
+        // ENTITY_CUSTOM
+        'default' => 0x01,
       ),
       'module' => array(
         'description' => 'The name of the providing module if the entity has been defined in code.',
