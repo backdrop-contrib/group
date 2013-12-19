@@ -396,7 +396,9 @@ class Group extends Entity {
    *   An array of group permission names.
    */
   public function userPermissions($uid) {
-    return ($group_membership = $this->getMember($uid))
+    $group_membership = $this->getMember($uid);
+
+    return ($group_membership && $group_membership->status == GROUP_MEMBERSHIP_ACTIVE)
       ? $group_membership->getPermissions()
       : group_type_load($this->type)->outsider_permissions;
   }
