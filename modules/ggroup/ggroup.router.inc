@@ -16,6 +16,7 @@ function ggroup_menu() {
     'page arguments' => array(1, 4),
     'access callback' => 'ggroup_add_subgroup_access',
     'access arguments' => array(1, 4),
+    'file' => 'forms/ggroup.inc',
   );
 
   $items['admin/group/config/subgroup'] = array(
