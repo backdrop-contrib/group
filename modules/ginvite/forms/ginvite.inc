@@ -13,7 +13,7 @@
  *
  * @see group_forms()
  */
-function group_invite_form($form, &$form_state, Group $group) {
+function ginvite_form($form, &$form_state, Group $group) {
   $group_roles = group_type_load($group->type)->getRoles(FALSE);
   foreach ($group_roles as &$group_role) {
     $group_role = $group_role->label;
@@ -40,9 +40,9 @@ function group_invite_form($form, &$form_state, Group $group) {
  *
  * Build the group invite by user form.
  *
- * @see group_forms()
+ * @see ginvite_forms()
  */
-function group_form_group_invite_by_user_form_alter(&$form, &$form_state) {
+function group_form_ginvite_by_user_form_alter(&$form, &$form_state) {
   $form['user'] = array(
     '#type' => 'textfield',
     '#title' => t('Username'),
@@ -54,11 +54,11 @@ function group_form_group_invite_by_user_form_alter(&$form, &$form_state) {
 }
 
 /**
- * Validate handler for group_invite_by_user_form().
+ * Validate handler for ginvite_by_user_form().
  *
- * @see group_form_group_invite_by_user_form_alter()
+ * @see group_form_ginvite_by_user_form_alter()
  */
-function group_invite_by_user_form_validate($form, &$form_state) {
+function ginvite_by_user_form_validate($form, &$form_state) {
   $username = $form_state['values']['user'];
 
   // Check if the username exists.
@@ -78,11 +78,11 @@ function group_invite_by_user_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for group_invite_by_user_form().
+ * Submit handler for ginvite_by_user_form().
  *
- * @see group_form_group_invite_by_user_form_alter()
+ * @see group_form_ginvite_by_user_form_alter()
  */
-function group_invite_by_user_form_submit($form, &$form_state) {
+function ginvite_by_user_form_submit($form, &$form_state) {
   $values = array(
     'gid' => $form_state['build_info']['args'][0]->gid,
     'uid' => $form_state['values']['uid'],
@@ -104,9 +104,9 @@ function group_invite_by_user_form_submit($form, &$form_state) {
  *
  * Build the group invite by mail form.
  *
- * @see group_forms()
+ * @see ginvite_forms()
  */
-function group_form_group_invite_by_mail_form_alter(&$form, &$form_state) {
+function group_form_ginvite_by_mail_form_alter(&$form, &$form_state) {
   $form['mail'] = array(
     '#type' => 'textfield',
     '#title' => t('E-mail address'),
@@ -117,20 +117,20 @@ function group_form_group_invite_by_mail_form_alter(&$form, &$form_state) {
 }
 
 /**
- * Validate handler for group_invite_by_mail_form().
+ * Validate handler for ginvite_by_mail_form().
  *
- * @see group_form_group_invite_by_mail_form_alter()
+ * @see group_form_ginvite_by_mail_form_alter()
  */
-function group_invite_by_mail_form_validate($form, &$form_state) {
+function ginvite_by_mail_form_validate($form, &$form_state) {
   if (!valid_email_address($form_state['values']['mail'])) {
     form_set_error('mail', t('Invalid e-mail address.'));
   }
 }
 
 /**
- * Submit handler for group_invite_by_mail_form().
+ * Submit handler for ginvite_by_mail_form().
  *
- * @see group_form_group_invite_by_mail_form_alter()
+ * @see group_form_ginvite_by_mail_form_alter()
  */
-function group_invite_by_mail_form_submit($form, &$form_state) {
+function ginvite_by_mail_form_submit($form, &$form_state) {
 }
