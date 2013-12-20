@@ -122,8 +122,45 @@ function group_form_ginvite_by_mail_form_alter(&$form, &$form_state) {
  * @see group_form_ginvite_by_mail_form_alter()
  */
 function ginvite_by_mail_form_validate($form, &$form_state) {
-  if (!valid_email_address($form_state['values']['mail'])) {
+  $group = $form_state['build_info']['args'][0];
+  $mail = $form_state['values']['mail'];
+
+  if (!valid_email_address($mail)) {
     form_set_error('mail', t('Invalid e-mail address.'));
+  }
+
+  // Validation if the e-mail address is already registered.
+  if ($account = user_load_by_mail($mail)) {
+    // First check for invite by user access.
+    if (!group_access('invite members by user', $group)) {
+      $message  = '%email is already registered on the website. ';
+      $message .= 'You do not, however, have the permission to invite existing users.';
+      form_set_error('mail', t($message, array('%email' => $mail)));
+    }
+
+    // Then check if the membership already exists.
+    elseif($group->getMember($account->uid)) {
+      $message = '%email is already registered to a member of this group.';
+      form_set_error('mail', t($message, array('%email' => $mail)));
+    }
+
+    // If nothing fails, set the required values for an invite by user.
+    else {
+      $form_state['values']['uid'] = $account->uid;
+      $form_state['values']['user'] = $account->name;
+    }
+  }
+
+  // Validation if the e-mail address is not already registered.
+  else {
+    // Get all invites for the e-mail address.
+    $invites = ginvite_get_invites($mail);
+
+    // Check for an existing invite for this group.
+    if (!empty($invites[$group->gid])) {
+      $message = 'There is already an invite pending for %email.';
+      form_set_error('mail', t($message, array('%email' => $mail)));
+    }
   }
 }
 
@@ -133,4 +170,31 @@ function ginvite_by_mail_form_validate($form, &$form_state) {
  * @see group_form_ginvite_by_mail_form_alter()
  */
 function ginvite_by_mail_form_submit($form, &$form_state) {
+  $mail = $form_state['values']['mail'];
+
+  // If the e-mail was already registered, send a user invite instead.
+  if (!empty($form_state['values']['uid'])) {
+    $message = 'There already is a user account for %email. Sending a regular invite instead.';
+    drupal_set_message(t($message, array('%email' => $mail)), 'warning');
+
+    ginvite_by_user_form_submit($form, $form_state);
+  }
+
+  // Otherwise, register the group invite in the database.
+  else {
+    // Insert the invite record into the database.
+    db_insert('group_invite')
+      ->fields(array(
+        'gid' => $form_state['build_info']['args'][0]->gid,
+        'roles' => serialize(array_values(array_filter($form_state['values']['roles']))),
+        'mail' => $mail,
+      ))
+      ->execute();
+
+    // Actually e-mail the invite to the person.
+    // @todo
+
+    // Show a confirmation message.
+    drupal_set_message(t('Invite sent to %mail', array('%mail' => $mail)));
+  }
 }

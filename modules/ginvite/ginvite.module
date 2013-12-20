@@ -2,6 +2,8 @@
 /**
  * @file
  * Contains invite functionality for the Group module.
+ *
+ * @todo On user register, turn invites into pending memberships.
  */
 
 /**
@@ -39,6 +41,24 @@ function ginvite_init() {
       drupal_set_message(t($message, $replace), 'warning', FALSE);
     }
   }
+}
+
+
+/**
+ * Get group invitations for a given e-mail address.
+ *
+ * @param string $mail
+ *   The e-mail address to retrieve invites for.
+ *
+ * @return array
+ *   An array of database records keyed by the group id.
+ */
+function ginvite_get_invites($mail) {
+  return db_select('group_invite', 'gi')
+    ->fields('gi')
+    ->condition('mail', $mail)
+    ->execute()
+    ->fetchAllAssoc('gid');
 }
 
 /**

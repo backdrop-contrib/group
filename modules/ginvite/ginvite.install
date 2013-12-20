@@ -1,0 +1,76 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the Group invite project.
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * @todo add membership properties?
+ */
+function ginvite_install() {
+}
+
+/**
+ * Implements hook_uninstall().
+ *
+ * @todo remove membership properties?
+ * @todo remove user invites?
+ */
+function ginvite_uninstall() {
+}
+
+/**
+ * Implements hook_schema().
+ *
+ * @todo add membership properties?
+ */
+function ginvite_schema() {
+  $schema['group_invite'] = array(
+    'description' => 'Stores group e-mail invites.',
+    'fields' => array(
+      'iid' => array(
+        'description' => 'Primary Key: Unique invite item ID.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'gid' => array(
+        'description' => 'The {groups}.gid for the membership.',
+        'type' => 'int',
+        'default' => 0,
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'roles' => array(
+        'description' => 'The group roles for the membership.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+      'mail' => array(
+        'description' => 'The e-mail address the invite is for.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'mail' => array('mail'),
+    ),
+    'foreign keys' => array(
+      'group' => array(
+        'table' => 'groups',
+        'columns' => array('gid' => 'gid'),
+      ),
+    ),
+    'unique keys' => array(
+      'membership' => array('gid', 'mail'),
+    ),
+    'primary key' => array('iid'),
+  );
+
+  return $schema;
+}
