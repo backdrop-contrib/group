@@ -1,0 +1,56 @@
+<?php
+/**
+ * @file
+ * Contains invite functionality for the Group module.
+ */
+
+/**
+ * Load our router functions without polluting the .module file.
+ */
+module_load_include('inc', 'ginvite', 'ginvite.router');
+
+/**
+ * Implements hook_forms().
+ */
+function ginvite_forms($form_id, $args) {
+  $forms['ginvite_by_user_form'] = array(
+    'callback' => 'ginvite_form',
+  );
+
+  $forms['ginvite_by_mail_form'] = array(
+    'callback' => 'ginvite_form',
+  );
+
+  return $forms;
+}
+
+/**
+ * Implements hook_init().
+ *
+ * Check for invites on every non-anonymous page load.
+ */
+function ginvite_init() {
+  global $user;
+
+  if ($user->uid) {
+    if (GroupMembership::getByStatus($user->uid, GROUP_MEMBERSHIP_INVITED)) {
+      $message = 'You have pending group invitations. <a href="@url">Visit your profile</a> to see them.';
+      $replace = array('@url' => url("user/$user->uid/group/invite"));
+      drupal_set_message(t($message, $replace), 'warning', FALSE);
+    }
+  }
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function ginvite_admin_paths() {
+  if (variable_get('group_admin_theme')) {
+    $paths = array(
+      'group/*/invite' => TRUE,
+      'group/*/invite/*' => TRUE,
+    );
+
+    return $paths;
+  }
+}

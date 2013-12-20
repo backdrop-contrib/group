@@ -156,6 +156,7 @@ function group_membership_statuses() {
   $statuses = array(
     GROUP_MEMBERSHIP_BLOCKED => t('Blocked'),
     GROUP_MEMBERSHIP_ACTIVE  => t('Active'),
+    // @todo Move to ginvite when these are entities.
     GROUP_MEMBERSHIP_INVITED => t('Invited'),
   );
 

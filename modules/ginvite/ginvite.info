@@ -1,0 +1,6 @@
+name = Group invite
+description = Allows group members to invite people into their group
+core = 7.x
+package = Group
+
+dependencies[] = group

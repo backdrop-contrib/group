@@ -24,6 +24,12 @@ function group_menu() {
     'weight' => 5,
   );
 
+  $items['user/%user/group/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+
   $items['admin/group/config'] = array(
     'title' => 'Configuration',
     'description' => 'Configure the Group modules.',
@@ -97,12 +103,10 @@ function group_type_add_role_access($group_type) {
 }
 
 /**
- * Access callback: Checks if a user has access to a membership.
+ * Access callback: Checks if a user has access to their own membership.
  *
- * This is most commonly used for:
- * - accepting invites
- * - declining invites
- * - cancelling a membership
+ * This is most commonly used for tasks that a user can perform on their own
+ * membership such as cancelling their membership.
  *
  * This should not be used for administrative tasks over a membership such as
  * setting group roles or the blocking or unblocking of someone's membership.

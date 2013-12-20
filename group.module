@@ -9,6 +9,7 @@
  */
 define('GROUP_MEMBERSHIP_BLOCKED', 0);
 define('GROUP_MEMBERSHIP_ACTIVE',  1);
+// @todo Move to ginvite when these are entities.
 define('GROUP_MEMBERSHIP_INVITED', 2);
 
 /**
@@ -83,23 +84,6 @@ function group_theme() {
 }
 
 /**
- * Implements hook_init().
- *
- * Check for invites on every non-anonymous page load.
- */
-function group_init() {
-  global $user;
-
-  if ($user->uid) {
-    if (GroupMembership::getUserInvites($user->uid)) {
-      $message = 'You have pending group invitations. <a href="@url">Visit your profile</a> to see them.';
-      $replace = array('@url' => url("user/$user->uid/group"));
-      drupal_set_message(t($message, $replace), 'warning', FALSE);
-    }
-  }
-}
-
-/**
  * Implements hook_permission().
  */
 function group_permission() {
@@ -160,8 +144,6 @@ function group_admin_paths() {
     $paths = array(
       'group/*/edit' => TRUE,
       'group/*/delete' => TRUE,
-      'group/*/invite' => TRUE,
-      'group/*/invite/*' => TRUE,
       'group/*/member' => TRUE,
       'group/*/member/*/*' => TRUE,
       'group/add' => TRUE,
