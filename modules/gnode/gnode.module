@@ -24,7 +24,8 @@ function gnode_entity_info_alter(&$entity_info) {
 /**
  * Implements hook_group_permission().
  *
- * Polyfills permissions for the Node module.
+ * Polyfills permissions for the Node module and can therefore not reside
+ * inside the gnode.group.inc file.
  */
 function node_group_permission() {
   $permissions = array();

@@ -35,17 +35,31 @@ module_load_include('inc', 'group', 'group.router');
  *
  * Makes sure this module automatically finds exported Group
  * entities in files using the module.group.inc name pattern.
+ *
+ * Furthermore allows other exposed hooks to live inside the
+ * same file to boost performance when they are not required.
  */
 function group_hook_info() {
-  $hooks['default_group_type'] = array(
-    'group' => 'group',
+  $group_hooks = array(
+    'default_group_role',
+    'default_group_type',
+    'group_filters',
+    'group_member_filters',
+    'group_member_operations',
+    'group_member_operation_links',
+    'group_operations',
+    'group_operation_links',
+    'group_permission',
+    'group_uninstall',
   );
 
-  $hooks['default_group_role'] = array(
-    'group' => 'group',
-  );
+  foreach ($group_hooks as $hook) {
+    $hook_info[$hook] = array(
+      'group' => 'group',
+    );
+  }
 
-  return $hooks;
+  return $hook_info;
 }
 
 /**
@@ -119,45 +133,6 @@ function group_permission() {
 }
 
 /**
- * Implements hook_group_permission().
- */
-function group_group_permission() {
-  $permissions = array(
-    'administer group' => array(
-      'title' => t('Administer group'),
-      'description' => t('Administer the group, its content and members'),
-      'restrict access' => TRUE,
-    ),
-    'administer members' => array(
-      'title' => t('Administer group members'),
-      'description' => t('Administer the group members'),
-      'restrict access' => TRUE,
-    ),
-    'access member overview' => array(
-      'title' => t('Access the member overview page'),
-    ),
-    'view group' => array(
-      'title' => t('View group'),
-    ),
-    'view members' => array(
-      'title' => t('View group members'),
-    ),
-    'invite members by user' => array(
-      'title' => t('Invite members by user'),
-      'description' => t('Invite members by their user name on the website'),
-      'warning' => t('You only get the autocomplete if you have the sitewide "View user profiles" permission.'),
-    ),
-    'invite members by mail' => array(
-      'title' => t('Invite members by mail'),
-      'description' => t('Invite members by their e-mail address'),
-      'warning' => t('Registered e-mail addresses will get a user invite instead.'),
-    ),
-  );
-
-  return $permissions;
-}
-
-/**
  * Implements hook_form_FORM_ID_alter().
  */
 function group_form_system_themes_admin_form_alter(&$form, &$form_state) {
@@ -198,70 +173,6 @@ function group_admin_paths() {
 }
 
 /**
- * Implements hook_group_filters().
- */
-function group_group_filters() {
-  // Get a list of all group types.
-  $group_types = array();
-  foreach (group_types() as $name => $group_type) {
-    $group_types[$name] = $group_type->label;
-  }
-
-  // Build a group type filter.
-  $filters['type'] = array(
-    'title' => t('Group type'),
-    'options' => array(
-      '[any]' => t('any'),
-    ) + $group_types,
-  );
-
-  return $filters;
-}
-
-/**
- * Implements hook_group_operations().
- */
-function group_group_operations() {
-  $operations['delete'] = array(
-    'label' => t('Delete selected groups'),
-    'callback' => 'group_multiple_delete_confirm',
-    'form callback' => TRUE,
-  );
-
-  return $operations;
-}
-
-/**
- * Implements hook_group_operation_links().
- */
-function group_group_operation_links($group) {
-  $operations = array();
-
-  // Retrieve the destination url.
-  $destination = drupal_get_destination();
-
-  // Add an 'edit' link if available.
-  if (group_access('update', $group)) {
-    $operations['edit'] = array(
-      'title' => t('edit'),
-      'href' => "group/$group->gid/edit",
-      'query' => $destination,
-    );
-  }
-
-  // Add a 'delete' link if available.
-  if (group_access('delete', $group)) {
-    $operations['delete'] = array(
-      'title' => t('delete'),
-      'href' => "group/$group->gid/delete",
-      'query' => $destination,
-    );
-  }
-
-  return $operations;
-}
-
-/**
  * Implements hook_query_TAG_alter().
  *
  * Alters the query that generates the group overview table on the
@@ -278,77 +189,6 @@ function group_query_group_overview_alter(QueryAlterableInterface $query) {
   if (isset($filters['type'])) {
     $query->condition('g.type', $filters['type']);
   }
-}
-
-/**
- * Implements hook_group_member_filters().
- */
-function group_group_member_filters() {
-  // Build a status filter.
-  $filters['status'] = array(
-    'title' => t('Status'),
-    'options' => array('[any]' => t('any')) + group_membership_statuses(),
-  );
-
-  return $filters;
-}
-
-/**
- * Implements hook_group_member_operations().
- *
- * Callbacks are situated in forms/group.members.inc.
- */
-function group_group_member_operations($group) {
-  $operations['remove'] = array(
-    'label' => t('Remove selected members'),
-    'callback' => 'group_membership_multiple_delete_confirm',
-    'form callback' => TRUE,
-  );
-
-  foreach (group_type_load($group->type)->getRoles(FALSE) as $group_role) {
-    $operations["add-$group_role->name"] = array(
-      'label' => $group_role->label,
-      'callback' => 'group_membership_add_role',
-      'callback arguments' => array($group_role->name),
-      'optgroup' => t('Add role to selected members'),
-    );
-
-    $operations["remove-$group_role->name"] = array(
-      'label' => $group_role->label,
-      'callback' => 'group_membership_remove_role',
-      'callback arguments' => array($group_role->name),
-      'optgroup' => t('Remove role from selected members'),
-    );
-  }
-
-  return $operations;
-}
-
-/**
- * Implements hook_group_member_operation_links().
- */
-function group_group_member_operation_links($group_membership) {
-  $operations = array();
-
-  // Retrieve the destination url.
-  $destination = drupal_get_destination();
-
-  // Add membership management links.
-  if (group_access('administer members', group_load($group_membership->gid))) {
-    $operations['edit-membership'] = array(
-      'title' => t('edit'),
-      'href' => 'group/' . $group_membership->gid . '/member/' . $group_membership->uid . '/edit',
-      'query' => $destination,
-    );
-
-    $operations['cancel-membership'] = array(
-      'title' => t('cancel'),
-      'href' => 'group/' . $group_membership->gid . '/member/' . $group_membership->uid . '/cancel',
-      'query' => $destination,
-    );
-  }
-
-  return $operations;
 }
 
 /**
