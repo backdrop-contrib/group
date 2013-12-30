@@ -10,6 +10,10 @@
  * @todo add membership properties?
  */
 function ginvite_install() {
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'ginvite')
+    ->execute();
 }
 
 /**
