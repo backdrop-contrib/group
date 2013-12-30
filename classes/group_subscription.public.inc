@@ -44,7 +44,14 @@ class GroupPublicSubscriptionController implements GroupSubscriptionControllerIn
    *   A render array to generate the form with.
    */
   public function memberForm($form, &$form_state, GroupMembership $group_membership) {
-    $form['leave'] = array(
+    $form['info'] = array(
+      '#prefix' => '<div>',
+      '#suffix' => '</div>',
+      '#markup' => t('You are member of this group'),
+    );
+
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['leave'] = array(
       '#type' => 'submit',
       '#value' => t('Leave group'),
     );
@@ -66,7 +73,14 @@ class GroupPublicSubscriptionController implements GroupSubscriptionControllerIn
    *   A render array to generate the form with.
    */
   public function outsiderForm($form, &$form_state, Group $group, $account) {
-    $form['join'] = array(
+    $form['info'] = array(
+      '#prefix' => '<div>',
+      '#suffix' => '</div>',
+      '#markup' => t('This group is free for anyone to join'),
+    );
+
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['join'] = array(
       '#type' => 'submit',
       '#value' => t('Join group'),
     );
@@ -84,7 +98,6 @@ class GroupPublicSubscriptionController implements GroupSubscriptionControllerIn
    * Implements GroupSubscriptionControllerInterface.
    */
   public function subscriptionFormSubmit($form, &$form_state) {
-    dpm($form_state['values']);
   }
 
 }

@@ -16,7 +16,15 @@ class GroupPrivateSubscriptionController extends GroupPublicSubscriptionControll
    */
   public function outsiderForm($form, &$form_state, Group $group, $account) {
     $form['info'] = array(
-      '#markup' => 'Request membership',
+      '#prefix' => '<div>',
+      '#suffix' => '</div>',
+      '#markup' => t('This group requires admin approval to join'),
+    );
+
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['request'] = array(
+      '#type' => 'submit',
+      '#value' => t('Request membership'),
     );
 
     return $form;
