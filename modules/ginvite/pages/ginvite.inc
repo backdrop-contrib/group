@@ -31,7 +31,7 @@ function ginvite_user_page($account) {
   );
 
   // Create the group invitation table if there are outstanding invites.
-  if ($invites = GroupMembership::getUserInvites($account->uid)) {
+  if ($invites = GroupMembership::getByStatus($account->uid, GROUP_MEMBERSHIP_INVITED)) {
     // Link the rows variable to the table element's rows.
     $rows = &$page['invites']['#rows'];
 
