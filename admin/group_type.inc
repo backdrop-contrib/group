@@ -39,10 +39,16 @@ function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
     '#description' => t('A unique machine-readable name for this group type. It must only contain lowercase letters, numbers, and underscores.'),
   );
 
+  // Build the group subscription types array.
+  $subscription_types = array();
+  foreach (group_subscription_info() as $type => $info) {
+    $subscription_types[$type] = '<strong>' . $info['title'] . '</strong>: ' . $info['description'];
+  }
+
   $form['subscription_type'] = array(
     '#title' => t('Subscription type'),
     '#type' => 'radios',
-    '#options' => group_subscription_types(),
+    '#options' => $subscription_types,
     '#default_value' => $group_type->subscription_type,
     '#description' => t('Select the way users can become members of groups of this type.'),
     '#required' => TRUE,
@@ -74,13 +80,6 @@ function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
 function group_type_form_submit(&$form, &$form_state) {
   $group_type = entity_ui_form_submit_build_entity($form, $form_state);
   $saved = $group_type->save();
-
-  if ($saved == SAVED_UPDATED) {
-    // In case we update a group type, we need to reset the cache regarding
-    // extra fields. That way, any changes in the subscription_type property
-    // can be picked up by GroupExtraFieldsController::fieldExtraFields().
-    cache_clear_all("field_info:bundle_extra:group:$group_type->name", 'cache_field');
-  }
 
   $form_state['redirect'] = 'admin/group/type';
 }

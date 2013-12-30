@@ -124,25 +124,6 @@ function group_role_exists($name) {
 }
 
 /**
- * Return the possible subscription types.
- *
- * @return array
- *   An array where the keys are subscription type machine names and the values
- *   are translated strings describing what the subscription type really means.
- *
- * @todo Expose this with hooks?
- */
-function group_subscription_types() {
-  $types = array(
-    'public' => t('<strong>Public</strong>: Users can freely subscribe to a group with the click of a button.'),
-    'private' => t('<strong>Private</strong>: Users can issue a membership request which has to be approved.'),
-    'invite' => t('<strong>Invite only</strong>: Users can only become a member after invitation.'),
-  );
-
-  return $types;
-}
-
-/**
  * Return the possible membership statuses.
  *
  * @return array
@@ -177,4 +158,71 @@ function group_permissions() {
   }
 
   return $permissions;
+}
+
+/**
+ * Get the group subscription information.
+ *
+ * @return array
+ *   An array of group subscription info as provided by
+ *   hook_group_subscription_info().
+ *
+ * @see hook_group_subscription_info()
+ */
+function group_subscription_info() {
+  $info = &drupal_static(__FUNCTION__);
+
+  if (!isset($info)) {
+    $info = module_invoke_all('group_subscription_info');
+  }
+
+  return $info;
+}
+
+/**
+ * Return the possible subscription types.
+ *
+ * @return array
+ *   An array where the keys are subscription type machine names and the values
+ *   are the subscription type titles. Ideal for use with checkboxes or radios.
+ */
+function group_subscription_types() {
+  $types = array();
+
+  foreach (group_subscription_info() as $type => $info) {
+    $types[$type] = $info['title'];
+  }
+
+  return $types;
+}
+
+/**
+ * Get the controller class for a group subscription type.
+ *
+ * @param string $subscription_type
+ *   The machine name of a subscription type.
+ *
+ * @return GroupSubscriptionControllerInterface
+ *   The controller for the subscription type.
+ *
+ * @see group_subscription_info()
+ */
+function group_subscription_controller($subscription_type) {
+  $controllers = &drupal_static(__FUNCTION__, array());
+
+  if (!isset($controllers[$subscription_type])) {
+    $info = group_subscription_info();
+    $class = $info[$subscription_type]['controller'];
+
+    $controller = new $class();
+    if ($controller instanceof GroupSubscriptionControllerInterface) {
+      $controllers[$subscription_type] = $controller;
+    }
+
+    // @todo Throw an error otherwise.
+    else {
+    }
+  }
+
+  return $controllers[$subscription_type];
 }

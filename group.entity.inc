@@ -523,3 +523,19 @@ function group_entity_delete($entity, $type) {
     }
   }
 }
+
+/**
+ * Implements hook_entity_view().
+ *
+ * Add the subscription form as an extra field display to groups.
+ */
+function group_entity_view($entity, $type, $view_mode, $langcode) {
+  if ($type == 'group') {
+    module_load_include('inc', 'group', 'forms/group.subscription');
+
+    $subscription_type = group_type_load($entity->type)->subscription_type;
+    $subscription_controller = group_subscription_controller($subscription_type);
+
+    $entity->content['subscription_form'] = drupal_get_form('group_subscription_form', $entity);
+  }
+}

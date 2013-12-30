@@ -25,23 +25,12 @@ class GroupExtraFieldsController extends EntityDefaultExtraFieldsController {
         );
       }
 
-      // Add the membership form to public and private group types.
-      switch ($group_type->subscription_type) {
-        case 'public':
-          $extra['group'][$type]['display']['join'] = array(
-            'label' => t('Join group form'),
-            'description' => t('The form to allow outsiders to join the group with.'),
-            'weight' => -4,
-          );
-          break;
-        case 'private':
-          $extra['group'][$type]['display']['apply'] = array(
-            'label' => t('Request membership form'),
-            'description' => t('The form to allow outsiders to apply for group membership with.'),
-            'weight' => -4,
-          );
-          break;
-      }
+      // Add the subscription form.
+      $extra['group'][$type]['display']['subscription_form'] = array(
+        'label' => t('Subscription form'),
+        'description' => t('The form for people to join or leave the group with.'),
+        'weight' => -4,
+      );
     }
 
     return $extra;

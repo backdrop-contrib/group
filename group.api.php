@@ -341,3 +341,33 @@ function hook_group_member_operation_links($group_membership) {
 
   return $operations;
 }
+
+/**
+ * Provide information about group subcription types exposed by your module.
+ *
+ * Subscription types manage the way users can become a member of a group. An
+ * example of how to implement your own subscription type can be found in the
+ * Group Invite (ginvite) submodule included in Group.
+ *
+ * @return array
+ *   An array whose keys are subscription controller machine names and whose
+ *   corresponding values are arrays containing the following key-value pairs:
+ *   - title: The human readable title for the subscription type.
+ *   - description: Extra information about what the subscription type does.
+ *   - controller: The name of the controller class. Must implement the
+ *     GroupSubscriptionControllerInterface or it will be ignored. It is
+ *     advisable, yet not obligated, to extend your controller from the
+ *     GroupPublicSubscriptionController class provided by Group itself.
+ *
+ * @see GroupSubscriptionControllerInterface
+ * @see GroupSubscriptionController
+ */
+function hook_group_subscription_info() {
+  $info['highlander'] = array(
+    'title' => t('Highlander'),
+    'description' => t('There can be only one.'),
+    'controller' => 'HighlanderSubscriptionController',
+  );
+
+  return $info;
+}

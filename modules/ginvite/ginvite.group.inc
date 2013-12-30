@@ -23,3 +23,16 @@ function ginvite_group_permission() {
 
   return $permissions;
 }
+
+/**
+ * Implements hook_group_subscription_info().
+ */
+function ginvite_group_subscription_info() {
+  $info['invite'] = array(
+    'title' => t('Invite only'),
+    'description' => t('Users can only become a member after invitation.'),
+    'controller' => 'GroupInviteSubscriptionController',
+  );
+
+  return $info;
+}

@@ -51,6 +51,7 @@ function group_hook_info() {
     'group_operations',
     'group_operation_links',
     'group_permission',
+    'group_subscription_info',
     'group_uninstall',
   );
 

@@ -185,3 +185,22 @@ function group_group_member_operation_links($group_membership) {
 
   return $operations;
 }
+
+/**
+ * Implements hook_group_subscription_info().
+ */
+function group_group_subscription_info() {
+  $info['public'] = array(
+    'title' => t('Public'),
+    'description' => t('Users can freely subscribe to a group with the click of a button.'),
+    'controller' => 'GroupPublicSubscriptionController',
+  );
+
+  $info['private'] = array(
+    'title' => t('Private'),
+    'description' => t('Users can issue a membership request which has to be approved.'),
+    'controller' => 'GroupPrivateSubscriptionController',
+  );
+
+  return $info;
+}
