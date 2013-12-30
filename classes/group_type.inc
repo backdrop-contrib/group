@@ -10,14 +10,14 @@
 class GroupType extends Entity {
 
   /**
-   * Static cache of GroupRole entities.
+   * Cache of GroupRole entities.
    *
    * @var array
    */
   protected $entityCache = array();
 
   /**
-   * Resets the internal, static entity cache.
+   * Resets the internal entity cache.
    *
    * @param array $ids
    *   (optional) If specified, the cache is reset for the GroupRole entities

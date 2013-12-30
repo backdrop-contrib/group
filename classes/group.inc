@@ -10,14 +10,14 @@
 class Group extends Entity {
 
   /**
-   * Static cache of entities.
+   * Cache of entities.
    *
    * @var array
    */
   protected $entityCache = array();
 
   /**
-   * Resets the internal, static entity cache.
+   * Resets the internal entity cache.
    */
   public function resetCache() {
     $this->entityCache = array();
