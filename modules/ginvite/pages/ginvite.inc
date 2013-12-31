@@ -92,7 +92,7 @@ function ginvite_accept_callback($account, Group $group) {
   $group_membership->save();
 
   drupal_set_message(t('You have accepted the group invitation.'));
-  drupal_goto("user/$account->uid/group");
+  drupal_goto("user/$account->uid/group/invite");
 }
 
 /**
@@ -105,5 +105,5 @@ function ginvite_decline_callback($account, Group $group) {
   $group_membership->delete();
 
   drupal_set_message(t('You have declined the group invitation.'));
-  drupal_goto("user/$account->uid/group");
+  drupal_goto("user/$account->uid/group/invite");
 }
