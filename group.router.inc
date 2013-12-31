@@ -25,7 +25,9 @@ function group_menu() {
   );
 
   $items['user/%user/group/list'] = array(
-    'title' => 'List',
+    'title' => 'My groups',
+    'title callback' => 'group_user_page_title',
+    'title arguments' => array(1),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0,
   );
@@ -130,4 +132,17 @@ function group_membership_access($group, $account) {
  */
 function group_page_title($group) {
   return $group->title;
+}
+
+/**
+ * Title callback for user/%user/group/list.
+ */
+function group_user_page_title($account) {
+  global $user;
+
+  if ($user->uid == $account->uid) {
+    return t('My groups');
+  }
+
+  return t("@user's groups", array('@user' => $account->name));
 }

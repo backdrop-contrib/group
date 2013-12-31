@@ -37,7 +37,9 @@ function ginvite_menu() {
   );
 
   $items['user/%user/group/invite'] = array(
-    'title' => 'Invites',
+    'title' => 'My invites',
+    'title callback' => 'ginvite_user_page_title',
+    'title arguments' => array(1),
     'description' => 'Group invitations for a given user.',
     'page callback' => 'ginvite_user_page',
     'page arguments' => array(1),
@@ -67,4 +69,17 @@ function ginvite_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Title callback for user/%user/group/invite.
+ */
+function ginvite_user_page_title($account) {
+  global $user;
+
+  if ($user->uid == $account->uid) {
+    return t('My invites');
+  }
+
+  return t("@user's invites", array('@user' => $account->name));
 }
