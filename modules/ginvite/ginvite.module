@@ -2,14 +2,58 @@
 /**
  * @file
  * Contains invite functionality for the Group module.
- *
- * @todo On user register, turn invites into pending memberships.
  */
 
 /**
  * Load our router functions without polluting the .module file.
  */
 module_load_include('inc', 'ginvite', 'ginvite.router');
+
+/**
+ * Implements hook_schema_alter().
+ *
+ * Informs Drupal of the changes we made to {group_membership}.
+ */
+function ginvite_schema_alter(&$schema) {
+  // Include the install file for its helper functions.
+  module_load_install('ginvite');
+
+  // Add the invited_on and invited_by fields.
+  $schema['group_membership']['fields']['invited_on'] = _ginvite_invited_on();
+  $schema['group_membership']['fields']['invited_by'] = _ginvite_invited_by();
+
+  // Add the invited_by foreign key.
+  $schema['group_membership']['foreign keys']['inviter'] = array(
+    'table' => 'users',
+    'columns' => array('invited_by' => 'uid'),
+  );
+}
+
+/**
+ * Implements hook_entity_property_info_alter().
+ *
+ * Informs Drupal of the changes we made to {group_membership}.
+ */
+function ginvite_entity_property_info_alter(&$info) {
+  $properties = &$info['group_membership']['properties'];
+  $properties['invited_on'] = array(
+    'label' => t('Invited on'),
+    'description' => t('The date when the member was invited.'),
+    'type' => 'date',
+    // @todo Enable when Entity API 1.3 is released.
+    //'getter callback' => 'entity_property_verbatim_date_get',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'invited_on',
+  );
+
+  $properties['invited_by'] = array(
+    'label' => t('Invited by'),
+    'description' => t('The user who invited the member.'),
+    'type' => 'user',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'invited_by',
+  );
+}
 
 /**
  * Implements hook_forms().
@@ -43,6 +87,34 @@ function ginvite_init() {
   }
 }
 
+/**
+ * Implements hook_user_insert().
+ *
+ * Converts e-mail invites into fully qualified invites.
+ */
+function ginvite_user_insert(&$edit, $account, $category) {
+  // Convert all invites for the registered e-mail address.
+  foreach (ginvite_get_invites($account->mail) as $invite) {
+    $values = array(
+      'gid' => $invite->gid,
+      'uid' => $account->uid,
+      'status' => GROUP_MEMBERSHIP_INVITED,
+      'invited_on' => $invite->invited_on,
+      'invited_by' => $invite->invited_by,
+    );
+
+    // Create the membership.
+    $group_membership = entity_create('group_membership', $values);
+
+    // Granting roles saves the membership.
+    $group_membership->grantRoles(unserialize($invite->roles));
+  }
+
+  // Delete the invites from {group_invite}.
+  db_delete('group_invite')
+    ->condition('mail', $account->mail)
+    ->execute();
+}
 
 /**
  * Get group invitations for a given e-mail address.

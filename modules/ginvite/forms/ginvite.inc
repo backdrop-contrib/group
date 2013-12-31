@@ -83,10 +83,14 @@ function ginvite_by_user_form_validate($form, &$form_state) {
  * @see group_form_ginvite_by_user_form_alter()
  */
 function ginvite_by_user_form_submit($form, &$form_state) {
+  global $user;
+
   $values = array(
     'gid' => $form_state['build_info']['args'][0]->gid,
     'uid' => $form_state['values']['uid'],
     'status' => GROUP_MEMBERSHIP_INVITED,
+    'invited_on' => REQUEST_TIME,
+    'invited_by' => $user->uid,
   );
 
   // Create the membership.
@@ -182,12 +186,16 @@ function ginvite_by_mail_form_submit($form, &$form_state) {
 
   // Otherwise, register the group invite in the database.
   else {
+    global $user;
+
     // Insert the invite record into the database.
     db_insert('group_invite')
       ->fields(array(
         'gid' => $form_state['build_info']['args'][0]->gid,
         'roles' => serialize(array_values(array_filter($form_state['values']['roles']))),
         'mail' => $mail,
+        'invited_on' => REQUEST_TIME,
+        'invited_by' => $user->uid,
       ))
       ->execute();
 

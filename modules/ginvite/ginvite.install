@@ -5,30 +5,58 @@
  */
 
 /**
- * Implements hook_install().
+ * Schema API definition for the invited_on column.
  *
- * @todo add membership properties?
+ * Helper function for shared column between invites and memberships.
+ */
+function _ginvite_invited_on() {
+  return array(
+    'description' => 'The Unix timestamp when the invite was issued.',
+    'type' => 'int',
+    'default' => 0,
+    'unsigned' => TRUE,
+  );
+}
+
+/**
+ * Schema API definition for the invited_by column.
+ *
+ * Helper function for shared column between invites and memberships.
+ */
+function _ginvite_invited_by() {
+  return array(
+    'description' => 'The {users}.uid of the inviter.',
+    'type' => 'int',
+    'default' => 0,
+    'unsigned' => TRUE,
+  );
+}
+
+/**
+ * Implements hook_install().
  */
 function ginvite_install() {
   db_update('system')
     ->fields(array('weight' => 1))
     ->condition('name', 'ginvite')
     ->execute();
+
+  db_add_field('group_membership', 'invited_on', _ginvite_invited_on());
+  db_add_field('group_membership', 'invited_by', _ginvite_invited_by());
 }
 
 /**
  * Implements hook_uninstall().
  *
- * @todo remove membership properties?
  * @todo remove user invites?
  */
 function ginvite_uninstall() {
+  db_drop_field('group_membership', 'invited_on');
+  db_drop_field('group_membership', 'invited_by');
 }
 
 /**
  * Implements hook_schema().
- *
- * @todo add membership properties?
  */
 function ginvite_schema() {
   $schema['group_invite'] = array(
@@ -60,6 +88,8 @@ function ginvite_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'invited_on' => _ginvite_invited_on(),
+      'invited_by' => _ginvite_invited_by(),
     ),
     'indexes' => array(
       'mail' => array('mail'),
@@ -69,6 +99,10 @@ function ginvite_schema() {
         'table' => 'groups',
         'columns' => array('gid' => 'gid'),
       ),
+      'inviter' => array(
+        'table' => 'users',
+        'columns' => array('invited_by' => 'uid'),
+      ),
     ),
     'unique keys' => array(
       'membership' => array('gid', 'mail'),
@@ -77,4 +111,18 @@ function ginvite_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Add the invited_on and invited_by columns to {group_invite} and
+ * {group_membership}.
+ */
+function ginvite_update_7001() {
+  $invited_on = _ginvite_invited_on();
+  $invited_by = _ginvite_invited_by();
+
+  db_add_field('group_invite', 'invited_on', $invited_on);
+  db_add_field('group_invite', 'invited_by', $invited_by);
+  db_add_field('group_membership', 'invited_on', $invited_on);
+  db_add_field('group_membership', 'invited_by', $invited_by);
 }
