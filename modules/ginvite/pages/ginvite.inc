@@ -47,12 +47,12 @@ function ginvite_user_page($account) {
       // Populate the invitation operations.
       $operations['accept'] = array(
         'title' => t('accept'),
-        'href' => "group/$account->uid/group/invite/$group_membership->gid/accept",
+        'href' => "user/$account->uid/group/invite/$group_membership->gid/accept",
       );
 
       $operations['decline'] = array(
         'title' => t('decline'),
-        'href' => "group/$account->uid/group/invite/$group_membership->gid/decline",
+        'href' => "user/$account->uid/group/invite/$group_membership->gid/decline",
       );
 
       $operations['view group'] = array(
