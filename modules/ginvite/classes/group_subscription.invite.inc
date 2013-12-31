@@ -55,4 +55,35 @@ class GroupInviteSubscriptionController extends GroupPublicSubscriptionControlle
     return $form;
   }
 
+  /**
+   * Implements GroupSubscriptionControllerInterface.
+   */
+  public function subscriptionFormSubmit($form, &$form_state) {
+    $values = $form_state['values'];
+    $group = $form_state['build_info']['args'][0];
+    $uid = $form_state['uid'];
+
+    // Act upon clicking 'Accept'.
+    if (isset($values['accept']) && $values['op'] == $values['accept']) {
+      $group_membership = $group->getMember($uid);
+      $group_membership->status = GROUP_MEMBERSHIP_ACTIVE;
+      $group_membership->save();
+
+      drupal_set_message(t('You have accepted the group invitation.'));
+    }
+
+    // Act upon clicking 'Decline'.
+    elseif (isset($values['decline']) && $values['op'] == $values['decline']) {
+      $group_membership = $group->getMember($uid);
+      $group_membership->delete();
+
+      drupal_set_message(t('You have declined the group invitation.'));
+    }
+
+    // Delegate the submission to the parent class.
+    else {
+      parent::subscriptionFormSubmit($form, $form_state);
+    }
+  }
+
 }

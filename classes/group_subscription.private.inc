@@ -30,4 +30,23 @@ class GroupPrivateSubscriptionController extends GroupPublicSubscriptionControll
     return $form;
   }
 
+  /**
+   * Implements GroupSubscriptionControllerInterface.
+   */
+  public function subscriptionFormSubmit($form, &$form_state) {
+    $values = $form_state['values'];
+
+    // Act upon clicking 'Request membership'.
+    if (isset($values['request']) && $values['op'] == $values['request']) {
+      // @todo Implement this.
+      drupal_set_message(t('You have requested to join the group.'));
+      drupal_set_message(t('Not implemented yet'), 'warning');
+    }
+
+    // Delegate the submission to the parent class.
+    else {
+      parent::subscriptionFormSubmit($form, $form_state);
+    }
+  }
+
 }

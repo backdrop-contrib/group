@@ -23,6 +23,9 @@ class GroupPublicSubscriptionController implements GroupSubscriptionControllerIn
       $account = $user;
     }
 
+    // Store the UID in the form state.
+    $form_state['uid'] = $account->uid;
+
     if (!empty($account->uid)) {
       if ($group_membership = group_membership_load($group->gid, $account->uid)) {
         return $this->memberForm($form, $form_state, $group_membership);
@@ -98,6 +101,21 @@ class GroupPublicSubscriptionController implements GroupSubscriptionControllerIn
    * Implements GroupSubscriptionControllerInterface.
    */
   public function subscriptionFormSubmit($form, &$form_state) {
+    $values = $form_state['values'];
+    $group = $form_state['build_info']['args'][0];
+    $uid = $form_state['uid'];
+
+    // Act upon clicking 'Join group'.
+    if (isset($values['join']) && $values['op'] == $values['join']) {
+      $group->addMember($uid);
+      drupal_set_message(t('You have joined the group.'));
+    }
+
+    // Act upon clicking 'Leave group'.
+    elseif (isset($values['leave']) && $values['op'] == $values['leave']) {
+      $group->removeMember($uid);
+      drupal_set_message(t('You have left the group.'));
+    }
   }
 
 }
