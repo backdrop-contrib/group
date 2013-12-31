@@ -20,7 +20,6 @@ function ginvite_user_page($account) {
   // Create the invitations table.
   $page['invites'] = array(
     '#theme' => 'table',
-    '#title' => t('Pending invites'),
     '#header' => array(
       'group' => t('Group name'),
       'roles' => t('Roles'),
@@ -30,7 +29,7 @@ function ginvite_user_page($account) {
     '#empty' => t('You do not have any pending group invitations.'),
   );
 
-  // Create the group invitation table if there are outstanding invites.
+  // Retrieve all group invitations (memberships).
   if ($invites = GroupMembership::getByStatus($account->uid, GROUP_MEMBERSHIP_INVITED)) {
     // Link the rows variable to the table element's rows.
     $rows = &$page['invites']['#rows'];
@@ -92,7 +91,7 @@ function ginvite_accept_callback($account, Group $group) {
   $group_membership->status = GROUP_MEMBERSHIP_ACTIVE;
   $group_membership->save();
 
-  drupal_set_message('Group invitation accepted.');
+  drupal_set_message(t('You have accepted the group invitation.'));
   drupal_goto("user/$account->uid/group");
 }
 
@@ -105,6 +104,6 @@ function ginvite_decline_callback($account, Group $group) {
   $group_membership = $group->getMember($account->uid);
   $group_membership->delete();
 
-  drupal_set_message('Group invitation declined.');
+  drupal_set_message(t('You have declined the group invitation.'));
   drupal_goto("user/$account->uid/group");
 }
