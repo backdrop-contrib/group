@@ -5,14 +5,6 @@
  */
 
 /**
- * Define group membership status constants.
- */
-define('GROUP_MEMBERSHIP_BLOCKED', 0);
-define('GROUP_MEMBERSHIP_ACTIVE',  1);
-// @todo Move to ginvite when these are entities.
-define('GROUP_MEMBERSHIP_INVITED', 2);
-
-/**
  * Load our helper functions without polluting the .module file.
  */
 module_load_include('inc', 'group', 'helpers/group.entity');
@@ -48,6 +40,7 @@ function group_hook_info() {
     'group_member_filters',
     'group_member_operations',
     'group_member_operation_links',
+    'group_membership_status_info',
     'group_operations',
     'group_operation_links',
     'group_permission',

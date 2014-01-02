@@ -27,7 +27,7 @@ function group_user_page($account) {
   );
 
   // Retrieve all active memberships.
-  if ($memberships = GroupMembership::getByStatus($account->uid, GROUP_MEMBERSHIP_ACTIVE)) {
+  if ($memberships = GroupMembership::getByActiveStatus($account->uid)) {
     // Link the rows variable to the table element's rows.
     $rows = &$page['groups']['#rows'];
 

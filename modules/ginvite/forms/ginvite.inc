@@ -88,7 +88,7 @@ function ginvite_by_user_form_submit($form, &$form_state) {
   $values = array(
     'gid' => $form_state['build_info']['args'][0]->gid,
     'uid' => $form_state['values']['uid'],
-    'status' => GROUP_MEMBERSHIP_INVITED,
+    'status' => 'invited',
     'invited_on' => REQUEST_TIME,
     'invited_by' => $user->uid,
   );

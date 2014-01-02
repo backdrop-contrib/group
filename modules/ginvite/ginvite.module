@@ -79,7 +79,7 @@ function ginvite_init() {
   global $user;
 
   if ($user->uid) {
-    if (GroupMembership::getByStatus($user->uid, GROUP_MEMBERSHIP_INVITED)) {
+    if (GroupMembership::getByStatus($user->uid, 'invited')) {
       $message = 'You have pending group invitations. <a href="@url">Visit your profile</a> to see them.';
       $replace = array('@url' => url("user/$user->uid/group/invite"));
       drupal_set_message(t($message, $replace), 'warning', FALSE);
@@ -98,7 +98,7 @@ function ginvite_user_insert(&$edit, $account, $category) {
     $values = array(
       'gid' => $invite->gid,
       'uid' => $account->uid,
-      'status' => GROUP_MEMBERSHIP_INVITED,
+      'status' => 'invited',
       'invited_on' => $invite->invited_on,
       'invited_by' => $invite->invited_by,
     );

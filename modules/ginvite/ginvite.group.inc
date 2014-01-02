@@ -25,6 +25,18 @@ function ginvite_group_permission() {
 }
 
 /**
+ * Implements hook_group_membership_status_info().
+ */
+function ginvite_group_membership_status_info() {
+  $info['invited'] = array(
+    'title' => t('Invited'),
+    'active' => FALSE,
+  );
+
+  return $info;
+}
+
+/**
  * Implements hook_group_subscription_info().
  */
 function ginvite_group_subscription_info() {

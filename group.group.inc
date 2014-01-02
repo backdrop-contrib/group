@@ -122,7 +122,7 @@ function group_group_member_filters() {
   // Build a status filter.
   $filters['status'] = array(
     'title' => t('Status'),
-    'options' => array('[any]' => t('any')) + group_membership_statuses(),
+    'options' => array('[any]' => t('any')) + group_membership_status_types(),
   );
 
   return $filters;
@@ -184,6 +184,23 @@ function group_group_member_operation_links($group_membership) {
   }
 
   return $operations;
+}
+
+/**
+ * Implements hook_group_membership_status_info().
+ */
+function group_group_membership_status_info() {
+  $info['active'] = array(
+    'title' => t('Active'),
+    'active' => TRUE,
+  );
+
+  $info['blocked'] = array(
+    'title' => t('Blocked'),
+    'active' => FALSE,
+  );
+
+  return $info;
 }
 
 /**

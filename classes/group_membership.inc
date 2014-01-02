@@ -110,12 +110,48 @@ class GroupMembership extends Entity {
   }
 
   /**
+   * Get all active memberships for a user.
+   *
+   * @param int $uid
+   *   The uid of the user to retrieve memberships for.
+   * @param bool $active
+   *   (optional) Whether to return active or inactive memberships. Defaults
+   *   to TRUE.
+   *
+   * @return array
+   *   An array of GroupMembership objects.
+   */
+  public static function getByActiveStatus($uid, $active = TRUE) {
+    // Gather all statuses that match $active.
+    foreach (group_membership_status_info() as $status => $info) {
+      if ($info['active'] === $active) {
+        $statuses[] = $status;
+      }
+    }
+
+    // Only query the database if there are statuses to search for.
+    if (!empty($statuses)) {
+      $query = new EntityFieldQuery();
+      $query->entityCondition('entity_type', 'group_membership');
+      $query->propertyCondition('uid', $uid);
+      $query->propertyCondition('status', $statuses, 'IN');
+      $result = $query->execute();
+
+      if (isset($result['group_membership'])) {
+        return group_membership_load_multiple(array_keys($result['group_membership']));
+      }
+    }
+
+    return array();
+  }
+
+  /**
    * Get all memberships by status for a user.
    *
    * @param int $uid
-   *   The uid of the user to check invites for.
-   * @param int $status
-   *   The integer that maps to the membership status.
+   *   The uid of the user to retrieve memberships for.
+   * @param string $status
+   *   The machine name of the membership status.
    *
    * @return array
    *   An array of GroupMembership objects.

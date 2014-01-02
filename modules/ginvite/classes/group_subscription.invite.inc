@@ -15,8 +15,8 @@ class GroupInviteSubscriptionController extends GroupPublicSubscriptionControlle
    * Shows the buttons for accepting or declining a group invitation..
    */
   public function memberForm($form, &$form_state, GroupMembership $group_membership) {
-    // If the membership is already active, show the leave button instead.
-    if ($group_membership->status != GROUP_MEMBERSHIP_INVITED) {
+    // If the membership status is not 'invited', default to parent function.
+    if ($group_membership->status != 'invited') {
       return parent::memberForm($form, $form_state, $group_membership);
     }
 
@@ -66,7 +66,7 @@ class GroupInviteSubscriptionController extends GroupPublicSubscriptionControlle
     // Act upon clicking 'Accept'.
     if (isset($values['accept']) && $values['op'] == $values['accept']) {
       $group_membership = $group->getMember($uid);
-      $group_membership->status = GROUP_MEMBERSHIP_ACTIVE;
+      $group_membership->status = 'active';
       $group_membership->save();
 
       drupal_set_message(t('You have accepted the group invitation.'));

@@ -343,7 +343,37 @@ function hook_group_member_operation_links($group_membership) {
 }
 
 /**
- * Provide information about group subcription types exposed by your module.
+ * Provide information about group membership statuses exposed by your module.
+ *
+ * Membership statuses are usually simple strings such as Active or Blocked.
+ * Modules may add their own membership statuses and handle group memberships
+ * differently depending on their status. An example can be found in the Group
+ * Invite (ginvite) submodule included in Group.
+ *
+ * @return array
+ *   An array whose keys are membership status machine names and whose
+ *   corresponding values are arrays containing the following key-value pairs:
+ *   - title: The human readable title for the membership status.
+ *   - active: (boolean) Whether this status should be considered as active,
+ *     meaning the membership will actually grant permissions to the member.
+ *     Set to FALSE for suspending statuses such as 'Blocked', 'Banned', etc.
+ */
+function hook_group_membership_status_info() {
+  $info['banned-24'] = array(
+    'title' => t('Banned (24 hours)'),
+    'active' => FALSE,
+  );
+
+  $info['banned-48'] = array(
+    'title' => t('Banned (48 hours)'),
+    'active' => FALSE,
+  );
+
+  return $info;
+}
+
+/**
+ * Provide information about group subscription types exposed by your module.
  *
  * Subscription types manage the way users can become a member of a group. An
  * example of how to implement your own subscription type can be found in the

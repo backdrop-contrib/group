@@ -124,32 +124,12 @@ function group_role_exists($name) {
 }
 
 /**
- * Return the possible membership statuses.
- *
- * @return array
- *   An array where the keys are the integer constants that are saved to the
- *   database and the values are translated strings describing what the status
- *   code really means.
- *
- * @todo Expose this with hooks?
- */
-function group_membership_statuses() {
-  $statuses = array(
-    GROUP_MEMBERSHIP_BLOCKED => t('Blocked'),
-    GROUP_MEMBERSHIP_ACTIVE  => t('Active'),
-    // @todo Move to ginvite when these are entities.
-    GROUP_MEMBERSHIP_INVITED => t('Invited'),
-  );
-
-  return $statuses;
-}
-
-/**
  * Return the possible group permissions.
  *
  * @return array
  *   An array where the keys are permission machine names and the values are
- *   the permission 'title' attributes as set in hook_group_permission().
+ *   the permission 'title' attributes as set in hook_group_permission(). Ideal
+ *   for use with checkboxes or radios.
  */
 function group_permissions() {
   $permissions = module_invoke_all('group_permission');
@@ -158,6 +138,42 @@ function group_permissions() {
   }
 
   return $permissions;
+}
+
+/**
+ * Get the group membership status information.
+ *
+ * @return array
+ *   An array of group membership status info as provided by
+ *   hook_group_membership_status_info().
+ *
+ * @see hook_group_membership_status_info()
+ */
+function group_membership_status_info() {
+  $info = &drupal_static(__FUNCTION__);
+
+  if (!isset($info)) {
+    $info = module_invoke_all('group_membership_status_info');
+  }
+
+  return $info;
+}
+
+/**
+ * Return the possible membership statuses.
+ *
+ * @return array
+ *   An array where the keys are subscription type machine names and the values
+ *   are the subscription type titles. Ideal for use with checkboxes or radios.
+ */
+function group_membership_status_types() {
+  $types = array();
+
+  foreach (group_membership_status_info() as $status => $info) {
+    $types[$status] = $info['title'];
+  }
+
+  return $types;
 }
 
 /**

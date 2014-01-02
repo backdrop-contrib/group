@@ -268,7 +268,7 @@ function group_members_form(Group $group, $pager_limit) {
   $query->addMetaData('filters', $filters);
 
   // Retrieve the membership status options.
-  $statuses = group_membership_statuses();
+  $statuses = group_membership_status_types();
 
   // Add the group memberships to the table.
   foreach (group_membership_load_multiple($query->execute()->fetchCol()) as $group_membership) {

@@ -30,7 +30,7 @@ function ginvite_user_page($account) {
   );
 
   // Retrieve all group invitations (memberships).
-  if ($invites = GroupMembership::getByStatus($account->uid, GROUP_MEMBERSHIP_INVITED)) {
+  if ($invites = GroupMembership::getByStatus($account->uid, 'invited')) {
     // Link the rows variable to the table element's rows.
     $rows = &$page['invites']['#rows'];
 
@@ -88,7 +88,7 @@ function ginvite_user_page($account) {
  */
 function ginvite_accept_callback($account, Group $group) {
   $group_membership = $group->getMember($account->uid);
-  $group_membership->status = GROUP_MEMBERSHIP_ACTIVE;
+  $group_membership->status = 'active';
   $group_membership->save();
 
   drupal_set_message(t('You have accepted the group invitation.'));

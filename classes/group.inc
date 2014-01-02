@@ -398,9 +398,15 @@ class Group extends Entity {
   public function userPermissions($uid) {
     $group_membership = $this->getMember($uid);
 
-    return ($group_membership && $group_membership->status == GROUP_MEMBERSHIP_ACTIVE)
-      ? $group_membership->getPermissions()
-      : group_type_load($this->type)->outsider_permissions;
+    if ($group_membership) {
+      $info = group_membership_status_info();
+
+      if (!empty($info[$group_membership->status]['active'])) {
+        return $group_membership->getPermissions();
+      }
+    }
+
+    return group_type_load($this->type)->outsider_permissions;
   }
 
   /**

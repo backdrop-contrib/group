@@ -249,12 +249,10 @@ function group_schema() {
       ),
       'status' => array(
         'description' => 'The membership status.',
-        'type' => 'int',
-        'size' => 'tiny',
-        'unsigned' => TRUE,
+        'type' => 'varchar',
+        'length' => 32,
         'not null' => TRUE,
-         // GROUP_MEMBERSHIP_ACTIVE
-        'default' => 1,
+        'default' => 'active',
       ),
     ),
     'indexes' => array(
@@ -349,4 +347,39 @@ function group_update_7002() {
      // GROUP_MEMBERSHIP_ACTIVE
     'default' => 1,
   ));
+}
+
+/**
+ * Convert the status column for {group_membership} to a token (varchar).
+ */
+function group_update_7003() {
+  $spec = array(
+    'description' => 'The membership status.',
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => 'active',
+  );
+
+  $keys_new = array(
+    'indexes' => array(
+      'status' => array('status'),
+    ),
+  );
+
+  db_drop_index('group_membership', 'status');
+  db_change_field('group_membership', 'status', 'status', $spec, $keys_new);
+
+  // Convert the old values into new ones.
+  $updates['blocked'] = db_update('group_membership')->condition('status', '0');
+  $updates['active']  = db_update('group_membership')->condition('status', '1');
+  $updates['invited'] = db_update('group_membership')->condition('status', '2');
+
+  foreach ($updates as $status => $query) {
+    $query->fields(array(
+      'status' => $status,
+    ));
+
+    $query->execute();
+  }
 }
