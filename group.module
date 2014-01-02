@@ -188,7 +188,7 @@ function group_query_group_member_overview_alter(QueryAlterableInterface $query)
   // Retrieve the selected filters.
   $filters = $query->getMetaData('filters');
 
-  if (isset($filters['status']) && in_array($filters['status'], array('0', '1'))) {
-    $query->condition('u.status', $filters['status']);
+  if (isset($filters['status'])) {
+    $query->condition('gm.status', $filters['status']);
   }
 }
