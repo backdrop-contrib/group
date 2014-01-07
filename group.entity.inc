@@ -38,7 +38,7 @@ function group_entity_info() {
       'controller class' => 'GroupUIController',
     ),
     'extra fields controller class' => 'GroupExtraFieldsController',
-    'views controller class' => 'EntityDefaultViewsController',
+    'views controller class' => 'GroupViewsController',
   );
 
   $info['group_type'] = array(
