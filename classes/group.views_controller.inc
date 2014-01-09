@@ -15,26 +15,30 @@ class GroupViewsController extends EntityDefaultViewsController {
   public function views_data() {
     $data = parent::views_data();
 
-    // Add an implicit join to {group_entity} for group views.
-    $data['group_entity']['table']['join']['groups'] = array(
-      'left_field' => 'gid',
-      'field' => 'gid',
-    );
-
-    // Then add a relationship to all sorts of group entities.
+    // Loop over all group entities.
     foreach (entity_get_info() as $type => $e_info) {
       if (!empty($e_info['group entity'])) {
-        $data['group_entity'][$e_info['base table']] = array(
-          'title' => $e_info['label'],
-          'help' => t('@label entities associated with this group.', array('@label' => $e_info['label'])),
+        // Add a child entity relationship to all group entities.
+        $data['groups']["group_entity_$type"] = array(
+          'title' => t('@label entities', array('@label' => $e_info['label'])),
+          'help' => t('@label entities that belong to a group.', array('@label' => $e_info['label'])),
           'relationship' => array(
-            'group' => t('Group entity'),
+            'handler' => 'group_handler_child_relationship',
             'label' => t('Group @label', array('@label' => drupal_strtolower($e_info['label']))),
             'base' => $e_info['base table'],
-            'relationship field' => 'entity_id',
-            'extra' => array(
-              array('table' => 'group_entity', 'field' => 'entity_type', 'value' => $type),
-            ),
+            'entity type' => $type,
+          ),
+        );
+
+        // Add a parent group relationship to all group entities.
+        $data[$e_info['base table']]['parent_group'] = array(
+          'title' => t('Parent group'),
+          'help' => t('The group an entity belongs to.'),
+          'relationship' => array(
+            'handler' => 'group_handler_parent_relationship',
+            'label' => t('@label group', array('@label' => $e_info['label'])),
+            'base' => 'groups',
+            'entity type' => $type,
           ),
         );
       }

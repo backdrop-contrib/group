@@ -25,3 +25,6 @@ files[] = classes/group_type.ui_controller.inc
 files[] = classes/group_type.features_controller.inc
 
 files[] = interfaces/group.subscription_controller.inc
+
+files[] = views/handlers/group_handler_child_relationship.inc
+files[] = views/handlers/group_handler_parent_relationship.inc

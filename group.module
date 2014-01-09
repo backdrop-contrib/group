@@ -24,6 +24,13 @@ module_load_include('inc', 'group', 'group.entity');
 module_load_include('inc', 'group', 'group.router');
 
 /**
+ * Implements hook_views_api().
+ */
+function group_views_api() {
+  return array('api' => 3);
+}
+
+/**
  * Implements hook_hook_info().
  *
  * Makes sure this module automatically finds exported Group
