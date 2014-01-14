@@ -67,10 +67,16 @@ class GroupMembershipController extends EntityAPIController {
       $original = entity_load_unchanged('group_membership', $entity->mid);
 
       // Remove revoked roles from the db.
-      $entity->revokeRoles(array_diff($original->roles, $entity->roles));
+      $revoke = array_diff($original->roles, $entity->roles);
+      if (!empty($revoke)) {
+        $this->revokeRoles($revoke);
+      }
 
       // Add new roles to the db.
-      $entity->grantRoles(array_diff($entity->roles, $original->roles), FALSE);
+      $grant = array_diff($entity->roles, $original->roles);
+      if (!empty($grant)) {
+        $this->grantRoles($grant, FALSE);
+      }
     }
 
     return $return;
