@@ -106,7 +106,7 @@ function group_entity_info() {
     'module' => 'group',
     // The admin part of group memberships is tied to the group the membership
     // belongs to. Please refer to GroupUIController for these page callbacks.
-    'views controller class' => 'EntityDefaultViewsController',
+    'views controller class' => 'GroupMembershipViewsController',
   );
 
   return $info;

@@ -13,6 +13,7 @@ files[] = classes/group.extra_fields_controller.inc
 files[] = classes/group.views_controller.inc
 files[] = classes/group_membership.inc
 files[] = classes/group_membership.controller.inc
+files[] = classes/group_membership.views_controller.inc
 files[] = classes/group_role.inc
 files[] = classes/group_role.controller.inc
 files[] = classes/group_role.ui_controller.inc
@@ -27,4 +28,5 @@ files[] = classes/group_type.features_controller.inc
 files[] = interfaces/group.subscription_controller.inc
 
 files[] = views/handlers/group_handler_child_relationship.inc
+files[] = views/handlers/group_handler_membership_role_relationship.inc
 files[] = views/handlers/group_handler_parent_relationship.inc
