@@ -366,12 +366,13 @@ function group_entity_property_info() {
     'schema field' => 'uid',
   );
 
+  // Generated in GroupMembershipController::load().
   $group_membership['roles'] = array(
     'label' => t('Roles'),
     'description' => t('The group roles for the membership.'),
     'type' => 'list<group_role>',
     'setter callback' => 'entity_property_verbatim_set',
-    'schema field' => 'roles',
+    'computed' => TRUE,
     //'options list' => '',
   );
 

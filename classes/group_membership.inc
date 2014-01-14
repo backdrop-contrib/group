@@ -16,12 +16,41 @@ class GroupMembership extends Entity {
    *
    * @param array $roles
    *   A list of role names to grant.
+   * @param bool $safety
+   *   (optional) Whether to check for primary key integrity. Defaults to TRUE.
+   *   Set this to FALSE if you know for sure that all of the roles you are
+   *   granting are not already related to the membership. It gives a small
+   *   performance boost.
    */
-  public function grantRoles(array $roles) {
+  public function grantRoles(array $roles, $safety = TRUE) {
+    // Only save roles to the db if the membership exists in it. If it doesn't
+    // exist yet, but gets saved later on, grantRoles() will be invoked again
+    // from GroupMembershipController::save().
+    if (isset($this->mid)) {
+      if ($safety) {
+        // Load the original entity to only retain new roles.
+        $original = entity_load_unchanged('group_membership', $this->mid);
+        $roles = array_diff($roles, $original->roles);
+      }
+
+      // Add the roles to {group_membership_role} for the membership.
+      if (!empty($roles)) {
+        $query = db_insert('group_membership_role')->fields(array('mid', 'role'));
+
+        foreach ($roles as $role) {
+          $query->values(array(
+            'mid' => $this->mid,
+            'role' => $role,
+          ));
+        }
+
+        $query->execute();
+      }
+    }
+
+    // Update the membership's roles property.
     $roles = array_merge($this->roles, $roles);
     $this->roles = array_values(array_unique($roles));
-
-    $this->save();
   }
 
   /**
@@ -32,11 +61,17 @@ class GroupMembership extends Entity {
    *   from the group membership if $permissions is left blank.
    */
   public function revokeRoles(array $roles = array()) {
+    $query = db_delete('group_membership_role')->condition('mid', $this->mid);
+
+    if (!empty($roles)) {
+      $query->condition('role', $roles, 'IN');
+    }
+    $query->execute();
+
+    // Update the membership's roles property.
     $this->roles = !empty($roles)
       ? array_values(array_diff($this->roles, $roles))
       : array();
-
-    $this->save();
   }
 
   /**

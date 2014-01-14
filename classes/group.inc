@@ -264,9 +264,9 @@ class Group extends Entity {
     if (!($group_membership = $this->getMember($uid))) {
       $values = array('gid' => $this->gid, 'uid' => $uid);
       $group_membership = entity_create('group_membership', $values);
+      $group_membership->save();
     }
 
-    // Granting roles saves the membership.
     $group_membership->grantRoles($roles);
   }
 

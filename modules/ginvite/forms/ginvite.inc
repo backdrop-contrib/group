@@ -93,10 +93,11 @@ function ginvite_by_user_form_submit($form, &$form_state) {
     'invited_by' => $user->uid,
   );
 
-  // Create the membership.
+  // Create and save the membership.
   $group_membership = entity_create('group_membership', $values);
+  $group_membership->save();
 
-  // Granting roles saves the membership.
+  // Grant the predetermined roles.
   $group_membership->grantRoles(array_filter($form_state['values']['roles']));
 
   // Show a confirmation message.

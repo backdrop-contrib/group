@@ -241,12 +241,6 @@ function group_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'roles' => array(
-        'description' => 'The group roles for the membership.',
-        'type' => 'text',
-        'not null' => TRUE,
-        'serialize' => TRUE,
-      ),
       'status' => array(
         'description' => 'The membership status.',
         'type' => 'varchar',
@@ -319,6 +313,40 @@ function group_schema() {
     'primary key' => array('gid', 'entity_type', 'entity_id'),
   );
 
+  $schema['group_membership_role'] = array(
+    'description' => 'Links group memberships to their roles.',
+    'fields' => array(
+      'mid' => array(
+        'description' => 'The {group_membership}.mid for the membership.',
+        'type' => 'int',
+        'default' => 0,
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'role' => array(
+        'description' => 'The {group_role}.name for the group role.',
+        'type' => 'varchar',
+        'length' => 32,
+        'default' => '',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'group_membership' => array('mid'),
+    ),
+    'foreign keys' => array(
+      'group_membership' => array(
+        'table' => 'group_membership',
+        'columns' => array('mid' => 'mid'),
+      ),
+      'group_role' => array(
+        'table' => 'group_role',
+        'columns' => array('role' => 'name'),
+      ),
+    ),
+    'primary key' => array('mid', 'role'),
+  );
+
   return $schema;
 }
 
@@ -382,4 +410,64 @@ function group_update_7003() {
 
     $query->execute();
   }
+}
+
+/**
+ * Change the way roles are saved on memberships.
+ */
+function group_update_7004() {
+  // Create the {group_membership_role} table.
+  $table = array(
+    'description' => 'Links group memberships to their roles.',
+    'fields' => array(
+      'mid' => array(
+        'description' => 'The {group_membership}.mid for the membership.',
+        'type' => 'int',
+        'default' => 0,
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'role' => array(
+        'description' => 'The {group_role}.name for the group role.',
+        'type' => 'varchar',
+        'length' => 32,
+        'default' => '',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'group_membership' => array('mid'),
+    ),
+    'foreign keys' => array(
+      'group_membership' => array(
+        'table' => 'group_membership',
+        'columns' => array('mid' => 'mid'),
+      ),
+      'group_role' => array(
+        'table' => 'group_role',
+        'columns' => array('role' => 'name'),
+      ),
+    ),
+    'primary key' => array('mid', 'role'),
+  );
+  db_create_table('group_membership_role', $table);
+
+  // Prepare the insert for the new table.
+  $query = db_insert('group_membership_role')->fields(array('mid', 'role'));
+
+  // Gather the existing membership data for insert.
+  foreach (db_select('group_membership', 'gm')->fields('gm')->execute() as $record) {
+    foreach (unserialize($record->roles) as $role) {
+      $query->values(array(
+        'mid' => $record->mid,
+        'role' => $role,
+      ));
+    }
+  }
+
+  // Migrate the existing data.
+  $query->execute();
+
+  // Drop the old data from {group_membership}.
+  db_drop_field('group_membership', 'roles');
 }

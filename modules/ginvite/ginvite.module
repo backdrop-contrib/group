@@ -103,10 +103,11 @@ function ginvite_user_insert(&$edit, $account, $category) {
       'invited_by' => $invite->invited_by,
     );
 
-    // Create the membership.
+    // Create and save the membership.
     $group_membership = entity_create('group_membership', $values);
+    $group_membership->save();
 
-    // Granting roles saves the membership.
+    // Grant the predetermined roles.
     $group_membership->grantRoles(unserialize($invite->roles));
   }
 
