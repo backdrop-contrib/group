@@ -57,6 +57,6 @@ class group_handler_membership_role_relationship extends views_handler_relations
     $alias = "{$this->table_alias}_roles";
 
     // Add the relationship to the view.
-    $this->alias = $this->query->add_relationship($alias, $join, $entity_table, $this->relationship);
+    $this->alias = $this->query->add_relationship($alias, $join, 'group_role', $this->relationship);
   }
 }
