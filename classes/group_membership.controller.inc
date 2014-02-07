@@ -41,10 +41,12 @@ class GroupMembershipController extends EntityAPIController {
    * Delete a group membership.
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
-    // Delete all associated group roles.
-    db_delete('group_membership_role')
-      ->condition('mid', $ids, 'IN')
-      ->execute();
+    if (!empty($ids)) {
+      // Delete all associated group membership roles.
+      db_delete('group_membership_role')
+        ->condition('mid', $ids, 'IN')
+        ->execute();
+    }
 
     parent::delete($ids, $transaction);
   }
