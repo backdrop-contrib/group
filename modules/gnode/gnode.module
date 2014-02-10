@@ -161,9 +161,16 @@ function gnode_node_add($group, $node_type) {
     'group' => $group->gid,
   );
   drupal_set_title(t('Create @name', array('@name' => $types[$node_type]->name)), PASS_THROUGH);
-  $output = drupal_get_form($node_type . '_node_form', $node);
 
-  return $output;
+  // Build the arguments to pass to drupal_get_form().
+  $setup = array($node_type . '_node_form', $node);
+  $extra = array_slice(func_get_args(), 2);
+  $args = array_merge($setup, $extra);
+
+  // We call call_user_func_array() so we can add any extra argument
+  // that was provided through the URL. This will ensure paths like
+  // group/1/node/add/page/specialvar will function properly.
+  return call_user_func_array('drupal_get_form', $args);
 }
 
 /**
