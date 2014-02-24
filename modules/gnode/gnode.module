@@ -235,7 +235,7 @@ function gnode_form_node_form_alter(&$form, $form_state) {
       '#description' => t("Enter the name of the group to attach this node to. Leave blank for no group.<br /><strong>By selecting a group, the node will inherit the group's access control</strong>."),
       // If the user can't create this node outside of a group, he is not allowed
       // to move it to the sitewide scope either.
-      '#required' => !user_access("create $node->type"),
+      '#required' => !node_access('create', $node->type),
     );
   }
 }
