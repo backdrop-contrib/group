@@ -27,6 +27,7 @@ files[] = classes/group_type.features_controller.inc
 
 files[] = interfaces/group.subscription_controller.inc
 
+files[] = views/handlers/group_handler_field_child_entity_count.inc
 files[] = views/handlers/group_handler_child_relationship.inc
 files[] = views/handlers/group_handler_membership_role_relationship.inc
 files[] = views/handlers/group_handler_parent_relationship.inc

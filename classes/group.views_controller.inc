@@ -18,6 +18,17 @@ class GroupViewsController extends EntityDefaultViewsController {
     // Loop over all group entities.
     foreach (entity_get_info() as $type => $e_info) {
       if (!empty($e_info['group entity'])) {
+        // Add a child count field to all group entities.
+        $data['groups']["group_entity_{$type}_count"] = array(
+          'title' => t('Count @label entities', array('@label' => $e_info['label'])),
+          'help' => t('The amount of @label entities that belong to a group.<br />Only use this field when you need <strong>multiple child entity counts</strong> for a <strong>single Group table</strong>.', array('@label' => $e_info['label'])),
+          'field' => array(
+            'handler' => 'group_handler_field_child_entity_count',
+            'click sortable' => TRUE,
+            'entity type' => $type,
+          ),
+        );
+
         // Add a child entity relationship to all group entities.
         $data['groups']["group_entity_$type"] = array(
           'title' => t('@label entities', array('@label' => $e_info['label'])),
