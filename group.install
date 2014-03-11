@@ -10,6 +10,15 @@
 function group_install() {
   variable_set('group_admin_theme', '1');
   variable_set('group_default_roles', array());
+
+  // Create a first global admin role and give it full permissions.
+  $group_admin = entity_create('group_role', array(
+    'name' => 'group_admin',
+    'label' => t('Administrator'),
+    'weight' => 10,
+    'permissions' => array_keys(module_invoke_all('group_permission')),
+  ));
+  $group_admin->save();
 }
 
 /**
@@ -470,4 +479,14 @@ function group_update_7004() {
 
   // Drop the old data from {group_membership}.
   db_drop_field('group_membership', 'roles');
+}
+
+/**
+ * Change the group_admin role to be deletable.
+ */
+function group_update_7005() {
+  if ($group_admin = group_role_load('group_admin')) {
+    $group_admin->status = ENTITY_CUSTOM;
+    $group_admin->save();
+  }
 }

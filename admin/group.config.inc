@@ -24,23 +24,32 @@ function group_config_form($form, &$form_state) {
   );
 
   foreach (group_types() as $group_type) {
-    // Fall back to the default of group_admin.
+    // Avoid notices for group types without saved configuration.
     if (!isset($defaults[$group_type->name])) {
-      $defaults[$group_type->name] = array('group_admin' => 'group_admin');
+      $defaults[$group_type->name] = array();
     }
 
-    // Populate the checkboxes for use below.
+    // Get the available group roles for this group type.
     $group_roles = $group_type->getRoles(FALSE);
+
+    // Convert the roles into valid checkbox options.
     foreach ($group_roles as &$group_role) {
       $group_role = $group_role->label;
     }
 
+    // Add a checkbox for each available group role.
     $form['group_default_roles'][$group_type->name] = array(
       '#type' => 'checkboxes',
       '#title' => t('Default roles for @group_type', array('@group_type' => $group_type->label)),
       '#options' => $group_roles,
       '#default_value' => $defaults[$group_type->name],
     );
+
+    // Show some help text when no roles are available.
+    if (empty($group_roles)) {
+      $message = t('There are no roles available for this group type.');
+      $form['group_default_roles'][$group_type->name]['#description'] = $message;
+    }
   }
 
   return system_settings_form($form);

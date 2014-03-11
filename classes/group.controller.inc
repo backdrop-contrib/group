@@ -89,7 +89,7 @@ class GroupController extends EntityAPIController {
     $defaults = variable_get('group_default_roles');
     $roles = isset($defaults[$entity->type])
       ? array_filter($defaults[$entity->type])
-      : array('group_admin');
+      : array();
 
     // Add the current user as the first member.
     global $user;
