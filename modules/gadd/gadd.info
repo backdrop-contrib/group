@@ -1,0 +1,6 @@
+name = Group add
+description = Allows you to add members to a group without their consent
+core = 7.x
+package = Group
+
+dependencies[] = group
