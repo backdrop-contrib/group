@@ -18,7 +18,7 @@ function group_membership_actions_form($form, &$form_state, Group $group, $accou
   $group_membership = $group->getMember($account->uid);
 
   foreach (group_membership_action_info() as $action => $info) {
-    if (isset($info['access callback'] && !call_user_func($info['access callback'], $group, $account, $group_membership)) {
+    if (isset($info['access callback']) && !call_user_func($info['access callback'], $group, $account, $group_membership)) {
       continue;
     }
 
