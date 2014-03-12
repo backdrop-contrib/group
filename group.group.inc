@@ -191,6 +191,11 @@ function group_group_membership_status_info() {
     'active' => TRUE,
   );
 
+  $info['requested'] = array(
+    'title' => t('Requested'),
+    'active' => FALSE,
+  );
+
   $info['blocked'] = array(
     'title' => t('Blocked'),
     'active' => FALSE,
@@ -283,9 +288,18 @@ function group_user_can_request_membership($group, $account, $group_membership =
  *   The user that wants to join.
  */
 function group_user_request_membership($group, $account) {
-  // @todo Implement this.
+  // @todo requested_on and requested_by?
+  $values = array(
+    'gid' => $group->gid,
+    'uid' => $account->uid,
+    'status' => 'requested',
+  );
+
+  // Create and save the membership.
+  $group_membership = entity_create('group_membership', $values);
+  $group_membership->save();
+
   drupal_set_message(t('You have requested to join the group.'));
-  drupal_set_message(t('Not implemented yet'), 'warning');
 }
 
 /**
