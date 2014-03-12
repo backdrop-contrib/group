@@ -405,6 +405,30 @@ function group_membership_remove_role($mids, $role) {
 }
 
 /**
+ * Group membership block callback.
+ *
+ * @todo Save the previous status.
+ */
+function group_membership_block($mids) {
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    $group_membership->status = 'blocked';
+    $group_membership->save();
+  }
+}
+
+/**
+ * Group membership unblock callback.
+ *
+ * @todo Reinstate the previous status.
+ */
+function group_membership_unblock($mids) {
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    $group_membership->status = 'active';
+    $group_membership->save();
+  }
+}
+
+/**
  * Group membership edit form.
  */
 function group_membership_edit_form($form, &$form_state, $group, $account) {

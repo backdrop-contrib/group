@@ -136,6 +136,18 @@ function group_group_member_operations($group) {
     'form callback' => TRUE,
   );
 
+  $operations['block'] = array(
+    'label' => t('Block selected members'),
+    'callback' => 'group_membership_block',
+    'optgroup' => t('Block or unblock selected members'),
+  );
+
+  $operations['unblock'] = array(
+    'label' => t('Unblock selected members'),
+    'callback' => 'group_membership_unblock',
+    'optgroup' => t('Block or unblock selected members'),
+  );
+
   foreach (group_type_load($group->type)->getRoles(FALSE) as $group_role) {
     $operations["add-$group_role->name"] = array(
       'label' => $group_role->label,
