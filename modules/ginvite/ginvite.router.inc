@@ -9,7 +9,7 @@
  */
 function ginvite_menu() {
   $items['group/%group/invite'] = array(
-    'title' => 'Invites',
+    'title' => 'Invite member',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('ginvite_by_user_form', 1),
     'access callback' => 'group_access',
@@ -20,13 +20,13 @@ function ginvite_menu() {
   );
 
   $items['group/%group/invite/user'] = array(
-    'title' => 'By user',
+    'title' => 'By username',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0,
   );
 
   $items['group/%group/invite/mail'] = array(
-    'title' => 'By mail',
+    'title' => 'By e-mail',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('ginvite_by_mail_form', 1),
     'access callback' => 'group_access',

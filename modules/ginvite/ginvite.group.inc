@@ -11,7 +11,7 @@ function ginvite_group_permission() {
   $permissions = array(
     'invite members by user' => array(
       'title' => t('Invite members by user'),
-      'description' => t('Invite members by their user name on the website'),
+      'description' => t('Invite members by their username on the website'),
       'warning' => t('You only get the autocomplete if you have the sitewide "View user profiles" permission.'),
     ),
     'invite members by mail' => array(
