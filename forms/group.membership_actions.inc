@@ -32,9 +32,9 @@ function group_membership_actions_form($form, &$form_state, Group $group, $accou
 }
 
 /**
- * Submit handler for group_membership_action_form().
+ * Submit handler for group_membership_actions_form().
  */
-function group_membership_action_form_submit($form, &$form_state) {
+function group_membership_actions_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $group = $form_state['build_info']['args'][0];
   $account = $form_state['build_info']['args'][1];
