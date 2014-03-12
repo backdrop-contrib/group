@@ -91,7 +91,6 @@ class GroupTypeController extends EntityAPIControllerExportable {
       'label' => '',
       'outsider_permissions' => array(),
       'member_permissions' => array(),
-      'subscription_type' => 'public',
     );
 
     return parent::create($values);

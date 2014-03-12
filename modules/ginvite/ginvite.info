@@ -4,5 +4,3 @@ core = 7.x
 package = Group
 
 dependencies[] = group
-
-files[] = classes/group_subscription.invite.inc

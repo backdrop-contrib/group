@@ -238,15 +238,6 @@ function group_entity_property_info() {
     'options list' => 'group_permissions',
   );
 
-  $group_type['subscription_type'] = array(
-    'label' => t('Subscription type'),
-    'description' => t('The way users can become members of groups of this group type.'),
-    'type' => 'token',
-    'setter callback' => 'entity_property_verbatim_set',
-    'schema field' => 'subscription_type',
-    'options list' => 'group_subscription_types',
-  );
-
   $group_type['weight'] = array(
     'label' => t('Weight'),
     'description' => t('The weight of the type compared to others.'),
@@ -527,15 +518,13 @@ function group_entity_delete($entity, $type) {
 /**
  * Implements hook_entity_view().
  *
- * Add the subscription form as an extra field display to groups.
+ * Add the membership actions form as an extra field display to groups.
  */
 function group_entity_view($entity, $type, $view_mode, $langcode) {
+  global $user;
+
   if ($type == 'group') {
-    module_load_include('inc', 'group', 'forms/group.subscription');
-
-    $subscription_type = group_type_load($entity->type)->subscription_type;
-    $subscription_controller = group_subscription_controller($subscription_type);
-
-    $entity->content['subscription_form'] = drupal_get_form('group_subscription_form', $entity);
+    module_load_include('inc', 'group', 'forms/group.membership_actions');
+    $entity->content['membership_actions'] = drupal_get_form('group_membership_actions_form', $entity, $user);
   }
 }

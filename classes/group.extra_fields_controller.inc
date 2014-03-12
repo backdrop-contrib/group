@@ -25,10 +25,10 @@ class GroupExtraFieldsController extends EntityDefaultExtraFieldsController {
         );
       }
 
-      // Add the subscription form.
-      $extra['group'][$type]['display']['subscription_form'] = array(
-        'label' => t('Subscription form'),
-        'description' => t('The form for people to join or leave the group with.'),
+      // Add the membership action form.
+      $extra['group'][$type]['display']['membership_actions'] = array(
+        'label' => t('Membership action form'),
+        'description' => t('The form containing various membership actions such as: join, leave, request membership, ...'),
         'weight' => -4,
       );
     }

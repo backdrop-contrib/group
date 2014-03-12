@@ -47,11 +47,11 @@ function group_hook_info() {
     'group_member_filters',
     'group_member_operations',
     'group_member_operation_links',
+    'group_membership_action_info',
     'group_membership_status_info',
     'group_operations',
     'group_operation_links',
     'group_permission',
-    'group_subscription_info',
     'group_uninstall',
   );
 

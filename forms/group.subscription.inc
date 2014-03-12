@@ -1,42 +1,51 @@
 <?php
 /**
  * @file
- * Group subscription form generator.
+ * Group membership actions form generator.
+ *
+ * Generates the membership action buttons as defined in by other modules in
+ * hook_group_membership_action_info().
  */
 
 /**
- * Generate the subscription form for a group.
+ * Generate the membership actions form for a group.
  */
-function group_subscription_form($form, &$form_state, Group $group, $account = NULL) {
+function group_membership_actions_form($form, &$form_state, Group $group, $account) {
   // Make sure this file is available throughout the entire form lifetime.
-  form_load_include($form_state, 'inc', 'group', 'forms/group.subscription');
+  form_load_include($form_state, 'inc', 'group', 'forms/group.membership_actions');
 
-  $subscription_type = group_type_load($group->type)->subscription_type;
-  $subscription_controller = group_subscription_controller($subscription_type);
+  // Retrieve the membership (if it exists).
+  $group_membership = $group->getMember($account->uid);
 
-  return $subscription_controller->subscriptionForm($form, $form_state, $group, $account);
+  foreach (group_membership_action_info() as $action => $info) {
+    if (isset($info['access callback'] && !call_user_func($info['access callback'], $group, $account, $group_membership)) {
+      continue;
+    }
+
+    $form[$action] = array(
+      '#type' => 'submit',
+      '#value' => $info['label'],
+    );
+  }
+
+  return $form;
 }
 
 /**
- * Validate handler for group_subscription_form().
+ * Submit handler for group_membership_action_form().
  */
-function group_subscription_form_validate($form, &$form_state) {
+function group_membership_action_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
   $group = $form_state['build_info']['args'][0];
+  $account = $form_state['build_info']['args'][1];
 
-  $subscription_type = group_type_load($group->type)->subscription_type;
-  $subscription_controller = group_subscription_controller($subscription_type);
+  // Retrieve the membership (if it exists).
+  $group_membership = $group->getMember($account->uid);
 
-  $subscription_controller->subscriptionFormValidate($form, $form_state);
-}
-
-/**
- * Submit handler for group_subscription_form().
- */
-function group_subscription_form_submit($form, &$form_state) {
-  $group = $form_state['build_info']['args'][0];
-
-  $subscription_type = group_type_load($group->type)->subscription_type;
-  $subscription_controller = group_subscription_controller($subscription_type);
-
-  $subscription_controller->subscriptionFormSubmit($form, $form_state);
+  // Call the clicked actions's callback.
+  foreach (group_membership_action_info() as $action => $info) {
+    if (isset($values[$action]) && $values['op'] == $values[$action]) {
+      call_user_func($info['action callback'], $group, $account, $group_membership);
+    }
+  }
 }

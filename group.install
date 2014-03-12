@@ -112,12 +112,6 @@ function group_schema() {
         'not null' => TRUE,
         'serialize' => TRUE,
       ),
-      'subscription_type' => array(
-        'description' => 'The way users can become members of groups of this group type.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-      ),
       'weight' => array(
         'description' => 'The weight of this group type in relation to others.',
         'type' => 'int',
@@ -489,4 +483,11 @@ function group_update_7005() {
     $group_admin->status = ENTITY_CUSTOM;
     $group_admin->save();
   }
+}
+
+/**
+ * Drop the subscription_type column from {group_type}.
+ */
+function group_update_7006() {
+  db_drop_field('group_type', 'subscription_type');
 }

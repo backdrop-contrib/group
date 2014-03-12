@@ -39,21 +39,6 @@ function group_type_form($form, &$form_state, $group_type, $op = 'edit') {
     '#description' => t('A unique machine-readable name for this group type. It must only contain lowercase letters, numbers, and underscores.'),
   );
 
-  // Build the group subscription types array.
-  $subscription_types = array();
-  foreach (group_subscription_info() as $type => $info) {
-    $subscription_types[$type] = '<strong>' . $info['title'] . '</strong>: ' . $info['description'];
-  }
-
-  $form['subscription_type'] = array(
-    '#title' => t('Subscription type'),
-    '#type' => 'radios',
-    '#options' => $subscription_types,
-    '#default_value' => $group_type->subscription_type,
-    '#description' => t('Select the way users can become members of groups of this type.'),
-    '#required' => TRUE,
-  );
-
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',

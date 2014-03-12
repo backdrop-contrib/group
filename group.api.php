@@ -373,30 +373,52 @@ function hook_group_membership_status_info() {
 }
 
 /**
- * Provide information about group subscription types exposed by your module.
+ * Provide information about group membership actions exposed by your module.
  *
- * Subscription types manage the way users can become a member of a group. An
- * example of how to implement your own subscription type can be found in the
- * Group Invite (ginvite) submodule included in Group.
+ * Membership actions affect the way users are members of a group. An example
+ * of how to implement your own membership action can be found in the Group
+ * Invite (ginvite) submodule included in Group.
+ *
+ * Typically, a module that provides a membership action also provides at least
+ * one group permission and optionally membership status to go with it. Check
+ * out hook_group_permission() and hook_group_membership_status_info()
+ * respectively on how to do so.
+ *
+ * Out of the box, membership actions are represented by buttons on the group
+ * view. Other modules can choose to create different display options for them.
  *
  * @return array
- *   An array whose keys are subscription controller machine names and whose
- *   corresponding values are arrays containing the following key-value pairs:
- *   - title: The human readable title for the subscription type.
- *   - description: Extra information about what the subscription type does.
- *   - controller: The name of the controller class. Must implement the
- *     GroupSubscriptionControllerInterface or it will be ignored. It is
- *     advisable, yet not obligated, to extend your controller from the
- *     GroupPublicSubscriptionController class provided by Group itself.
+ *   An array of actions that can affect the state of a membership, keyed by a
+ *   unique machine name with each entry having the following keys:
+ *   - label: The human readable label for the membership action. This will be
+ *     used as the button label on the group view.
+ *   - description: (optional) Extra information about what the action does to
+ *     a membership. Can be used by other modules.
+ *   - access callback: (optional) Callback that returns TRUE if the user has
+ *     access to the action or FALSE otherwise. Always receives a group and
+ *     user object as arguments and a group membership object if one exists.
+ *     Always allows access if a callback is omitted.
+ *   - action callback: Callback which is called when the action is fired. Out
+ *     of the box this happens when the button on the group view is pressed.
+ *     Always receives a group and user object as arguments and a group
+ *     membership object if one exists.
  *
- * @see GroupSubscriptionControllerInterface
- * @see GroupSubscriptionController
+ * @see hook_group_permission()
+ * @see hook_group_membership_status_info()
  */
-function hook_group_subscription_info() {
-  $info['highlander'] = array(
-    'title' => t('Highlander'),
-    'description' => t('There can be only one.'),
-    'controller' => 'HighlanderSubscriptionController',
+function hook_group_membership_action_info() {
+  $info['digest_subscribe'] = array(
+    'label' => t('Subscribe to e-mail digest'),
+    'description' => t('Receive e-mail notifications for events in this group.'),
+    'access callback' => 'mymodule_member_is_not_subscribed',
+    'action callback' => 'mymodule_subscribe_member_digest',
+  );
+
+  $info['digest_unsubscribe'] = array(
+    'label' => t('Unsubscribe from e-mail digest'),
+    'description' => t('Stop receiving e-mail notifications.'),
+    'access callback' => 'mymodule_member_is_subscribed',
+    'action callback' => 'mymodule_unsubscribe_member_digest',
   );
 
   return $info;

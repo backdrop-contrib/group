@@ -22,6 +22,17 @@ function group_group_permission() {
     'access member overview' => array(
       'title' => t('Access the member overview page'),
     ),
+    'join group' => array(
+      'title' => t('Join group'),
+      'description' => t('Should not be used in combination with "Request group membership"'),
+    ),
+    'request membership' => array(
+      'title' => t('Request group membership'),
+      'description' => t('Should not be used in combination with "Join group"'),
+    ),
+    'leave group' => array(
+      'title' => t('Leave group'),
+    ),
     'view group' => array(
       'title' => t('View group'),
     ),
@@ -186,20 +197,122 @@ function group_group_membership_status_info() {
 }
 
 /**
- * Implements hook_group_subscription_info().
+ * Implements hook_group_membership_action_info().
  */
-function group_group_subscription_info() {
-  $info['public'] = array(
-    'title' => t('Public'),
-    'description' => t('Users can freely subscribe to a group with the click of a button.'),
-    'controller' => 'GroupPublicSubscriptionController',
+function group_group_membership_action_info() {
+  $info['group_join'] = array(
+    'label' => t('Join'),
+    'description' => t('This group is free for anyone to join'),
+    'access callback' => 'group_user_can_join',
+    'action callback' => 'group_user_join',
   );
 
-  $info['private'] = array(
-    'title' => t('Private'),
-    'description' => t('Users can issue a membership request which has to be approved.'),
-    'controller' => 'GroupPrivateSubscriptionController',
+  $info['group_request_membership'] = array(
+    'label' => t('Request membership'),
+    'description' => t('This group requires admin approval to join'),
+    'access callback' => 'group_user_can_request_membership',
+    'action callback' => 'group_user_request_membership',
+  );
+
+  $info['group_leave'] = array(
+    'label' => t('Leave'),
+    'description' => t('You are member of this group'),
+    'access callback' => 'group_user_can_leave',
+    'action callback' => 'group_user_leave',
   );
 
   return $info;
+}
+
+/**
+ * Check whether a user can join a group.
+ *
+ * @param Group $group
+ *   The group to check access for.
+ * @param object $account
+ *   The user to check access for.
+ * @param GroupMembership $group_membership
+ *   (optional) The group membership if one exists already.
+ *
+ * @return bool
+ *   Whether the user can join the group.
+ */
+function group_user_can_join($group, $account, $group_membership = NULL) {
+  return empty($group_membership) && group_access('join group', $group, $account);
+}
+
+/**
+ * Join a group.
+ *
+ * @param Group $group
+ *   The group to join.
+ * @param object $account
+ *   The user that wants to join.
+ */
+function group_user_join($group, $account) {
+  $group->addMember($account->uid);
+  drupal_set_message(t('You have joined the group.'));
+}
+
+/**
+ * Check whether a user can request to join a group.
+ *
+ * @param Group $group
+ *   The group to check access for.
+ * @param object $account
+ *   The user to check access for.
+ * @param GroupMembership $group_membership
+ *   (optional) The group membership if one exists already.
+ *
+ * @return bool
+ *   Whether the user can request a membership for the group.
+ */
+function group_user_can_request_membership($group, $account, $group_membership = NULL) {
+  return empty($group_membership) && group_access('request membership', $group, $account);
+}
+
+/**
+ * Request to join a group.
+ *
+ * @param Group $group
+ *   The group to join.
+ * @param object $account
+ *   The user that wants to join.
+ */
+function group_user_request_membership($group, $account) {
+  // @todo Implement this.
+  drupal_set_message(t('You have requested to join the group.'));
+  drupal_set_message(t('Not implemented yet'), 'warning');
+}
+
+/**
+ * Check whether a user can leave a group.
+ *
+ * @param Group $group
+ *   The group to check access for.
+ * @param object $account
+ *   The user to check access for.
+ * @param GroupMembership $group_membership
+ *   The group membership of the user that wants to leave.
+ *
+ * @return bool
+ *   Whether the user can leave the group.
+ */
+function group_user_can_leave($group, $account, $group_membership) {
+  return !empty($group_membership) && group_access('leave group', $group, $account);
+}
+
+/**
+ * Leave a group.
+ *
+ * @param Group $group
+ *   The group to leave.
+ * @param object $account
+ *   The user that wants to leave.
+ * @param GroupMembership $group_membership
+ *   The group membership of the user that wants to leave.
+ */
+function group_user_leave($group, $account, $group_membership) {
+  $group_membership->delete();
+  drupal_set_message(t('You have left the group.'));
 }
