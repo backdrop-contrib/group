@@ -135,6 +135,42 @@ function ginvite_get_invites($mail) {
 }
 
 /**
+ * Implements hook_mail().
+ *
+ * This mail is sent when people who do not have an account on the website yet
+ * are invited into a group. It is sent in the language the inviter was using
+ * the website in.
+ *
+ * @todo Make this e-mail customizable: variable or stringoverrides module?
+ *
+ * @see ginvite_by_mail_form_submit()
+ */
+function ginvite_mail($key, &$message, $params) {
+  if ($key == 'invite') {
+    $options = array(
+      'langcode' => $message['language']->language
+    );
+
+    $body_message  = 'Hi there!' . "\n\n";
+    $body_message .= '@user has invited you to become a member of the group "@group" on @site.' . "\n";
+    $body_message .= 'If you wish to accept the invitation, you need to create an account first.' . "\n\n";
+    $body_message .= 'Please visit the following address in order to do so: @url.' . "\n";
+    $body_message .= 'Make sure you register your account with this e-mail address!' . "\n\n";
+    $body_message .= 'Kind regards,' . "\n";
+    $body_message .= 'The @site team';
+    $body_replace = array(
+      '@user' => $params['user']->name,
+      '@group' => $params['group']->title,
+      '@site' => variable_get('site_name', 'Drupal'),
+      '@url' => url('user/register', array('absolute' => TRUE)),
+    );
+
+    $message['subject'] = t('You have a pending group invitation', array(), $options);
+    $message['body'][] = t($body_message, $body_replace, $options);
+  }
+}
+
+/**
  * Implements hook_admin_paths().
  */
 function ginvite_admin_paths() {

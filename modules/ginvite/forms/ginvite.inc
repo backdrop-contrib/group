@@ -187,7 +187,8 @@ function ginvite_by_mail_form_submit($form, &$form_state) {
 
   // Otherwise, register the group invite in the database.
   else {
-    global $user;
+    global $user, $language;
+    $group = $form_state['build_info']['args'][0];
 
     // Insert the invite record into the database.
     db_insert('group_invite')
@@ -201,7 +202,8 @@ function ginvite_by_mail_form_submit($form, &$form_state) {
       ->execute();
 
     // Actually e-mail the invite to the person.
-    // @todo
+    $params = array('user' => $user, 'group' => $group);
+    drupal_mail('ginvite', 'invite', $mail, $language, $params);
 
     // Show a confirmation message.
     drupal_set_message(t('Invite sent to %mail', array('%mail' => $mail)));
