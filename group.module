@@ -31,6 +31,16 @@ function group_views_api() {
 }
 
 /**
+ * Implements hook_ctools_plugin_directory()
+ */
+function group_ctools_plugin_directory($module, $plugin) {
+  // We currently only support CTools plugins.
+  if ($module == 'ctools') {
+    return "plugins/ctools/$plugin";
+  }
+}
+
+/**
  * Implements hook_hook_info().
  *
  * Makes sure this module automatically finds exported Group
