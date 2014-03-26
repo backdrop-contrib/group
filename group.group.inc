@@ -22,6 +22,14 @@ function group_group_permission() {
     'access member overview' => array(
       'title' => t('Access the member overview page'),
     ),
+    'edit group' => array(
+      'title' => t('Edit group'),
+      'description' => t('Edit the group information'),
+    ),
+    'delete group' => array(
+      'title' => t('Delete group'),
+      'description' => t('Delete the group'),
+    ),
     'join group' => array(
       'title' => t('Join group'),
       'description' => t('Should not be used in combination with "Request group membership"'),

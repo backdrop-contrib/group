@@ -152,8 +152,11 @@ function group_entity_access($op, $group, $account = NULL, $entity_type = NULL, 
       return group_access('administer group', $group, $account)
         || group_access('view group', $group, $account);
     case 'update':
+      return group_access('administer group', $group, $account)
+        || group_access('edit group', $group, $account);
     case 'delete':
-      return group_access('administer group', $group, $account);
+      return group_access('administer group', $group, $account)
+        || group_access('delete group', $group, $account);
   }
 }
 
