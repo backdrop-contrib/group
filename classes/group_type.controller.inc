@@ -18,17 +18,37 @@ class GroupTypeController extends EntityAPIControllerExportable {
     $gids = array();
 
     foreach (group_types($ids) as $group_type) {
+      // If an entity is deleted while it was flagged as ENTITY_IN_CODE, it
+      // means the entity was either reverted or really deleted. By checking
+      // for the 'is_rebuild' property, we know it was deleted from within
+      // _entity_defaults_rebuild() which only deletes the entity if the
+      // default it came from is no longer available. In any other case, we
+      // are dealing with a revert or a manual deletion which will only result
+      // in the entity being rebuilt upon next cache clear.
+      $entity_in_code = entity_has_status('group_type', $group_type, ENTITY_IN_CODE);
+      $entity_rebuilt = !empty($entity->is_rebuild);
+
+      // Set this on the group type so other modules can use it.
+      $group_type->is_revert = $entity_in_code && !$entity_rebuilt;
+
       // Clean up local roles before deletion.
+      $group_type->is_deleted = TRUE;
       $group_type->removeRoles();
 
-      // Gather the group ids of all groups of the deleted types.
-      $groups = group_load_by_type($group_type->name);
-      $gids = array_merge($gids, array_keys($groups));
+      // Gather the group ids of all groups of the deleted type.
+      if (!$group_type->is_revert) {
+        $groups = group_load_by_type($group_type->name);
+        $gids = array_merge($gids, array_keys($groups));
+      }
     }
 
-    // Delete all groups of the deleted types.
-    group_delete_multiple($gids);
+    // Delete all groups of the group types that weren't being reverted.
+    if (!empty($gids)) {
+      group_delete_multiple($gids);
+    }
 
+    // Delete the group types after setting our flags so those flags are still
+    // being passed on to other modules implementing hook_group_delete().
     parent::delete($ids, $transaction);
 
     // Rebuild the menu cache so the group/add page works.
@@ -41,16 +61,9 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * @see EntityAPIController::save()
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
-    $is_new = !empty($entity->is_new) || empty($entity->{$this->idKey});
-
-    // If the is_rebuild property is set, we are dealing with a group type
-    // that was imported from code and we need to take care of the roles.
-    if (!empty($entity->is_rebuild)) {
-      // Delete attached group roles if it is a rebuild.
-      if (!$is_new) {
-        $entity->removeRoles();
-      }
-
+    // When we are dealing with an imported Group Type, we need to take care
+    // of the Group Role entities that were imported along with it.
+    if (!empty($entity->is_new) && !empty($entity->roles)) {
       // Create the group roles that were imported along with the type.
       foreach ($entity->roles as $role) {
         $group_role = group_role_import(entity_var_json_export($role));

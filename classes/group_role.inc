@@ -44,9 +44,11 @@ class GroupRole extends Entity {
     // Only flag the parent type when we're dealing with a local group role.
     if (empty($this->global)) {
       // If the type cannot be loaded, it should mean that this function was
-      // run while we are still building an imported type. We therefore do not
-      // need to flag the type as ENTITY_CUSTOM just yet.
-      if ($group_type = group_type_load($this->type)) {
+      // run while we are still building an imported type. Furthermore, if the
+      // group type can be loaded but has the 'is_deleted' property, it means
+      // we were about to delete that group type. In both cases, we do not need
+      // to save the group type.
+      if ($group_type = group_type_load($this->type) && empty($group_type->is_deleted)) {
         // Saving without $entity->is_rebuild automatically sets ENTITY_CUSTOM.
         group_type_save($group_type);
       }
