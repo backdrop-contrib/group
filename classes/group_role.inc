@@ -48,7 +48,7 @@ class GroupRole extends Entity {
       // group type can be loaded but has the 'is_deleted' property, it means
       // we were about to delete that group type. In both cases, we do not need
       // to save the group type.
-      if ($group_type = group_type_load($this->type) && empty($group_type->is_deleted)) {
+      if (($group_type = group_type_load($this->type)) && empty($group_type->is_deleted)) {
         // Saving without $entity->is_rebuild automatically sets ENTITY_CUSTOM.
         group_type_save($group_type);
       }
