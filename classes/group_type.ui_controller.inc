@@ -104,7 +104,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
   /**
    * Builds the operation form.
    */
-  public function operationForm($form, &$form_state, $entity, $op) {
+  public function operationForm($form, &$form_state, $group_type, $op) {
     if ($op == 'delete') {
       $form['info'] = array(
         '#markup' => t('By deleting this group type you will delete all groups of that type, including their content.'),
@@ -113,14 +113,14 @@ class GroupTypeUIController extends EntityDefaultUIController {
 
       $message = 'Are you sure you want to delete the group type %label and all of its groups?';
       $replace = array(
-        '%label' => entity_label($this->entityType, $entity),
+        '%label' => entity_label('group_type', $group_type),
       );
 
       return confirm_form($form, t($message, $replace), $this->path, NULL, t('Delete'));
     }
 
     // Call parent method for other operations.
-    return parent::operationForm($form, $form_state, $entity, $op);
+    return parent::operationForm($form, $form_state, $group_type, $op);
   }
 
   /**
