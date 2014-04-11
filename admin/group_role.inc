@@ -12,7 +12,7 @@
  *
  * @see GroupTypeUIController::hook_menu()
  */
-function group_type_add_role_form($group_type) {
+function group_type_add_role_form(GroupType $group_type) {
   $group_role = entity_create('group_role', array('type' => $group_type->name, 'global' => 0));
   return entity_ui_get_form('group_role', $group_role, 'add');
 }
@@ -20,7 +20,7 @@ function group_type_add_role_form($group_type) {
 /**
  * Generates the group role editing form.
  */
-function group_role_form($form, &$form_state, $group_role, $op = 'edit') {
+function group_role_form($form, &$form_state, GroupRole $group_role, $op = 'edit') {
   $locked = entity_has_status('group_role', $group_role, ENTITY_IN_CODE);
 
   if ($op == 'clone') {

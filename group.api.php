@@ -209,7 +209,7 @@ function hook_group_operations() {
  * @see group_groups_form()
  * @see theme_links()
  */
-function hook_group_operation_links($group) {
+function hook_group_operation_links(Group $group) {
   $operations = array();
 
   // Add an 'edit' link if available.
@@ -291,7 +291,7 @@ function hook_group_member_filters() {
  *
  * @see group_member_options_form()
  */
-function hook_group_member_operations($group) {
+function hook_group_member_operations(Group $group) {
   // Acts upon selected members but shows overview form right after.
   $operations['block'] = array(
     'label' => t('Block selected members'),
@@ -328,7 +328,7 @@ function hook_group_member_operations($group) {
  * @see group_members_form()
  * @see theme_links()
  */
-function hook_group_member_operation_links($group_membership) {
+function hook_group_member_operation_links(GroupMembership $group_membership) {
   $operations = array();
 
   // Add membership management links.

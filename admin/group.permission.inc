@@ -7,13 +7,17 @@
 /**
  * Builds the role permission page.
  *
+ * @param array $form
+ * @param array $form_state
  * @param GroupType $group_type
  *   The group type to show the permissions page for.
  * @param GroupRole $group_role
  *   (optional) A single group role to show the page for.
  *   When $group_role is provided, $group_type is ignored.
+ *
+ * @return array
  */
-function group_permission_form($form, &$form_state, $group_type, $group_role = NULL) {
+function group_permission_form($form, &$form_state, GroupType $group_type, GroupRole $group_role = NULL) {
   // Define whether we're on a group type overview page or not.
   $type_page = !empty($group_type) && empty($group_role);
 

@@ -223,7 +223,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
   /**
    * Generates the row for the passed type.
    */
-  protected function typeTableRow($name, $group_type) {
+  protected function typeTableRow($name, GroupType $group_type) {
     // Check if the group type is ENTITY_FIXED.
     $type_fixed = entity_has_status('group_type', $group_type, ENTITY_FIXED);
 

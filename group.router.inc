@@ -100,7 +100,7 @@ function _group_add_access() {
  *
  * @see GroupTypeUiController::hook_menu()
  */
-function group_type_add_role_access($group_type) {
+function group_type_add_role_access(GroupType $group_type) {
   return user_access('administer group types') && !entity_has_status('group_type', $group_type, ENTITY_FIXED);
 }
 
@@ -116,7 +116,7 @@ function group_type_add_role_access($group_type) {
  *
  * @see GroupUiController::hook_menu()
  */
-function group_membership_access($group, $account) {
+function group_membership_access(Group $group, $account) {
   global $user;
 
   // Short-circuit if the current user is the subject of the membership.
@@ -130,7 +130,7 @@ function group_membership_access($group, $account) {
  *
  * @see GroupUiController::hook_menu()
  */
-function group_page_title($group) {
+function group_page_title(Group $group) {
   return $group->title;
 }
 

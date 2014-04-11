@@ -225,7 +225,7 @@ class Group extends Entity {
    * @param Group $group
    *   The subgroup to remove from the group.
    */
-  public function removeSubgroup($group) {
+  public function removeSubgroup(Group $group) {
     $this->removeEntity($group->gid, 'group');
   }
 

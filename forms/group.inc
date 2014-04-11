@@ -7,7 +7,7 @@
 /**
  * Generates the group editing form.
  */
-function group_form($form, &$form_state, $group, $op = 'edit') {
+function group_form($form, &$form_state, Group $group, $op = 'edit') {
   $group_type = group_type_load($group->type);
 
   if ($op == 'add') {

@@ -92,7 +92,7 @@ function group_group_operations() {
 /**
  * Implements hook_group_operation_links().
  */
-function group_group_operation_links($group) {
+function group_group_operation_links(Group $group) {
   $operations = array();
 
   // Retrieve the destination url.
@@ -137,7 +137,7 @@ function group_group_member_filters() {
  *
  * Callbacks are situated in forms/group.members.inc.
  */
-function group_group_member_operations($group) {
+function group_group_member_operations(Group $group) {
   $operations['remove'] = array(
     'label' => t('Remove selected members'),
     'callback' => 'group_membership_multiple_delete_confirm',
@@ -178,7 +178,7 @@ function group_group_member_operations($group) {
 /**
  * Implements hook_group_member_operation_links().
  */
-function group_group_member_operation_links($group_membership) {
+function group_group_member_operation_links(GroupMembership $group_membership) {
   $operations = array();
 
   // Retrieve the destination url.
@@ -265,7 +265,7 @@ function group_group_membership_action_info() {
  * @return bool
  *   Whether the user can join the group.
  */
-function group_user_can_join($group, $account, $group_membership = NULL) {
+function group_user_can_join(Group $group, $account, GroupMembership $group_membership = NULL) {
   return empty($group_membership) && group_access('join group', $group, $account);
 }
 
@@ -295,7 +295,7 @@ function group_user_join($group, $account) {
  * @return bool
  *   Whether the user can request a membership for the group.
  */
-function group_user_can_request_membership($group, $account, $group_membership = NULL) {
+function group_user_can_request_membership(Group $group, $account, GroupMembership $group_membership = NULL) {
   return empty($group_membership) && group_access('request membership', $group, $account);
 }
 
@@ -307,7 +307,7 @@ function group_user_can_request_membership($group, $account, $group_membership =
  * @param object $account
  *   The user that wants to join.
  */
-function group_user_request_membership($group, $account) {
+function group_user_request_membership(Group $group, $account) {
   // @todo requested_on and requested_by?
   $values = array(
     'gid' => $group->gid,
@@ -335,7 +335,7 @@ function group_user_request_membership($group, $account) {
  * @return bool
  *   Whether the user can leave the group.
  */
-function group_user_can_leave($group, $account, $group_membership) {
+function group_user_can_leave(Group $group, $account, GroupMembership $group_membership) {
   return !empty($group_membership) && group_access('leave group', $group, $account);
 }
 

@@ -37,7 +37,7 @@ function group_autocomplete($search = '') {
  *
  * @todo Individual group access check.
  */
-function group_autocomplete_by_type($group_type, $search = '') {
+function group_autocomplete_by_type(GroupType $group_type, $search = '') {
   $matches = array();
 
   if ($search) {
@@ -101,7 +101,7 @@ function group_add_page() {
  * @return array
  *   A render array suitable for use by drupal_render().
  */
-function group_page($group) {
+function group_page(Group $group) {
   // If there is a menu link to this group, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the group title.

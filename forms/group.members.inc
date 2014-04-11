@@ -33,7 +33,7 @@ function group_member_overview_form($form, &$form_state, Group $group) {
 /**
  * Builds the group member overview filters.
  */
-function group_member_filters_form(Group $group) {
+function group_member_filters_form() {
   $filters = module_invoke_all('group_member_filters');
 
   $session = isset($_SESSION['group_member_filters'])
@@ -431,7 +431,7 @@ function group_membership_unblock($mids) {
 /**
  * Group membership edit form.
  */
-function group_membership_edit_form($form, &$form_state, $group, $account) {
+function group_membership_edit_form($form, &$form_state, Group $group, $account) {
   $group_membership = $group->getMember($account->uid);
 
   $message = 'Edit membership for %user in %group';
@@ -476,7 +476,7 @@ function group_membership_edit_form_submit($form, &$form_state) {
 /**
  * Group membership cancel form.
  */
-function group_membership_cancel_form($form, &$form_state, $group, $account) {
+function group_membership_cancel_form($form, &$form_state, Group $group, $account) {
   global $user;
 
   $unsubscribe_self = $user->uid == $account->uid;

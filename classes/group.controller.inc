@@ -76,24 +76,24 @@ class GroupController extends EntityAPIController {
    *
    * @see EntityAPIController::save()
    */
-  public function save($entity, DatabaseTransaction $transaction = NULL) {
+  public function save($group, DatabaseTransaction $transaction = NULL) {
     // Only act upon saving a new group.
-    if (empty($entity->is_new)) {
-      return parent::save($entity, $transaction);
+    if (empty($group->is_new)) {
+      return parent::save($group, $transaction);
     }
 
     // Hold off on returning the parent return value.
-    $return = parent::save($entity, $transaction);
+    $return = parent::save($group, $transaction);
 
     // Retrieve the default roles for this group type.
     $defaults = variable_get('group_default_roles');
-    $roles = isset($defaults[$entity->type])
-      ? array_filter($defaults[$entity->type])
+    $roles = isset($defaults[$group->type])
+      ? array_filter($defaults[$group->type])
       : array();
 
     // Add the current user as the first member.
     global $user;
-    $entity->addMember($user->uid, $roles);
+    $group->addMember($user->uid, $roles);
 
     return $return;
   }

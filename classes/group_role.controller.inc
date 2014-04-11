@@ -33,9 +33,9 @@ class GroupRoleController extends EntityAPIControllerExportable {
    *
    * @see EntityAPIController::save()
    */
-  public function save($entity, DatabaseTransaction $transaction = NULL) {
-    $is_new = !empty($entity->is_new);
-    $is_special = in_array($entity->name, array('outsider', 'member'));
+  public function save($group_role, DatabaseTransaction $transaction = NULL) {
+    $is_new = !empty($group_role->is_new);
+    $is_special = in_array($group_role->name, array('outsider', 'member'));
 
     // Invalidate the parent type's GroupRole cache whenever we save a new
     // group role or alter a special group role (outsider or member). The
@@ -43,16 +43,16 @@ class GroupRoleController extends EntityAPIControllerExportable {
     // saved to the db and thus need to be rebuilt after every change to avoid
     // serving outdated special roles from the cache.
     if ($is_new || $is_special) {
-      $entity->invalidateTypeCache();
+      $group_role->invalidateTypeCache();
     }
 
     // If we save a special group role (outsider or member), we don't actually
     // save the role but attach its permissions back onto the group type.
     if ($is_special) {
-      $key = $entity->name . '_permissions';
+      $key = $group_role->name . '_permissions';
 
-      $group_type = group_type_load($entity->type);
-      $group_type->$key = $entity->permissions;
+      $group_type = group_type_load($group_role->type);
+      $group_type->$key = $group_role->permissions;
       $group_type->save();
 
       return;
@@ -61,9 +61,9 @@ class GroupRoleController extends EntityAPIControllerExportable {
     // If we save a group role we call GroupRole::flagTypeCustom() which in turn
     // will check whether or not there is a parent group type that needs to be
     // flagged as ENTITY_CUSTOM.
-    $entity->flagTypeCustom();
+    $group_role->flagTypeCustom();
 
-    return parent::save($entity, $transaction);
+    return parent::save($group_role, $transaction);
   }
 
   /**

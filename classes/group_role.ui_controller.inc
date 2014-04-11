@@ -266,7 +266,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
   /**
    * Generates the row for the passed role.
    */
-  protected function roleTableRow($name, $group_role) {
+  protected function roleTableRow($name, GroupRole $group_role) {
     // Check if the group role is ENTITY_FIXED.
     $role_fixed = entity_has_status('group_role', $group_role, ENTITY_FIXED);
 

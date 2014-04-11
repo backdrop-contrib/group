@@ -60,24 +60,24 @@ class GroupTypeController extends EntityAPIControllerExportable {
    *
    * @see EntityAPIController::save()
    */
-  public function save($entity, DatabaseTransaction $transaction = NULL) {
+  public function save($group_type, DatabaseTransaction $transaction = NULL) {
     // When we are dealing with an imported Group Type, we need to take care
     // of the Group Role entities that were imported along with it.
-    if (!empty($entity->is_new) && !empty($entity->roles)) {
+    if (!empty($group_type->is_new) && !empty($group_type->roles)) {
       // Create the group roles that were imported along with the type.
-      foreach ($entity->roles as $role) {
-        $group_role = group_role_import(entity_var_json_export($role));
+      foreach ($group_type->roles as $role) {
+        $group_role = entity_import('group_role', entity_var_json_export($role));
         $group_role->save();
       }
 
       // Remove the roles property before saving the group type.
-      unset($entity->roles);
+      unset($group_type->roles);
     }
 
     // Save the group type after manipulating the roles and permissions
     // so that those functions don't incorrectly flag this group type
     // as ENTITY_CUSTOM.
-    $return = parent::save($entity, $transaction);
+    $return = parent::save($group_type, $transaction);
 
     // Rebuild the menu cache so the group/add page works.
     menu_rebuild();
@@ -114,28 +114,28 @@ class GroupTypeController extends EntityAPIControllerExportable {
    *
    * Exports a group type and its group roles.
    */
-  public function export($entity, $prefix = '') {
+  public function export($group_type, $prefix = '') {
     // Only add special export logic on existing entities. Features likes to
     // run on-the-fly entities through GroupTypeController::export(), which
     // may cause issues when determining the feature's state.
-    if (empty($entity->is_new)) {
+    if (empty($group_type->is_new)) {
       // Get the GroupRole controller.
       $controller = entity_get_controller('group_role');
 
       // Add an empty array to always have the 'roles' property on exports.
-      $entity->roles = array();
+      $group_type->roles = array();
 
       // Add group roles to the group type.
-      foreach ($entity->getRoles(FALSE) as $group_role) {
+      foreach ($group_type->getRoles(FALSE) as $group_role) {
         // Global group roles are never exported along with a group type.
         if ($group_role->global) {
           continue;
         }
 
-        $entity->roles[] = drupal_json_decode($controller->export($group_role, $prefix));
+        $group_type->roles[] = drupal_json_decode($controller->export($group_role, $prefix));
       }
     }
 
-    return parent::export($entity, $prefix);
+    return parent::export($group_type, $prefix);
   }
 }
