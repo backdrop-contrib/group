@@ -256,19 +256,17 @@ class Group extends Entity {
    *
    * @param int $uid
    *   The uid of the member.
-   * @param array $roles
-   *   (optional) The machine names of the group roles to assign to this
-   *   membership. Leave blank to make the user 'just a member'.
-   *
-   * @todo Rework this to allow all GroupMembership values?
+   * @param array $values
+   *   (optional) Extra values to add to the GroupMembership entity, like the
+   *   'roles' property. You cannot overwrite the group id (gid) or user id
+   *   (uid) with this method. Leave blank to make the user 'just a member'.
    */
-  public function addMember($uid, $roles = array()) {
-    if (!($group_membership = $this->getMember($uid))) {
-      $values = array('gid' => $this->gid, 'uid' => $uid);
+  public function addMember($uid, $values = array()) {
+    if (!$this->getMember($uid)) {
+      $values = array('gid' => $this->gid, 'uid' => $uid) + $values;
       $group_membership = entity_create('group_membership', $values);
+      $group_membership->save();
     }
-
-    $group_membership->grantRoles($roles);
   }
 
   /**
