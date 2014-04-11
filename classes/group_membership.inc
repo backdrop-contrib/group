@@ -6,72 +6,48 @@
 
 /**
  * Main class for group memberships.
- *
- * @todo Validation of added roles.
  */
 class GroupMembership extends Entity {
 
   /**
-   * Grant roles for a membership.
+   * Grant roles to a membership.
+   *
+   * This is merely a helper function that sets the 'roles' property and then
+   * saves the GroupMembership. The actual business logic can be found in
+   * GroupMembershipController::save().
    *
    * @param array $roles
    *   A list of role names to grant.
-   * @param bool $safety
-   *   (optional) Whether to check for primary key integrity. Defaults to TRUE.
-   *   Set this to FALSE if you know for sure that all of the roles you are
-   *   granting are not already related to the membership. It gives a small
-   *   performance boost.
+   *
+   * @see GroupMembershipController::save()
    */
-  public function grantRoles(array $roles, $safety = TRUE) {
-    // Only save roles to the db if the membership exists in it. If it doesn't
-    // exist yet, but gets saved later on, grantRoles() will be invoked again
-    // from GroupMembershipController::save().
-    if (isset($this->mid)) {
-      if ($safety) {
-        // Load the original entity to only retain new roles.
-        $original = entity_load_unchanged('group_membership', $this->mid);
-        $roles = array_diff($roles, $original->roles);
-      }
-
-      // Add the roles to {group_membership_role} for the membership.
-      if (!empty($roles)) {
-        $query = db_insert('group_membership_role')->fields(array('mid', 'role'));
-
-        foreach ($roles as $role) {
-          $query->values(array(
-            'mid' => $this->mid,
-            'role' => $role,
-          ));
-        }
-
-        $query->execute();
-      }
-    }
-
+  public function grantRoles(array $roles) {
     // Update the membership's roles property.
-    $roles = array_merge($this->roles, $roles);
-    $this->roles = array_values(array_unique($roles));
+    $this->roles = array_merge($this->roles, $roles);
+
+    // Save the membership so the roles are actually granted.
+    $this->save();
   }
 
   /**
    * Revoke roles from a membership.
    *
+   * This is merely a helper function that sets the 'roles' property and then
+   * saves the GroupMembership. The actual business logic can be found in
+   * GroupMembershipController::save().
+   *
    * @param array $roles
    *   (optional) A list of role names to revoke. Will revoke all roles
-   *   from the group membership if $permissions is left blank.
+   *   from the group membership if left blank.
+   *
+   * @see GroupMembershipController::save()
    */
   public function revokeRoles(array $roles = array()) {
-    $query = db_delete('group_membership_role')->condition('mid', $this->mid);
-
-    if (!empty($roles)) {
-      $query->condition('role', $roles, 'IN');
-    }
-    $query->execute();
-
     // Update the membership's roles property.
-    $this->roles = !empty($roles)
-      ? array_values(array_diff($this->roles, $roles))
-      : array();
+    $this->roles = empty($roles) ? array() : array_diff($this->roles, $roles);
+
+    // Save the membership so the roles are actually revoked.
+    $this->save();
   }
 
   /**
@@ -81,6 +57,10 @@ class GroupMembership extends Entity {
    * example, when a form exposes checkboxes to configure roles for a
    * membership, the form submit handler may directly pass the submitted values
    * for the checkboxes form element to this function.
+   *
+   * This is merely a helper function that sets the 'roles' property and then
+   * saves the GroupMembership. The actual business logic can be found in
+   * GroupMembershipController::save().
    *
    * @param $roles
    *   An associative array, where the key holds the role name and the value
@@ -98,21 +78,21 @@ class GroupMembership extends Entity {
    *   @endcode
    *   Existing roles are not changed, unless specified in $roles.
    *
-   * @see GroupMembership::grantRoles()
-   * @see GroupMembership::revokeRoles()
+   * @see GroupMembershipController::save()
    */
   public function changeRoles(array $roles) {
-    // Grant new roles for the membership.
+    // Find out what roles we want to grant or revoke.
     $grant = array_filter($roles);
-    if (!empty($grant)) {
-      $this->grantRoles(array_keys($grant));
-    }
+    $revoke = array_diff_assoc($roles, $grant);
+
+    // Grant new roles for the membership.
+    $this->roles = array_merge($this->roles, array_keys($grant));
 
     // Revoke roles from the membership.
-    $revoke = array_diff_assoc($roles, $grant);
-    if (!empty($revoke)) {
-      $this->revokeRoles(array_keys($revoke));
-    }
+    $this->roles = array_diff($this->roles, array_keys($revoke));
+
+    // Save the membership so the roles are actually updated.
+    $this->save();
   }
 
   /**

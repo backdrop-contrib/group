@@ -53,32 +53,53 @@ class GroupMembershipController extends EntityAPIController {
 
   /**
    * Save a group membership.
+   *
+   * @todo Validation of added roles.
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
+    // First of all we clean up the 'roles' property to avoid duplicates.
+    $entity->roles = array_unique($entity->roles);
+
     // Save the group membership so we are sure to have an id.
     $return = parent::save($entity, $transaction);
 
-    // Save all roles to the db for new memberships.
+    // Below we take care of the 'roles' property that was set on the
+    // GroupMembership; saving new roles to and removing revoked roles from the
+    // database. For new GroupMembership entities, we can simply grant all of
+    // the roles. For existing ones, we need to run some integrity checks.
     if ($return == SAVED_NEW) {
-      $entity->grantRoles($entity->roles, FALSE);
+      $grant = $entity->roles;
     }
-
-    // Act more carefully for updated memberships.
     else {
       // Load the original entity to detect changes.
       $original = entity_load_unchanged('group_membership', $entity->mid);
 
-      // Remove revoked roles from the db.
+      // Flag new roles for granting.
+      $grant = array_diff($entity->roles, $original->roles);
+
+      // Flag old roles for revoking.
       $revoke = array_diff($original->roles, $entity->roles);
-      if (!empty($revoke)) {
-        $this->revokeRoles($revoke);
+    }
+
+    // Grant the roles by inserting them into {group_membership_role}.
+    if (!empty($grant)) {
+      $query = db_insert('group_membership_role')->fields(array('mid', 'role'));
+
+      foreach ($grant as $role) {
+        $query->values(array(
+          'mid' => $entity->mid,
+          'role' => $role,
+        ));
       }
 
-      // Add new roles to the db.
-      $grant = array_diff($entity->roles, $original->roles);
-      if (!empty($grant)) {
-        $this->grantRoles($grant, FALSE);
-      }
+      $query->execute();
+    }
+
+    // Revoke the roles by deleting them from {group_membership_role}.
+    if (!empty($revoke)) {
+      $query = db_delete('group_membership_role')->condition('mid', $entity->mid);
+      $query->condition('role', $revoke, 'IN');
+      $query->execute();
     }
 
     return $return;

@@ -259,12 +259,13 @@ class Group extends Entity {
    * @param array $roles
    *   (optional) The machine names of the group roles to assign to this
    *   membership. Leave blank to make the user 'just a member'.
+   *
+   * @todo Rework this to allow all GroupMembership values?
    */
   public function addMember($uid, $roles = array()) {
     if (!($group_membership = $this->getMember($uid))) {
       $values = array('gid' => $this->gid, 'uid' => $uid);
       $group_membership = entity_create('group_membership', $values);
-      $group_membership->save();
     }
 
     $group_membership->grantRoles($roles);
