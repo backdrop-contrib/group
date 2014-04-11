@@ -107,8 +107,8 @@ class GroupController extends EntityAPIController {
    * @param $values
    *   An array of values to set, keyed by property name.
    *
-   * @return
-   *   A new instance of the group entity type.
+   * @return Group
+   *   A new Group instance.
    */
   public function create(array $values = array()) {
     // Provide defaults that are needed in group_form().

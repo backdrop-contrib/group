@@ -5,6 +5,11 @@
  */
 
 /**
+ * @addtogroup hooks
+ * @{
+ */
+
+/**
  * Act upon uninstallation of the Group module.
  *
  * This function differs from hook_modules_uninstalled() in a sense that it
@@ -61,7 +66,7 @@ function hook_entity_info() {
  *
  * Permissions are checked using Group::userHasPermission().
  *
- * @return
+ * @return array
  * An array whose keys are permission names and whose corresponding values
  * are arrays containing the following key-value pairs:
  * - title: The human-readable name of the permission, to be shown on the
@@ -423,3 +428,7 @@ function hook_group_membership_action_info() {
 
   return $info;
 }
+
+/**
+ * @} End of "addtogroup hooks".
+ */

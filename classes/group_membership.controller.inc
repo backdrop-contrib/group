@@ -114,8 +114,8 @@ class GroupMembershipController extends EntityAPIController {
    * @param $values
    *   An array of values to set, keyed by property name.
    *
-   * @return
-   *   A new instance of the group entity type.
+   * @return GroupMembership
+   *   A new GroupMembership instance.
    */
   public function create(array $values = array()) {
     // Provide defaults that are needed for the db.

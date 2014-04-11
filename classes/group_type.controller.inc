@@ -94,8 +94,8 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * @param $values
    *   An array of values to set, keyed by property name.
    *
-   * @return
-   *   A new instance of the group type entity type.
+   * @return GroupType
+   *   A new GroupType instance.
    */
   public function create(array $values = array()) {
     // Provide defaults that are needed in group_type_form().
