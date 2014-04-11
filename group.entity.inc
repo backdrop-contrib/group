@@ -150,7 +150,7 @@ function group_entity_info_alter(&$entity_info) {
  *
  * @return bool
  */
-function group_entity_access($op, Group $group, $account = NULL, $entity_type = NULL, $group_type = NULL) {
+function group_entity_access($op, Group $group = NULL, $account = NULL, $entity_type = NULL, $group_type = NULL) {
   switch ($op) {
     case 'create':
       return !empty($group_type) && user_access("create $group_type group", $account);
