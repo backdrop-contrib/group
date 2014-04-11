@@ -15,7 +15,7 @@
  *
  * @see entity_load_multiple_by_name()
  */
-function group_types($names = array()) {
+function group_types($names = FALSE) {
   return entity_load_multiple_by_name('group_type', $names);
 }
 

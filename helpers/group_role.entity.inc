@@ -15,7 +15,7 @@
  *
  * @see entity_load_multiple_by_name()
  */
-function group_roles($names = array()) {
+function group_roles($names = FALSE) {
   return entity_load_multiple_by_name('group_role', $names);
 }
 
