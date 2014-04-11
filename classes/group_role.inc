@@ -50,7 +50,7 @@ class GroupRole extends Entity {
       // to save the group type.
       if (($group_type = group_type_load($this->type)) && empty($group_type->is_deleted)) {
         // Saving without $entity->is_rebuild automatically sets ENTITY_CUSTOM.
-        group_type_save($group_type);
+        $group_type->save();
       }
     }
   }

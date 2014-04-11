@@ -19,7 +19,7 @@
  *   (optional) The account to check, if not given use currently logged in user.
  *
  * @return bool
- *   Wether the user has the requested permission.
+ *   Whether the user has the requested permission.
  */
 function group_access($permission, $group, $account = NULL) {
   global $user;
@@ -180,7 +180,7 @@ function group_membership_status_types() {
  * Get the group membership action information.
  *
  * @return array
- *   An array of group membersip action info as provided by
+ *   An array of group membership action info as provided by
  *   hook_group_membership_action_info().
  *
  * @see hook_group_membership_action_info()

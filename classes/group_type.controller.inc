@@ -67,7 +67,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
       // Create the group roles that were imported along with the type.
       foreach ($entity->roles as $role) {
         $group_role = group_role_import(entity_var_json_export($role));
-        group_role_save($group_role);
+        $group_role->save();
       }
 
       // Remove the roles property before saving the group type.

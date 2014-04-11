@@ -279,7 +279,7 @@ class Group extends Entity {
    */
   public function removeMember($uid) {
     if ($group_membership = $this->getMember($uid)) {
-      group_membership_delete($group_membership);
+      $group_membership->delete();
     }
   }
 

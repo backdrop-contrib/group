@@ -53,7 +53,7 @@ class GroupRoleController extends EntityAPIControllerExportable {
 
       $group_type = group_type_load($entity->type);
       $group_type->$key = $entity->permissions;
-      group_type_save($group_type);
+      $group_type->save();
 
       return;
     }

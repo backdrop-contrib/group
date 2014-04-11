@@ -133,7 +133,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
       if ($group_role->weight != $weight) {
         $group_role->weight = $weight;
-        group_type_save($group_role);
+        $group_role->save();
       }
     }
   }

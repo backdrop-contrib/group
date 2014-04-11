@@ -6,13 +6,31 @@
 
 /**
  * Load multiple groups.
+ *
+ * @param array $gids
+ *   (optional) An array of group ids to load.
+ * @param bool $reset
+ *   (optional) Whether to reset the internal cache.
+ *
+ * @return array
+ *   An array of Group entities, keyed by their group ids.
+ *
+ * @see entity_load()
  */
-function group_load_multiple($gids = FALSE, $reset = FALSE) {
+function group_load_multiple($gids = array(), $reset = FALSE) {
   return entity_load('group', $gids, array(), $reset);
 }
 
 /**
  * Load a group.
+ *
+ * @param int $gid
+ *   The group id of the group you want to load.
+ * @param bool $reset
+ *   (optional) Whether to reset the internal cache.
+ *
+ * @return Group
+ *   The loaded Group entity.
  */
 function group_load($gid, $reset = FALSE) {
   $groups = group_load_multiple(array($gid), array(), $reset);
@@ -43,6 +61,12 @@ function group_load_by_property($property, $value) {
 
 /**
  * Load all groups with a given name.
+ *
+ * @param string $name
+ *   The name of the group you want to load.
+ *
+ * @return array
+ *   An array of Group entities, keyed by their group ids.
  */
 function group_load_by_name($name) {
   return group_load_by_property('title', $name);
@@ -50,6 +74,12 @@ function group_load_by_name($name) {
 
 /**
  * Load all groups of a given type.
+ *
+ * @param string $type
+ *   The group type you want to load groups for.
+ *
+ * @return array
+ *   An array of Group entities, keyed by their group ids.
  */
 function group_load_by_type($type) {
   return group_load_by_property('type', $type);
@@ -61,7 +91,7 @@ function group_load_by_type($type) {
  * @param int $uid
  *   The id of the user.
  * @param string $type
- *   (optional) Filters the results for a given group type.
+ *   (optional) Filters the results by a group type.
  *
  * @return array
  *   An array of Group entities, keyed by their group ids.
@@ -85,21 +115,10 @@ function group_load_by_member($uid, $type = NULL) {
 }
 
 /**
- * Save a group.
- */
-function group_save($group) {
-  entity_save('group', $group);
-}
-
-/**
- * Delete a group.
- */
-function group_delete($group) {
-  entity_delete('group', entity_id('group', $group));
-}
-
-/**
  * Delete multiple groups.
+ *
+ * @param array $gids
+ *   The ids of the groups you want to delete.
  */
 function group_delete_multiple($gids) {
   entity_delete_multiple('group', $gids);
