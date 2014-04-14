@@ -259,13 +259,13 @@ function group_group_membership_action_info() {
  *   The group to check access for.
  * @param object $account
  *   The user to check access for.
- * @param GroupMembership $group_membership
- *   (optional) The group membership if one exists already.
+ * @param GroupMembership|false $group_membership
+ *   The group membership if one exists already.
  *
  * @return bool
  *   Whether the user can join the group.
  */
-function group_user_can_join(Group $group, $account, GroupMembership $group_membership = NULL) {
+function group_user_can_join(Group $group, $account, $group_membership) {
   return empty($group_membership) && group_access('join group', $group, $account);
 }
 
@@ -289,13 +289,13 @@ function group_user_join($group, $account) {
  *   The group to check access for.
  * @param object $account
  *   The user to check access for.
- * @param GroupMembership $group_membership
- *   (optional) The group membership if one exists already.
+ * @param GroupMembership|false $group_membership
+ *   The group membership if one exists already.
  *
  * @return bool
  *   Whether the user can request a membership for the group.
  */
-function group_user_can_request_membership(Group $group, $account, GroupMembership $group_membership = NULL) {
+function group_user_can_request_membership(Group $group, $account, $group_membership) {
   return empty($group_membership) && group_access('request membership', $group, $account);
 }
 
@@ -335,7 +335,7 @@ function group_user_request_membership(Group $group, $account) {
  * @return bool
  *   Whether the user can leave the group.
  */
-function group_user_can_leave(Group $group, $account, GroupMembership $group_membership) {
+function group_user_can_leave(Group $group, $account, $group_membership) {
   return !empty($group_membership) && group_access('leave group', $group, $account);
 }
 
@@ -349,7 +349,7 @@ function group_user_can_leave(Group $group, $account, GroupMembership $group_mem
  * @param GroupMembership $group_membership
  *   The group membership of the user that wants to leave.
  */
-function group_user_leave($group, $account, $group_membership) {
+function group_user_leave(Group $group, $account, $group_membership) {
   $group_membership->delete();
   drupal_set_message(t('You have left the group.'));
 }

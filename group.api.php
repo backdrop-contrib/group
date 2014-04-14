@@ -401,12 +401,12 @@ function hook_group_membership_status_info() {
  *     a membership. Can be used by other modules.
  *   - access callback: (optional) Callback that returns TRUE if the user has
  *     access to the action or FALSE otherwise. Always receives a group and
- *     user object as arguments and a group membership object if one exists.
- *     Always allows access if a callback is omitted.
+ *     user object as arguments and a group membership object if one exists or
+ *     FALSE otherwise. Always allows access if a callback is omitted.
  *   - action callback: Callback which is called when the action is fired. Out
  *     of the box this happens when the button on the group view is pressed.
  *     Always receives a group and user object as arguments and a group
- *     membership object if one exists.
+ *     membership object if one exists or FALSE otherwise.
  *
  * @see hook_group_permission()
  * @see hook_group_membership_status_info()
