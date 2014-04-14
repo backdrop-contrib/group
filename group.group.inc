@@ -277,7 +277,7 @@ function group_user_can_join(Group $group, $account, $group_membership) {
  * @param object $account
  *   The user that wants to join.
  */
-function group_user_join($group, $account) {
+function group_user_join(Group $group, $account) {
   $group->addMember($account->uid);
   drupal_set_message(t('You have joined the group.'));
 }
@@ -329,7 +329,7 @@ function group_user_request_membership(Group $group, $account) {
  *   The group to check access for.
  * @param object $account
  *   The user to check access for.
- * @param GroupMembership $group_membership
+ * @param GroupMembership|false $group_membership
  *   The group membership of the user that wants to leave.
  *
  * @return bool
