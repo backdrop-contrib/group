@@ -7,17 +7,25 @@
 /**
  * Builds the role permission page.
  *
+ * Shows the permissions overview for either all group roles that affect a
+ * single group type (local and global roles) or a single group role entity.
+ * Roles that should be edited elsewhere (global) or are otherwise locked
+ * (local on a fixed group type) will have their checkboxes disabled.
+ *
  * @param array $form
  * @param array $form_state
  * @param GroupType $group_type
- *   The group type to show the permissions page for.
+ *   (optional) The group type to show the permissions page for. If left blank,
+ *   a GroupRole entity needs to be passed as the fourth argument.
  * @param GroupRole $group_role
  *   (optional) A single group role to show the page for.
  *   When $group_role is provided, $group_type is ignored.
  *
  * @return array
+ *
+ * @todo Consolidate third and fourth argument and use instanceof?
  */
-function group_permission_form($form, &$form_state, GroupType $group_type, GroupRole $group_role = NULL) {
+function group_permission_form($form, &$form_state, GroupType $group_type = NULL, GroupRole $group_role = NULL) {
   // Define whether we're on a group type overview page or not.
   $type_page = !empty($group_type) && empty($group_role);
 
