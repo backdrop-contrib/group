@@ -93,7 +93,7 @@ class GroupController extends EntityAPIController {
 
     // Add the current user as the first member.
     global $user;
-    $group->addMember($user->uid, $roles);
+    $group->addMember($user->uid, array('roles' => $roles));
 
     return $return;
   }
