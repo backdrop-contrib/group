@@ -87,7 +87,7 @@ function _group_add_access() {
 
   if (user_access('administer group types')) {
     // There are no group types defined that the user has permission to create,
-    // but the user does have the permission to administer the content types, so
+    // but the user does have the permission to administer the group types, so
     // grant them access to the page anyway.
     return TRUE;
   }
