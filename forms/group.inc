@@ -43,7 +43,7 @@ function group_form($form, &$form_state, Group $group, $op = 'edit') {
     '#weight' => 40,
   );
 
-  if ($op == 'edit') {
+  if ($op == 'edit' && group_access('delete group', $group)) {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
       '#value' => t('Delete @group_type', array('@group_type' => $group_type->label)),
