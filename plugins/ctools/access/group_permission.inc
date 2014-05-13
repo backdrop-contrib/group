@@ -65,7 +65,7 @@ function group_group_permission_access_check($conf, $context) {
   $group = $context[0]->data;
   $account = $context[1]->data;
 
-  return (bool) array_intersect($conf['permissions'], $group->userPermissions($account->uid));
+  return user_access('bypass group access') || (bool) array_intersect($conf['permissions'], $group->userPermissions($account->uid));
 }
 
 /**
