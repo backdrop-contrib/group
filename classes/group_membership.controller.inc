@@ -10,18 +10,17 @@
 class GroupMembershipController extends EntityAPIController {
 
   /**
-   * Load a group membership.
+   * Add group roles to group memberships upon loading.
    *
-   * Adds group roles to the GroupMembership instance.
+   * This will load the memberships' roles before it is passed onto any hooks
+   * that act upon entity loading.
    */
-  public function load($ids = array(), $conditions = array()) {
-    $return = parent::load($ids, $conditions);
-
-    if ($return) {
-      // Gather all loaded memberships's role data.
+  protected function attachLoad(&$queried_entities, $revision_id = FALSE) {
+    if ($queried_entities) {
+      // Gather all loaded memberships' role data.
       $query = db_select('group_membership_role', 'gmr')
         ->fields('gmr', array('mid', 'role'))
-        ->condition('mid', array_keys($return), 'IN');
+        ->condition('mid', array_keys($queried_entities), 'IN');
 
       // Gather the roles per group membership id.
       foreach ($query->execute() as $record) {
@@ -29,12 +28,13 @@ class GroupMembershipController extends EntityAPIController {
       }
 
       // Add the group roles onto the memberships.
-      foreach ($return as $mid => $group_membership) {
+      foreach ($queried_entities as $mid => $group_membership) {
         $group_membership->roles = isset($roles[$mid]) ? $roles[$mid] : array();
       }
     }
 
-    return $return;
+    // Invoke the other attachLoad functionality.
+    parent::attachLoad($queried_entities, $revision_id);
   }
 
   /**
