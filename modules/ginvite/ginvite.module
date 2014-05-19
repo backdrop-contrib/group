@@ -133,6 +133,19 @@ function ginvite_get_invites($mail) {
 }
 
 /**
+ * Implements hook_entity_delete().
+ *
+ * Removes any unused invites for deleted groups.
+ */
+function ginvite_entity_delete($entity, $type) {
+  if ($type == 'group') {
+    db_delete('group_invite')
+      ->condition('gid', $entity->gid)
+      ->execute();
+  }
+}
+
+/**
  * Implements hook_mail().
  *
  * This mail is sent when people who do not have an account on the website yet
