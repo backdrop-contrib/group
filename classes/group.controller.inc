@@ -10,6 +10,42 @@
 class GroupController extends EntityAPIController {
 
   /**
+   * Overridden to take care of adding the group creator.
+   *
+   * If this functionality were placed in GroupController::save(), we'd find
+   * ourselves in a catch-22:
+   * - On the one hand we need a group id to save the creator's GroupMembership
+   *   to the database, requiring us to first save new Group entities before
+   *   saving their creator memberships.
+   * - On the other hand, saving a new entity causes the insert hook to be
+   *   invoked, leaving room for buggy behavior should one try to load the
+   *   newly created group's members in aforementioned hook.
+   *
+   * To solve this without overriding EntityAPIController::save() and without
+   * having to fiddle with either module or hook weight, we place the code here
+   * because GroupController::invoke() is called right after the actual insert
+   * and we are sure to have a group id already.
+   *
+   * @see EntityAPIController::save()
+   */
+  public function invoke($hook, $group) {
+    if ($hook == 'insert') {
+      // Retrieve the default roles for this group type.
+      $group_type = group_type_load($group->type);
+      $roles = isset($group_type->config['creator_roles'])
+        ? array_filter($group_type->config['creator_roles'])
+        : array();
+
+      // Add the current user as the first member.
+      global $user;
+      $group->addMember($user->uid, array('roles' => $roles));
+    }
+
+    // Continue running the actual invoke logic.
+    parent::invoke($hook, $group);
+  }
+
+  /**
    * Delete a group.
    *
    * As part of the cleanup process, we delete all child entities. This will
@@ -67,35 +103,6 @@ class GroupController extends EntityAPIController {
     group_membership_delete_multiple($mids);
 
     parent::delete($ids, $transaction);
-  }
-
-  /**
-   * Save a group.
-   *
-   * Add the user who creates a group as the first member.
-   *
-   * @see EntityAPIController::save()
-   */
-  public function save($group, DatabaseTransaction $transaction = NULL) {
-    // Only act upon saving a new group.
-    if (empty($group->is_new)) {
-      return parent::save($group, $transaction);
-    }
-
-    // Hold off on returning the parent return value.
-    $return = parent::save($group, $transaction);
-
-    // Retrieve the default roles for this group type.
-    $defaults = variable_get('group_default_roles');
-    $roles = isset($defaults[$group->type])
-      ? array_filter($defaults[$group->type])
-      : array();
-
-    // Add the current user as the first member.
-    global $user;
-    $group->addMember($user->uid, array('roles' => $roles));
-
-    return $return;
   }
 
   /**
