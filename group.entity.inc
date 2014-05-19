@@ -31,6 +31,12 @@ function group_entity_info() {
     'bundle keys' => array(
       'bundle' => 'name',
     ),
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Group page'),
+        'custom settings' => FALSE,
+      ),
+    ),
     'module' => 'group',
     'admin ui' => array(
       'path' => 'admin/group',
