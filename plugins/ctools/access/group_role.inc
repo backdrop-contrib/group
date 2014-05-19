@@ -31,9 +31,9 @@ $plugin = array(
  * Settings form for the group role access plugin.
  */
 function group_group_role_access_settings(&$form, &$form_state, $conf) {
-  $group_roles = array();
-  foreach (group_roles() as $name => $group_role) {
-    $group_roles[$name] = check_plain($group_role->label);
+  $group_roles = group_roles();
+  foreach ($group_roles as &$group_role) {
+    $group_role = check_plain($group_role->label);
   }
 
   $form['settings']['roles'] = array(
