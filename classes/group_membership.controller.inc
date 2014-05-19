@@ -38,6 +38,73 @@ class GroupMembershipController extends EntityAPIController {
   }
 
   /**
+   * Overridden to take care of saving membership roles.
+   *
+   * If this functionality were placed in GroupMembershipController::save(),
+   * we'd find ourselves in a catch-22:
+   * - On the one hand we need a membership id to save the roles to
+   *   {group_membership_role}, requiring us to first save new
+   *   GroupMembership entities before saving their roles.
+   * - On the other hand, saving an entity causes the insert or update hooks
+   *   to be invoked, leaving room for buggy behavior should one try to load
+   *   the recently saved entity again (it gets removed from the cache upon
+   *   being saved to the database).
+   *
+   * To solve this without overriding EntityAPIController::save() and without
+   * having to fiddle with either module or hook weight, we place the code here
+   * because GroupMembershipController::invoke() is called right after the
+   * actual insert or update and we are sure to have a membership id already.
+   *
+   * @see EntityAPIController::save()
+   * @see GroupMembershipController::save()
+   */
+  public function invoke($hook, $group_membership) {
+    if ($hook == 'update' || $hook == 'insert') {
+      // Below we take care of the 'roles' property that was set on the
+      // GroupMembership; saving new roles to and removing revoked roles from the
+      // database. For new GroupMembership entities, we can simply grant all of
+      // the roles. For existing ones, we need to run some integrity checks.
+      if (!empty($group_membership->is_new)) {
+        $grant = $group_membership->roles;
+      }
+      else {
+        // Load the original entity to detect changes.
+        $original = entity_load_unchanged('group_membership', $group_membership->mid);
+
+        // Flag new roles for granting.
+        $grant = array_diff($group_membership->roles, $original->roles);
+
+        // Flag old roles for revoking.
+        $revoke = array_diff($original->roles, $group_membership->roles);
+      }
+
+      // Grant the roles by inserting them into {group_membership_role}.
+      if (!empty($grant)) {
+        $query = db_insert('group_membership_role')->fields(array('mid', 'role'));
+
+        foreach ($grant as $role) {
+          $query->values(array(
+            'mid' => $group_membership->mid,
+            'role' => $role,
+          ));
+        }
+
+        $query->execute();
+      }
+
+      // Revoke the roles by deleting them from {group_membership_role}.
+      if (!empty($revoke)) {
+        $query = db_delete('group_membership_role')->condition('mid', $group_membership->mid);
+        $query->condition('role', $revoke, 'IN');
+        $query->execute();
+      }
+    }
+
+    // Continue running the actual invoke logic.
+    parent::invoke($hook, $group_membership);
+  }
+
+  /**
    * Delete a group membership.
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
@@ -54,55 +121,17 @@ class GroupMembershipController extends EntityAPIController {
   /**
    * Save a group membership.
    *
+   * The saving of roles takes place in GroupMembershipController::invoke().
+   *
+   * @see GroupMembershipController::invoke()
+   *
    * @todo Validation of added roles.
    */
   public function save($group_membership, DatabaseTransaction $transaction = NULL) {
-    // First of all we clean up the 'roles' property to avoid duplicates.
+    // Clean up the 'roles' property to avoid duplicates.
     $group_membership->roles = array_unique($group_membership->roles);
 
-    // Save the group membership so we are sure to have an id.
-    $return = parent::save($group_membership, $transaction);
-
-    // Below we take care of the 'roles' property that was set on the
-    // GroupMembership; saving new roles to and removing revoked roles from the
-    // database. For new GroupMembership entities, we can simply grant all of
-    // the roles. For existing ones, we need to run some integrity checks.
-    if ($return == SAVED_NEW) {
-      $grant = $group_membership->roles;
-    }
-    else {
-      // Load the original entity to detect changes.
-      $original = entity_load_unchanged('group_membership', $group_membership->mid);
-
-      // Flag new roles for granting.
-      $grant = array_diff($group_membership->roles, $original->roles);
-
-      // Flag old roles for revoking.
-      $revoke = array_diff($original->roles, $group_membership->roles);
-    }
-
-    // Grant the roles by inserting them into {group_membership_role}.
-    if (!empty($grant)) {
-      $query = db_insert('group_membership_role')->fields(array('mid', 'role'));
-
-      foreach ($grant as $role) {
-        $query->values(array(
-          'mid' => $group_membership->mid,
-          'role' => $role,
-        ));
-      }
-
-      $query->execute();
-    }
-
-    // Revoke the roles by deleting them from {group_membership_role}.
-    if (!empty($revoke)) {
-      $query = db_delete('group_membership_role')->condition('mid', $group_membership->mid);
-      $query->condition('role', $revoke, 'IN');
-      $query->execute();
-    }
-
-    return $return;
+    return parent::save($group_membership, $transaction);
   }
 
   /**
