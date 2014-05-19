@@ -14,16 +14,12 @@ class GroupExtraFieldsController extends EntityDefaultExtraFieldsController {
    */
   public function fieldExtraFields() {
     foreach (group_types() as $type => $group_type) {
-      // Add the 'title' field to every group type.
-      // Display shouldn't be necessary: https://drupal.org/node/2123923.
-      // @todo Follow-up on above comment.
-      foreach (array('form', 'display') as $context) {
-        $extra['group'][$type][$context]['title'] = array(
-          'label' => t('Group title'),
-          'description' => t('The name of the group'),
-          'weight' => -5,
-        );
-      }
+      // Add the 'title' form field to every group type.
+      $extra['group'][$type]['form']['title'] = array(
+        'label' => t('Group title'),
+        'description' => t('The name of the group'),
+        'weight' => -5,
+      );
 
       // Add the membership action form.
       $extra['group'][$type]['display']['membership_actions'] = array(
