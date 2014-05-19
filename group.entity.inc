@@ -45,6 +45,32 @@ function group_entity_info() {
     ),
     'extra fields controller class' => 'GroupExtraFieldsController',
     'views controller class' => 'GroupViewsController',
+    // Add Title module support.
+    'field replacement' => array(
+      'title' => array(
+        'field' => array(
+          'type' => 'text',
+          'cardinality' => 1,
+          'translatable' => TRUE,
+        ),
+        'instance' => array(
+          'label' => t('Title'),
+          'description' => t('The name of the group.'),
+          'required' => TRUE,
+          'settings' => array(
+            'text_processing' => 0,
+          ),
+          'widget' => array(
+            'weight' => -5,
+          ),
+          'display' => array(
+            'default' => array(
+              'type' => 'hidden',
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 
   $info['group_type'] = array(
