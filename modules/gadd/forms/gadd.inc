@@ -24,7 +24,7 @@ function gadd_add_member_form($form, &$form_state, Group $group) {
   $form['roles'] = array(
     '#type' => 'checkboxes',
     '#title' => ('Roles'),
-    '#description' => ('Select the roles the member will receive.'),
+    '#description' => t('Select the roles the member will receive.'),
     '#options' => $group_roles,
     '#default_value' => array(),
   );

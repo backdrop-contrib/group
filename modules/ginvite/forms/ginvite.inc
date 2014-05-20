@@ -22,7 +22,7 @@ function ginvite_form($form, &$form_state, Group $group) {
   $form['roles'] = array(
     '#type' => 'checkboxes',
     '#title' => ('Roles'),
-    '#description' => ('Select the roles the member will receive should they accept the invite.'),
+    '#description' => t('Select the roles the member will receive should they accept the invite.'),
     '#options' => $group_roles,
     '#default_value' => array(),
   );
