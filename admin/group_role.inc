@@ -27,11 +27,6 @@ function group_role_form($form, &$form_state, GroupRole $group_role, $op = 'edit
     $group_role->label .= ' (cloned)';
   }
 
-  $group_types = array();
-  foreach (group_types() as $name => $group_type) {
-    $group_types[$name] = $group_type->label;
-  }
-
   if (empty($group_role->global) && !empty($group_role->type)) {
     $form['type'] = array(
       '#type' => 'value',
