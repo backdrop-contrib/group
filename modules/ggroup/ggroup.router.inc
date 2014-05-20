@@ -68,7 +68,7 @@ function ggroup_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  */
 function ggroup_add_subgroup_title($group_type) {
   $types = group_types();
-  return t('Add @group', array('@group' => $types[$group_type]->label));
+  return t('Add @group', array('@group' => $types[$group_type]->label()));
 }
 
 /**

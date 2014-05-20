@@ -35,8 +35,8 @@ function ggroup_form_group_form_alter($form, &$form_state) {
 
     $message = 'Create @group_type in @group';
     $replace = array(
-      '@group_type' => $group_type->label,
-      '@group' => $group->title,
+      '@group_type' => $group_type->label(),
+      '@group' => $group->label(),
     );
 
     drupal_set_title(t($message, $replace));

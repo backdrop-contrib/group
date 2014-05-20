@@ -105,7 +105,7 @@ function group_page(Group $group) {
   // If there is a menu link to this group, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the group title.
-  drupal_set_title($group->title);
+  drupal_set_title($group->label());
 
   // Retrieve the URI for the group.
   $uri = entity_uri('group', $group);

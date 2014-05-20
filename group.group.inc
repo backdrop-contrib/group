@@ -62,7 +62,7 @@ function group_group_filters() {
   // Get a list of all group types.
   $group_types = array();
   foreach (group_types() as $name => $group_type) {
-    $group_types[$name] = $group_type->label;
+    $group_types[$name] = $group_type->label();
   }
 
   // Build a group type filter.
@@ -158,14 +158,14 @@ function group_group_member_operations(Group $group) {
 
   foreach (group_type_load($group->type)->getRoles(FALSE) as $group_role) {
     $operations["add-$group_role->name"] = array(
-      'label' => $group_role->label,
+      'label' => $group_role->label(),
       'callback' => 'group_membership_add_role',
       'callback arguments' => array($group_role->name),
       'optgroup' => t('Add role to selected members'),
     );
 
     $operations["remove-$group_role->name"] = array(
-      'label' => $group_role->label,
+      'label' => $group_role->label(),
       'callback' => 'group_membership_remove_role',
       'callback arguments' => array($group_role->name),
       'optgroup' => t('Remove role from selected members'),

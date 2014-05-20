@@ -27,7 +27,7 @@ class GroupRoleFeaturesController extends EntityDefaultFeaturesController {
 
     foreach (entity_load_multiple_by_name('group_role', FALSE) as $name => $group_role) {
       if ($group_role->global) {
-        $options[$name] = $group_role->label;
+        $options[$name] = $group_role->label();
       }
     }
 

@@ -61,7 +61,7 @@ function theme_group_permission_form($variables) {
 
       foreach (element_children($form['checkboxes']) as $rname) {
         // Title content for both the label as the checkbox itself.
-        $title = $group_roles[$rname]->label . ': ' . $form['permissions'][$pname]['#markup'];
+        $title = $group_roles[$rname]->label() . ': ' . $form['permissions'][$pname]['#markup'];
 
         $form['checkboxes'][$rname][$pname]['#title'] = $title;
         $form['checkboxes'][$rname][$pname]['#title_display'] = 'invisible';

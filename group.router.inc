@@ -131,7 +131,7 @@ function group_membership_access(Group $group, $account) {
  * @see GroupUiController::hook_menu()
  */
 function group_page_title(Group $group) {
-  return $group->title;
+  return $group->label();
 }
 
 /**

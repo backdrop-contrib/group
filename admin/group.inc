@@ -251,8 +251,8 @@ function group_groups_form($pager_limit) {
   // Add the groups to the table.
   foreach (group_load_multiple($query->execute()->fetchCol()) as $group) {
     $options[$group->gid] = array(
-      'title' => l($group->title, "group/$group->gid"),
-      'type' => group_type_load($group->type)->label,
+      'title' => l($group->label(), "group/$group->gid"),
+      'type' => group_type_load($group->type)->label(),
       'members' => $group->getMemberCount(),
     );
 

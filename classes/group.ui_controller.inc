@@ -65,7 +65,6 @@ class GroupUIController extends EntityDefaultUIController {
 
       $items["group/add/$name"] = array(
         'title' => $group_type->label,
-        'title callback' => 'check_plain',
         'description' => "Create $group_type->label",
         'page callback' => 'entity_ui_get_form',
         'page arguments' => array('group', $group, 'add'),
@@ -201,7 +200,7 @@ class GroupUIController extends EntityDefaultUIController {
 
       $message = 'Are you sure you want to delete the group %label?';
       $replace = array(
-        '%label' => $group->title,
+        '%label' => $group->label(),
       );
 
       return confirm_form($form, t($message, $replace), "group/$group->gid", NULL, t('Delete'));
@@ -218,7 +217,7 @@ class GroupUIController extends EntityDefaultUIController {
    */
   public function applyOperation($op, $group) {
     if ($op == 'delete') {
-      $title = $group->title;
+      $title = $group->label();
       entity_delete('group', $group->gid);
 
       watchdog('group', 'Deleted %title.', array('%title' => $title));

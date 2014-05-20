@@ -137,7 +137,7 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
 
     // Add the role names to the table.
     $form['roles'][$rname] = array(
-      '#markup' => check_plain($group_role->label),
+      '#markup' => $group_role->label(),
       '#tree' => TRUE,
     );
   }

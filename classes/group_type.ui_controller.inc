@@ -254,7 +254,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
     );
 
     // Add the type label.
-    $row['data']['label'] = check_plain($group_type->label);
+    $row['data']['label'] = $group_type->label();
 
     // Permissions related links.
     $what = $type_fixed ? t('view permissions') : t('edit permissions');

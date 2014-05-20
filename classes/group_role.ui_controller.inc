@@ -299,7 +299,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
     }
 
     // Add the role label.
-    $row['data']['label'] = check_plain($group_role->label);
+    $row['data']['label'] = $group_role->label();
 
     // Permissions related links.
     $what = $role_fixed || $this->type_fixed ? t('view permissions') : t('edit permissions');

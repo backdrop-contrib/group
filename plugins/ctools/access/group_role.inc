@@ -33,7 +33,7 @@ $plugin = array(
 function group_group_role_access_settings(&$form, &$form_state, $conf) {
   $group_roles = group_roles();
   foreach ($group_roles as &$group_role) {
-    $group_role = check_plain($group_role->label);
+    $group_role = $group_role->label();
   }
 
   $form['settings']['roles'] = array(
@@ -82,7 +82,7 @@ function group_group_role_access_summary($conf, $context) {
   $group_roles = group_roles();
 
   foreach (array_filter($conf['roles']) as $role) {
-    $names[] = check_plain($group_roles[$role]->label);
+    $names[] = $group_roles[$role]->label();
   }
 
   $message_single = '@identifier has group role "@roles"';

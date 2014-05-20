@@ -35,7 +35,7 @@ class GroupViewsController extends EntityDefaultViewsController {
           'help' => t('@label entities that belong to a group.', array('@label' => $e_info['label'])),
           'relationship' => array(
             'handler' => 'group_handler_child_relationship',
-            'label' => t('Group @label', array('@label' => drupal_strtolower($e_info['label']))),
+            'label' => t('Group @label', array('@label' => $e_info['label'])),
             'base' => $e_info['base table'],
             'entity type' => $type,
           ),

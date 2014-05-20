@@ -437,13 +437,13 @@ function group_membership_edit_form($form, &$form_state, Group $group, $account)
   $message = 'Edit membership for %user in %group';
   $replace = array(
     '%user' => $account->name,
-    '%group' => $group->title,
+    '%group' => $group->label(),
   );
   drupal_set_title(t($message, $replace), PASS_THROUGH);
 
   $roles = array();
   foreach ($group->getRoles(FALSE) as $group_role) {
-    $roles[$group_role->name] = $group_role->label;
+    $roles[$group_role->name] = $group_role->label();
   }
 
   $form['roles'] = array(
@@ -491,7 +491,7 @@ function group_membership_cancel_form($form, &$form_state, Group $group, $accoun
 
   $replace = array(
     '%user' => $account->name,
-    '%group' => $group->title,
+    '%group' => $group->label(),
   );
 
   $redirect = $unsubscribe_self

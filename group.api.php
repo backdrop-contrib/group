@@ -121,7 +121,7 @@ function hook_group_filters() {
   // Get a list of all group types.
   $group_types = array();
   foreach (group_types() as $name => $group_type) {
-    $group_types[$name] = $group_type->label;
+    $group_types[$name] = $group_type->label();
   }
 
   // Build a group type filter.

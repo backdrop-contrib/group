@@ -120,7 +120,7 @@ function group_permission() {
   // Generate group creation permissions.
   foreach (group_types() as $name => $group_type) {
     $permissions["create $name group"] = array(
-      'title' => t('%type_name: Create new group', array('%type_name' => $group_type->label)),
+      'title' => t('%type_name: Create new group', array('%type_name' => $group_type->label())),
     );
   }
 

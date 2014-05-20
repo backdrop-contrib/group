@@ -11,7 +11,7 @@ function ggroup_config_form($form, &$form_state) {
   // Populate the checkboxes for use below.
   $group_types = group_types();
   foreach ($group_types as &$group_type) {
-    $group_type = $group_type->label;
+    $group_type = $group_type->label();
   }
 
   $form['ggroup_enabled_subgroups'] = array(

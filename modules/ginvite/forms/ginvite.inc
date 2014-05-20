@@ -16,7 +16,7 @@
 function ginvite_form($form, &$form_state, Group $group) {
   $group_roles = group_type_load($group->type)->getRoles(FALSE);
   foreach ($group_roles as &$group_role) {
-    $group_role = $group_role->label;
+    $group_role = $group_role->label();
   }
 
   $form['roles'] = array(
