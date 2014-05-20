@@ -1,0 +1,61 @@
+<?php
+/**
+ * @file
+ * Internationalization (i18n) module - Group type handling.
+ *
+ * The i18n strings created by this module are:
+ * - group:type:[group_type]:[label]
+ * - group:role:[group_role]:[label]
+ */
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function gi18n_entity_info_alter(&$info) {
+  // Enable i18n support via Entity API.
+  $info['group_type']['i18n controller class'] = 'EntityDefaultI18nStringController';
+  $info['group_role']['i18n controller class'] = 'EntityDefaultI18nStringController';
+}
+
+/**
+ * Implements hook_entity_property_info_alter().
+ */
+function gi18n_entity_property_info_alter(&$info) {
+  // Allow the group type and role labels to be translated.
+  foreach (array('group_type', 'group_role') as $entity) {
+    $info[$entity]['properties']['label']['translatable'] = TRUE;
+    $info[$entity]['properties']['label']['i18n string'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function gi18n_entity_insert($entity, $type) {
+  gi18n_entity_save($entity, $type);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function gi18n_entity_update($entity, $type) {
+  gi18n_entity_save($entity, $type);
+}
+
+/**
+ * Helper for hook_entity_insert() and hook_entity_update().
+ */
+function gi18n_entity_save($entity, $type) {
+  if (in_array($type, array('group_type', 'group_role'))) {
+    i18n_string_object_update($type, $entity);
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function gi18n_entity_delete($entity, $type) {
+  if (in_array($type, array('group_type', 'group_role'))) {
+    i18n_string_object_remove($type, $entity);
+  }
+}
