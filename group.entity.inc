@@ -281,6 +281,16 @@ function group_entity_property_info() {
     'options list' => 'group_permissions',
   );
 
+  // @todo Describe the struct through 'property info' key.
+  /*$group_type['config'] = array(
+    'label' => t('Group type configuration'),
+    'description' => t('The specific configuration for the group type.'),
+    'type' => 'struct',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'config',
+    'options list' => 'group_permissions',
+  );*/
+
   $group_type['weight'] = array(
     'label' => t('Weight'),
     'description' => t('The weight of the type compared to others.'),

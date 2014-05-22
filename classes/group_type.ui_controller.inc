@@ -18,6 +18,8 @@ class GroupTypeUIController extends EntityDefaultUIController {
     $items[$this->path]['type'] = MENU_LOCAL_TASK;
     $items[$this->path]['weight'] = -5;
 
+    $items["$this->path/manage/%entity_object/edit"]['weight'] = -10;
+
     $items["$this->path/manage/%group_type/permissions"] = array(
       'title' => 'Permissions',
       'description' => 'Edit permissions for groups of this type',
@@ -60,6 +62,26 @@ class GroupTypeUIController extends EntityDefaultUIController {
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_ACTION,
       'weight' => 0,
+    );
+
+    $items["$this->path/manage/%group_type/config"] = array(
+      'title' => 'Config',
+      'description' => 'Configure the group type.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('group_type_config_form', 4),
+      'access callback' => 'user_access',
+      'access arguments' => array('configure group module'),
+      'file' => 'admin/group_type.config.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => -5,
+    );
+
+    $items["$this->path/manage/%group_type/config/owner"] = array(
+      'title' => 'Group owner',
+      'description' => 'Configuration of the creating member.',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
     );
 
     return $items;
@@ -175,7 +197,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
    * Returns the available operations for the page.
    */
   protected function typeOperations() {
-    $ops = array('edit');
+    $ops = array('edit', 'config');
     if (module_exists('field_ui')) {
       array_push($ops, 'manage fields', 'manage display');
     }
@@ -264,6 +286,9 @@ class GroupTypeUIController extends EntityDefaultUIController {
 
     // Add the edit action.
     $row['data']['edit'] = $type_fixed ? '' : l(t('edit'), "$this->path/manage/$name");
+
+    // Add the config action.
+    $row['data']['config'] = $type_fixed ? '' : l(t('config'), "$this->path/manage/$name/config");
 
     // Add the Field UI actions.
     if (module_exists('field_ui')) {

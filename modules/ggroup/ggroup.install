@@ -5,20 +5,74 @@
  */
 
 /**
+ * Schema API definition for the parent_mid column.
+ *
+ * Helper function for reuse of this database column.
+ */
+function _ggroup_parent_mid() {
+  return array(
+    'description' => 'The id of the membership this membership was inherited from.',
+    'type' => 'int',
+    'default' => 0,
+    'unsigned' => TRUE,
+  );
+}
+
+/**
  * Implements hook_install().
  */
 function ggroup_install() {
-  variable_set('ggroup_enabled_subgroups', array());
-
   db_update('system')
     ->fields(array('weight' => 1))
     ->condition('name', 'ggroup')
     ->execute();
+
+  db_add_field('group_membership', 'parent_mid', _ggroup_parent_mid());
 }
 
 /**
  * Implements hook_uninstall().
  */
 function ggroup_uninstall() {
+  db_drop_field('group_membership', 'parent_mid');
+}
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function ggroup_update_dependencies() {
+  // The {group_type} schema needs to be adjusted first.
+  $dependencies['ggroup'][7001] = array(
+    'group' => 7007,
+  );
+
+  return $dependencies;
+}
+
+/**
+ * Drop the ggroup_enabled_subgroups variable.
+ */
+function ggroup_update_7001() {
+  // Reshape the old configuration to fit the new style.
+  foreach (variable_get('ggroup_enabled_subgroups') as $type => $enabled) {
+    if (!empty($enabled)) {
+      // By setting data, we flag the subgroup type as enabled.
+      $old_config[$type] = array();
+    }
+  }
+
+  // The content of ggroup_enabled_subgroups has moved to the group types.
+  foreach (group_types() as $group_type) {
+    $group_type->config['subgroup'] = $old_config;
+    $group_type->save();
+  }
+
   variable_del('ggroup_enabled_subgroups');
+}
+
+/**
+ * Add the parent_mid column to {group_membership}.
+ */
+function ggroup_update_7002() {
+  db_add_field('group_membership', 'parent_mid', _ggroup_parent_mid());
 }

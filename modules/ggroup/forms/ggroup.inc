@@ -11,11 +11,11 @@
 /**
  * Generate the subgroup creation form.
  */
-function ggroup_add_subgroup_form($group, $group_type) {
+function ggroup_add_subgroup_form($group, GroupType $group_type) {
   $subgroup = entity_create('group', array(
     'group' => $group->gid,
-    'type' => $group_type)
-  );
+    'type' => $group_type->name,
+  ));
 
   // Group creation / editing form lives in a separate file.
   form_load_include($form_state, 'inc', 'group', 'forms/group');

@@ -8,7 +8,7 @@
  * Implements hook_menu().
  */
 function ggroup_menu() {
-  $items['group/%group/subgroup/add/%'] = array(
+  $items['group/%group/subgroup/add/%group_type'] = array(
     'title' => 'Add subgroup',
     'title callback' => 'ggroup_add_subgroup_title',
     'title arguments' => array(4),
@@ -19,16 +19,16 @@ function ggroup_menu() {
     'file' => 'forms/ggroup.inc',
   );
 
-  $items['admin/group/config/subgroup'] = array(
+  $items['admin/group/type/manage/%group_type/config/subgroup'] = array(
     'title' => 'Subgroups',
     'description' => 'Configuration regarding subgroups.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('ggroup_config_form'),
+    'page arguments' => array('ggroup_config_form', 4),
     'access callback' => 'user_access',
     'access arguments' => array('configure group module'),
     'file' => 'admin/ggroup.config.inc',
     'type' => MENU_LOCAL_TASK,
-    'weight' => -5,
+    'weight' => 5,
   );
 
   return $items;
@@ -44,36 +44,40 @@ function ggroup_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   if ($root_path == 'group/%') {
     $gid = $router_item['original_map'][1];
 
-    // Retrieve the group types that can be subgroups.
-    $subgroups = array_filter(variable_get('ggroup_enabled_subgroups'));
-
-    // Set local actions for the enabled subgroup types.
+    // Set local actions for creating subgroups.
     foreach (group_types() as $group_type => $info) {
-      if (isset($subgroups[$group_type])) {
-        $item = menu_get_item("group/$gid/subgroup/add/$group_type");
+      $item = menu_get_item("group/$gid/subgroup/add/$group_type");
 
-        if ($item['access']) {
-          $data['actions']['output'][] = array(
-            '#theme' => 'menu_local_action',
-            '#link' => $item,
-          );
-        }
+      if ($item['access']) {
+        $data['actions']['output'][] = array(
+          '#theme' => 'menu_local_action',
+          '#link' => $item,
+        );
       }
     }
   }
 }
 
 /**
- * Title callback for group/%group/subgroup/add/%.
+ * Title callback for group/%group/subgroup/add/%group_type.
  */
-function ggroup_add_subgroup_title($group_type) {
-  $types = group_types();
-  return t('Add @group', array('@group' => $types[$group_type]->label()));
+function ggroup_add_subgroup_title(GroupType $group_type) {
+  return t('Add @group', array('@group' => $group_type->label()));
 }
 
 /**
- * Access callback for group/%group/subgroup/add/%.
+ * Access callback for group/%group/subgroup/add/%group_type.
  */
 function ggroup_add_subgroup_access($group, $group_type) {
-  return group_access("create $group_type", $group);
+  if (empty($group_type)) {
+    return FALSE;
+  }
+
+  // Check if the parent group supports subgroups of this type.
+  $parent_type = group_type_load($group->type);
+  if (!isset($parent_type->config['subgroup'][$group_type->name])) {
+    return FALSE;
+  }
+
+  return group_access("create $group_type->name", $group);
 }

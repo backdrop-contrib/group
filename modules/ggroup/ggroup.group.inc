@@ -12,19 +12,30 @@
 function ggroup_group_permission() {
   $permissions = array();
 
-  // Retrieve the group types that can be subgroups.
-  $subgroups = array_filter(variable_get('ggroup_enabled_subgroups'));
-
   // Set permissions for the enabled subgroup types.
   foreach (group_types() as $group_type) {
-    if (isset($subgroups[$group_type->name])) {
-      $replace = array('%group_type' => $group_type->label());
-
-      $permissions["create $group_type->name"] = array(
-        'title' => t('Create %group_type as a subgroup', $replace),
-      );
-    }
+    $permissions["create $group_type->name"] = array(
+      'title' => t('Create %group_type as a subgroup', array('%group_type' => $group_type->label())),
+      'warning' => t("This only grants the permission to create subgroups of this type.<br />Which group types can actually become subgroups is configured under every group type's config link."),
+    );
   }
 
   return $permissions;
+}
+
+/**
+ * Implements hook_group_membership_status_info().
+ */
+function ggroup_group_membership_status_info() {
+  $info['inherited'] = array(
+    'title' => t('Inherited'),
+    'active' => TRUE,
+  );
+
+  $info['inherited-overridden'] = array(
+    'title' => t('Inherited (overridden)'),
+    'active' => TRUE,
+  );
+
+  return $info;
 }

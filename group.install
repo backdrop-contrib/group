@@ -9,7 +9,6 @@
  */
 function group_install() {
   variable_set('group_admin_theme', '1');
-  variable_set('group_default_roles', array());
 
   // Create a first global admin role and give it full permissions.
   $group_admin = entity_create('group_role', array(
@@ -28,7 +27,6 @@ function group_install() {
  */
 function group_uninstall() {
   variable_del('group_admin_theme');
-  variable_del('group_default_roles');
 
   // Run hook_group_uninstall() to allow other modules to clean up.
   $gids = db_select('groups', 'g')->fields('g', array('gid'))->execute()->fetchCol();
@@ -108,6 +106,12 @@ function group_schema() {
       ),
       'member_permissions' => array(
         'description' => 'The member permissions for this group type.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+      'config' => array(
+        'description' => 'The specific configuration for this group type.',
         'type' => 'text',
         'not null' => TRUE,
         'serialize' => TRUE,
@@ -490,4 +494,34 @@ function group_update_7005() {
  */
 function group_update_7006() {
   db_drop_field('group_type', 'subscription_type');
+}
+
+/**
+ * Add group type configuration to {group_type}.
+ */
+function group_update_7007() {
+  db_add_field('group_type', 'config', array(
+    'description' => 'The specific configuration for this group type.',
+    'type' => 'text',
+    'not null' => TRUE,
+    'serialize' => TRUE,
+    'initial' => serialize(array()),
+  ));
+}
+
+/**
+ * Drop the group_default_roles variable.
+ */
+function group_update_7008() {
+  $old_config = variable_get('group_default_roles');
+
+  // The content of group_default_roles has moved to the group types.
+  foreach (group_types() as $type => $group_type) {
+    if (!empty($old_config[$type])) {
+      $group_type->config['creator_roles'] = $old_config[$type];
+      $group_type->save();
+    }
+  }
+
+  variable_del('group_default_roles');
 }
