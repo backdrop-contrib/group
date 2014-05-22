@@ -175,7 +175,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
    * Returns the available operations for the page.
    */
   protected function typeOperations() {
-    $ops = array('status', 'edit');
+    $ops = array('edit');
     if (module_exists('field_ui')) {
       array_push($ops, 'manage fields', 'manage display');
     }
@@ -198,24 +198,14 @@ class GroupTypeUIController extends EntityDefaultUIController {
         'data' => t('Permissions'),
         'colspan' => 2,
       ),
+      'status' => t('Status'),
     );
 
-    // Add Entity API related columns.
-    if ($ops = $this->typeOperations()) {
-      $count = count($ops);
-
-      // Add the status column.
-      if (in_array('status', $ops)) {
-        $header['status'] = t('Status');
-        $count--;
-      }
-
-      // Add the actions column.
-      $header['actions'] = array(
-        'data' => t('Actions'),
-        'colspan' => $count,
-      );
-    }
+    // Add the actions column.
+    $header['actions'] = array(
+      'data' => t('Actions'),
+      'colspan' => count($this->typeOperations()),
+    );
 
     return $header;
   }
@@ -261,63 +251,58 @@ class GroupTypeUIController extends EntityDefaultUIController {
     $row['data']['permissions'] = l($what, "$this->path/manage/$name/permissions");
     $row['data']['roles'] = l(t('roles'), "$this->path/manage/$name/permissions/roles");
 
-    // Add Entity API related columns.
-    if ($ops = $this->typeOperations()) {
-      // Add the status column if available.
-      if (in_array('status', $ops)) {
-        $row['data']['status'] = array(
-          'data' => array(
-            '#theme' => 'entity_status',
-            '#status' => $group_type->status,
-          )
+    // Add the status column.
+    $row['data']['status'] = array(
+      'data' => array(
+        '#theme' => 'entity_status',
+        '#status' => $group_type->status,
+      )
+    );
+
+    // Add the edit action.
+    $row['data']['edit'] = $type_fixed ? '' : l(t('edit'), "$this->path/manage/$name");
+
+    // Add the Field UI actions.
+    if (module_exists('field_ui')) {
+      if (!$type_fixed) {
+        $row['data']['manage fields'] = l(t('manage fields'), "$this->path/manage/$name/fields");
+        $row['data']['manage display'] = l(t('manage display'), "$this->path/manage/$name/display");
+      }
+      else {
+        $row['data']['manage fields'] = array(
+          'data' => '',
+          'colspan' => 2,
         );
       }
-
-      // Add the edit action.
-      $row['data']['edit'] = $type_fixed ? '' : l(t('edit'), "$this->path/manage/$name");
-
-      // Add the Field UI actions.
-      if (module_exists('field_ui')) {
-        if (!$type_fixed) {
-          $row['data']['manage fields'] = l(t('manage fields'), "$this->path/manage/$name/fields");
-          $row['data']['manage display'] = l(t('manage display'), "$this->path/manage/$name/display");
-        }
-        else {
-          $row['data']['manage fields'] = array(
-            'data' => '',
-            'colspan' => 2,
-          );
-        }
-      }
-
-      // Add the clone action.
-      $row['data']['clone'] = l(t('clone'), "$this->path/manage/$name/clone");
-
-      // Don't show delete action for fixed or default types.
-      if ($type_fixed || $group_type->status == ENTITY_IN_CODE) {
-        $row['data']['delete'] = '';
-      }
-
-      // Add the delete/revert action.
-      else {
-        // Show revert action for overridden roles.
-        if (entity_has_status('group_type', $group_type, ENTITY_OVERRIDDEN)) {
-          $what = t('revert');
-          $path = "$this->path/manage/$name/revert";
-        }
-
-        // Show delete action for custom types.
-        else {
-          $what = t('delete');
-          $path = "$this->path/manage/$name/delete";
-        }
-
-        $row['data']['delete'] = l($what, $path, array('query' => drupal_get_destination()));
-      }
-
-      // Add the export action.
-      $row['data']['export'] = l(t('export'), "$this->path/manage/$name/export");
     }
+
+    // Add the clone action.
+    $row['data']['clone'] = l(t('clone'), "$this->path/manage/$name/clone");
+
+    // Don't show delete action for fixed or default types.
+    if ($type_fixed || $group_type->status == ENTITY_IN_CODE) {
+      $row['data']['delete'] = '';
+    }
+
+    // Add the delete/revert action.
+    else {
+      // Show revert action for overridden roles.
+      if (entity_has_status('group_type', $group_type, ENTITY_OVERRIDDEN)) {
+        $what = t('revert');
+        $path = "$this->path/manage/$name/revert";
+      }
+
+      // Show delete action for custom types.
+      else {
+        $what = t('delete');
+        $path = "$this->path/manage/$name/delete";
+      }
+
+      $row['data']['delete'] = l($what, $path, array('query' => drupal_get_destination()));
+    }
+
+    // Add the export action.
+    $row['data']['export'] = l(t('export'), "$this->path/manage/$name/export");
 
     return $row;
   }
