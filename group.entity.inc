@@ -153,7 +153,7 @@ function group_entity_info_alter(&$entity_info) {
   // Informs Drupal that group types are bundles for groups.
   foreach (group_types() as $name => $group_type) {
     $entity_info['group']['bundles'][$name] = array(
-      'label' => $group_type->label(),
+      'label' => $group_type->label,
       'admin' => array(
         'path' => 'admin/group/type/manage/%group_type',
         'real path' => 'admin/group/type/manage/' . $name,
