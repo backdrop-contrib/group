@@ -215,10 +215,16 @@ class GroupRoleUIController extends EntityDefaultUIController {
       }
     }
 
-    // Edit, clone and delete/revert links when not showing the UI for a fixed
-    // global role or the roles of a fixed group type.
+    // Edit, clone and delete/revert links only show when we are viewing the
+    // global UI or the roles for a non-fixed group type.
     if ($this->tabledrag) {
       array_push($ops, 'edit', 'clone', 'delete');
+    }
+
+    // Translate links should always be available, regardless of context or
+    // whether or not the entity has a fixed status.
+    if (module_exists('gi18n')) {
+      $ops[] = 'translate';
     }
 
     return $ops;
@@ -305,7 +311,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
     $what = $role_fixed || $this->type_fixed ? t('view permissions') : t('edit permissions');
     $row['data']['permissions'] = l($what, "$this->path/manage/$name/permissions");
 
-    // Add Entity API related columns.
+    // Add the actions columns.
     if ($ops = $this->roleOperations()) {
       // Add the status column if available.
       if (in_array('status', $ops)) {
@@ -320,6 +326,11 @@ class GroupRoleUIController extends EntityDefaultUIController {
       // Add the edit action if available.
       if (in_array('edit', $ops)) {
         $row['data']['edit'] = $role_fixed ? '' : l(t('edit'), "$this->path/manage/$name");
+      }
+
+      // Add the translate action if available.
+      if (in_array('translate', $ops)) {
+        $row['data']['translate'] = l(t('translate'), "$this->path/manage/$name/translate");
       }
 
       // Add the clone action if available.

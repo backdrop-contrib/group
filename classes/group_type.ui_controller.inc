@@ -179,6 +179,9 @@ class GroupTypeUIController extends EntityDefaultUIController {
     if (module_exists('field_ui')) {
       array_push($ops, 'manage fields', 'manage display');
     }
+    if (module_exists('gi18n')) {
+      $ops[] = 'translate';
+    }
     array_push($ops, 'clone', 'delete', 'export');
 
     return $ops;
@@ -274,6 +277,11 @@ class GroupTypeUIController extends EntityDefaultUIController {
           'colspan' => 2,
         );
       }
+    }
+
+    // Add the Group Translation action.
+    if (module_exists('gi18n')) {
+      $row['data']['translate'] = l(t('translate'), "$this->path/manage/$name/translate");
     }
 
     // Add the clone action.
