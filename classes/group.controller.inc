@@ -39,6 +39,16 @@ class GroupController extends EntityAPIController {
       // Add the current user as the first member.
       global $user;
       $group->addMember($user->uid, array('roles' => $roles));
+
+      // On the off chance that someone tried to load the group when acting upon
+      // the GroupMembership save above, the field cache for this group needs to
+      // be cleared. Otherwise, the newly created group will keep loading without
+      // its field data available until the caches are cleared.
+      //
+      // For now, this is the approach we're taking seeing as the alternative is
+      // to copy over EntityAPIController::invoke() entirely, forcing us to keep
+      // track of the changes in that function until the world ends.
+      cache_clear_all("field:group:$group->gid", 'cache_field');
     }
 
     // Continue running the actual invoke logic.
