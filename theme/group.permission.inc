@@ -91,7 +91,7 @@ function theme_group_permission_form($variables) {
   $output .= theme('table', array(
     'header' => $header,
     'rows' => $rows,
-    'attributes' => array('id' => 'permissions'),
+    'attributes' => array('id' => 'group-permissions'),
   ));
   $output .= drupal_render_children($form);
 
