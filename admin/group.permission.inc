@@ -64,17 +64,18 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
 
   // Populate the checkbox options and rows for every possible permission.
   $options = array();
-  foreach ($modules as $module => $display_name) {
+  foreach ($modules as $module => $module_name) {
     if ($permissions = module_invoke($module, 'group_permission')) {
       // Add the module name first so we can show a separating row.
       $form['permissions'][] = array(
-        '#markup' => $module_info[$module]['name'],
+        '#markup' => $module_name,
         '#id' => $module,
       );
 
       // Then add a row for every permission defined by the module.
       foreach ($permissions as $pname => $permission) {
-        // Add the permission name to the checkbox options.
+        // Add the permission to the checkbox options. The label of each option
+        // will be properly set in theme_group_permission_form().
         $options[$pname] = '';
 
         // Set the warning message, if any.
