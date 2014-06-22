@@ -70,7 +70,13 @@ function group_form_submit($form, &$form_state) {
   $group = entity_ui_form_submit_build_entity($form, $form_state);
   $group->save();
 
-  drupal_set_message(t('The group %group was saved successfully.', array('%group' => $group->label())));
+  $message = 'The @group_type %group was saved successfully.';
+  $replace = array(
+    '@group_type' => group_type_load($group->type)->label(),
+    '%group' => $group->label(),
+  );
+
+  drupal_set_message(t($message, $replace));
   $form_state['redirect'] = "group/$group->gid";
 }
 
