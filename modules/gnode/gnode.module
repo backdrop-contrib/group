@@ -246,6 +246,10 @@ function gnode_form_node_form_alter(&$form, $form_state) {
  * Validates and processes the 'parent group' field.
  *
  * @see gnode_form_node_form_alter()
+ *
+ * @todo If gid is still 0, it could mean someone accessed the global creation
+ *       page while only having the permission to create a node on the group
+ *       level.
  */
 function gnode_node_validate($node, $form, &$form_state) {
   $values = $form_state['values']['group_settings'];
