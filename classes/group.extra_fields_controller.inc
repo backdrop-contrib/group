@@ -13,6 +13,8 @@ class GroupExtraFieldsController extends EntityDefaultExtraFieldsController {
    * Implements EntityExtraFieldsControllerInterface::fieldExtraFields().
    */
   public function fieldExtraFields() {
+    $extra = array();
+
     foreach (group_types() as $type => $group_type) {
       // Add the 'title' form field to every group type.
       $extra['group'][$type]['form']['title'] = array(
