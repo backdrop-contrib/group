@@ -240,6 +240,15 @@ function group_entity_property_info() {
     'schema field' => 'title',
   );
 
+  $group['url'] = array(
+    'label' => t('URL'),
+    'description' => t('The URL of the group.'),
+    'type' => 'uri',
+    'getter callback' => 'entity_metadata_entity_get_properties',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+
   // Properties for GroupType entities.
   $group_type = &$info['group_type']['properties'];
   $group_type['tid'] = array(
