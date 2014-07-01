@@ -227,7 +227,7 @@ function group_entity_property_info() {
     'label' => t('Group type'),
     'description' => t('The bundle of the group.'),
     'type' => 'group_type',
-    'options list' => array('EntityDefaultMetadataController', 'bundleOptionsList'),
+    'options list' => 'group_type_labels',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'type',
   );
@@ -429,7 +429,7 @@ function group_entity_property_info() {
     'label' => t('Roles'),
     'description' => t('The group roles for the membership.'),
     'type' => 'list<group_role>',
-    //'options list' => '',
+    'options list' => 'group_role_labels',
     'setter callback' => 'entity_property_verbatim_set',
     'computed' => TRUE,
   );

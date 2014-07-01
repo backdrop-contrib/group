@@ -31,16 +31,11 @@ $plugin = array(
  * Settings form for the group role access plugin.
  */
 function group_group_role_access_settings(&$form, &$form_state, $conf) {
-  $group_roles = group_roles();
-  foreach ($group_roles as &$group_role) {
-    $group_role = $group_role->label();
-  }
-
   $form['settings']['roles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Group role'),
     '#description' => t('Only the checked group roles will be granted access.'),
-    '#options' => $group_roles,
+    '#options' => group_role_labels(),
     '#default_value' => $conf['roles'],
     '#required' => TRUE,
   );

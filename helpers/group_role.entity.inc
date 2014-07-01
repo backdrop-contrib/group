@@ -20,6 +20,22 @@ function group_roles($names = FALSE) {
 }
 
 /**
+ * Retrieve all group role labels.
+ *
+ * Ideally used for populating option lists.
+ *
+ * @return array
+ *   An array of GroupRole labels, keyed by their machine names.
+ */
+function group_role_labels() {
+  $group_roles = group_roles();
+  foreach ($group_roles as &$group_role) {
+    $group_role = $group_role->label();
+  }
+  return $group_roles;
+}
+
+/**
  * Load a group role by name.
  *
  * @param string $name

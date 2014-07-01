@@ -20,6 +20,22 @@ function group_types($names = FALSE) {
 }
 
 /**
+ * Retrieve all group type labels.
+ *
+ * Ideally used for populating option lists.
+ *
+ * @return array
+ *   An array of GroupType labels, keyed by their machine names.
+ */
+function group_type_labels() {
+  $group_types = group_types();
+  foreach ($group_types as &$group_type) {
+    $group_type = $group_type->label();
+  }
+  return $group_types;
+}
+
+/**
  * Load a group type by name.
  *
  * @param string $name
