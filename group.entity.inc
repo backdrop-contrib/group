@@ -227,6 +227,7 @@ function group_entity_property_info() {
     'label' => t('Group type'),
     'description' => t('The bundle of the group.'),
     'type' => 'group_type',
+    'options list' => array('EntityDefaultMetadataController', 'bundleOptionsList'),
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'type',
   );
