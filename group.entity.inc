@@ -219,6 +219,7 @@ function group_entity_property_info() {
     'label' => t('Group ID'),
     'description' => t('The unique group ID.'),
     'type' => 'integer',
+    'validate callback' => ' entity_metadata_validate_integer_positive',
     'schema field' => 'gid',
   );
 
@@ -244,6 +245,7 @@ function group_entity_property_info() {
     'label' => t('Group type ID'),
     'description' => t('The unique group type ID.'),
     'type' => 'integer',
+    'validate callback' => ' entity_metadata_validate_integer_positive',
     'schema field' => 'tid',
   );
 
@@ -319,6 +321,7 @@ function group_entity_property_info() {
     'label' => t('Group role ID'),
     'description' => t('The unique group role ID.'),
     'type' => 'integer',
+    'validate callback' => ' entity_metadata_validate_integer_positive',
     'schema field' => 'rid',
   );
 
@@ -391,6 +394,7 @@ function group_entity_property_info() {
     'label' => t('Group membership ID'),
     'description' => t('The unique group membership ID.'),
     'type' => 'integer',
+    'validate callback' => ' entity_metadata_validate_integer_positive',
     'schema field' => 'mid',
   );
 
