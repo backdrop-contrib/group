@@ -18,6 +18,12 @@ class GroupMembershipViewsController extends EntityDefaultViewsController {
     $data['group_membership']['roles'] = array(
       'title' => t('Group role'),
       'help' => t('The granted group roles for a membership.'),
+      'filter' => array(
+        'handler' => 'group_handler_membership_role_filter',
+        'label' => t('Membership role'),
+        'allow empty' => TRUE,
+        'options callback' => 'group_role_labels',
+      ),
       'relationship' => array(
         'handler' => 'group_handler_membership_role_relationship',
         'label' => t('Membership role'),
