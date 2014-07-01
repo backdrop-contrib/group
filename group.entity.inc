@@ -279,18 +279,18 @@ function group_entity_property_info() {
     'label' => t('Outsider permissions'),
     'description' => t('The outsider permissions for the group type.'),
     'type' => 'list<text>',
+    'options list' => 'group_permissions',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'outsider_permissions',
-    'options list' => 'group_permissions',
   );
 
   $group_type['member_permissions'] = array(
     'label' => t('Member permissions'),
     'description' => t('The member permissions for the group type.'),
     'type' => 'list<text>',
+    'options list' => 'group_permissions',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'member_permissions',
-    'options list' => 'group_permissions',
   );
 
   // @todo Describe the struct through 'property info' key.
@@ -298,9 +298,9 @@ function group_entity_property_info() {
     'label' => t('Group type configuration'),
     'description' => t('The specific configuration for the group type.'),
     'type' => 'struct',
+    'options list' => 'group_permissions',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'config',
-    'options list' => 'group_permissions',
   );*/
 
   $group_type['weight'] = array(
@@ -371,9 +371,9 @@ function group_entity_property_info() {
     'label' => t('Permissions'),
     'description' => t('The permissions for the role.'),
     'type' => 'list<text>',
+    'options list' => 'group_permissions',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'permissions',
-    'options list' => 'group_permissions',
   );
 
   $group_role['weight'] = array(
@@ -429,18 +429,18 @@ function group_entity_property_info() {
     'label' => t('Roles'),
     'description' => t('The group roles for the membership.'),
     'type' => 'list<group_role>',
+    //'options list' => '',
     'setter callback' => 'entity_property_verbatim_set',
     'computed' => TRUE,
-    //'options list' => '',
   );
 
   $group_membership['status'] = array(
     'label' => t('Membership status'),
     'description' => t('The membership status.'),
     'type' => 'token',
+    'options list' => 'group_membership_status_types',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'status',
-    'options list' => 'group_membership_status_types',
   );
 
   return $info;
