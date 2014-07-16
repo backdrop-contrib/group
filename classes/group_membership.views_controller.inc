@@ -28,7 +28,7 @@ class GroupMembershipViewsController extends EntityDefaultViewsController {
         'no group by' => TRUE,
       ),
       'relationship' => array(
-        'handler' => 'group_handler_membership_role_relationship',
+        'handler' => 'group_handler_relationship_membership_role',
         'label' => t('Membership role'),
         'base' => 'group_role',
       ),

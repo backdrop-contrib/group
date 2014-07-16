@@ -34,7 +34,7 @@ class GroupViewsController extends EntityDefaultViewsController {
           'title' => t('@label entities', array('@label' => $e_info['label'])),
           'help' => t('@label entities that belong to a group.', array('@label' => $e_info['label'])),
           'relationship' => array(
-            'handler' => 'group_handler_child_relationship',
+            'handler' => 'group_handler_relationship_child_entity',
             'label' => t('Group @label', array('@label' => $e_info['label'])),
             'base' => $e_info['base table'],
             'entity type' => $type,
@@ -46,7 +46,7 @@ class GroupViewsController extends EntityDefaultViewsController {
           'title' => t('Parent group'),
           'help' => t('The group an entity belongs to.'),
           'relationship' => array(
-            'handler' => 'group_handler_parent_relationship',
+            'handler' => 'group_handler_relationship_parent_group',
             'label' => t('@label group', array('@label' => $e_info['label'])),
             'base' => 'groups',
             'entity type' => $type,

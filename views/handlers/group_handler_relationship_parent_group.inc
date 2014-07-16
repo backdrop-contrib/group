@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Definition of group_handler_parent_relationship.
+ * Definition of group_handler_relationship_parent_group.
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @ingroup views_relationship_handlers
  */
-class group_handler_parent_relationship extends views_handler_relationship {
+class group_handler_relationship_parent_group extends views_handler_relationship {
 
   /**
    * Called to implement a relationship in a query.
