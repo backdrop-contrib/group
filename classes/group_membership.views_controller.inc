@@ -15,19 +15,43 @@ class GroupMembershipViewsController extends EntityDefaultViewsController {
   public function views_data() {
     $data = parent::views_data();
 
-    $data['group_membership']['roles'] = array(
+    $data['group_membership']['role'] = array(
       'title' => t('Group role'),
       'help' => t('The granted group roles for a membership.'),
-      'filter' => array(
-        'handler' => 'group_handler_membership_role_filter',
-        'label' => t('Membership role'),
-        'allow empty' => TRUE,
-        'options callback' => 'group_role_labels',
+      'real field' => 'mid',
+      // We do not add this field onto the {group_membership_role} table,
+      // because the handler only requires the selected mids which it then
+      // uses in a subquery to avoid duplicate rows. For more info, read the
+      // handler's class documentation.
+      'field' => array(
+        'handler' => 'group_handler_field_membership_role',
+        'no group by' => TRUE,
       ),
       'relationship' => array(
         'handler' => 'group_handler_membership_role_relationship',
         'label' => t('Membership role'),
         'base' => 'group_role',
+      ),
+    );
+
+    // Define the many-to-many table so we can filter on group roles without
+    // having to create a relationship first.
+    $data['group_membership_role']['table'] = array(
+      'group' => t('Group membership'),
+      'join' => array(
+        'group_membership' => array(
+          'left_field' => 'mid',
+          'field' => 'mid',
+        )
+      )
+    );
+
+    $data['group_membership_role']['role'] = array(
+      'title' => t('Group role'),
+      'help' => t('The granted group roles for a membership.'),
+      'filter' => array(
+        'handler' => 'group_handler_filter_membership_role',
+        'allow empty' => TRUE,
       ),
     );
 
