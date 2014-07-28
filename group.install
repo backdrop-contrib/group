@@ -265,6 +265,50 @@ function group_schema() {
         'not null' => TRUE,
         'default' => 'active',
       ),
+      'blocked_status' => array(
+        'description' => 'The membership status before the member was blocked.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => 'active',
+      ),
+      'blocked_on' => array(
+        'description' => 'The Unix timestamp when the membership was blocked.',
+        'type' => 'int',
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'blocked_by' => array(
+        'description' => 'The {users}.uid of the blocking user.',
+        'type' => 'int',
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'joined_on' => array(
+        'description' => 'The Unix timestamp when the user joined.',
+        'type' => 'int',
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'requested_on' => array(
+        'description' => 'The Unix timestamp when the user requested to join.',
+        'type' => 'int',
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      // @todo implement the fields below
+      'approved_on' => array(
+        'description' => 'The Unix timestamp when the membership was approved.',
+        'type' => 'int',
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'approved_by' => array(
+        'description' => 'The {users}.uid of the approving user.',
+        'type' => 'int',
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
     ),
     'indexes' => array(
       'gid' => array('gid'),
@@ -282,6 +326,14 @@ function group_schema() {
       'group_user' => array(
         'table' => 'users',
         'columns' => array('uid' => 'uid'),
+      ),
+      'blocking_user' => array(
+        'table' => 'users',
+        'columns' => array('blocked_by' => 'uid'),
+      ),
+      'approving_user' => array(
+        'table' => 'users',
+        'columns' => array('approved_by' => 'uid'),
       ),
     ),
     'primary key' => array('mid'),
@@ -534,4 +586,50 @@ function group_update_7008() {
   }
 
   variable_del('group_default_roles');
+}
+
+/**
+ * Add a lot of metadata to group memberships.
+ */
+function group_update_7009() {
+  $blocked_status = array(
+    'description' => 'The membership status before the member was blocked.',
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => '',
+  );
+
+  // Add 'blocked_status'.
+  db_add_field('group_membership', 'blocked_status', $blocked_status);
+
+  $base = array(
+    'type' => 'int',
+    'default' => 0,
+    'unsigned' => TRUE,
+  );
+
+  // Add 'blocked_on'.
+  $field = array('description' => 'The Unix timestamp when the membership was blocked.') + $base;
+  db_add_field('group_membership', 'blocked_on', $field);
+
+  // Add 'blocked_by'.
+  $field = array('description' => 'The {users}.uid of the blocking user.') + $base;
+  db_add_field('group_membership', 'blocked_by', $field);
+
+  // Add 'joined_on'.
+  $field = array('description' => 'The Unix timestamp when the user joined.') + $base;
+  db_add_field('group_membership', 'joined_on', $field);
+
+  // Add 'requested_on'.
+  $field = array('description' => 'The Unix timestamp when the user requested to join.') + $base;
+  db_add_field('group_membership', 'requested_on', $field);
+
+  // Add 'approved_on'.
+  $field = array('description' => 'The Unix timestamp when the membership was approved.') + $base;
+  db_add_field('group_membership', 'approved_on', $field);
+
+  // Add 'approved_by'.
+  $field = array('description' => 'The {users}.uid of the approving user.') + $base;
+  db_add_field('group_membership', 'approved_by', $field);
 }

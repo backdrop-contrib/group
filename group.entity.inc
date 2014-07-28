@@ -443,6 +443,67 @@ function group_entity_property_info() {
     'schema field' => 'status',
   );
 
+  $group_membership['blocked_status'] = array(
+    'label' => t('Membership status (blocked)'),
+    'description' => t('The membership status before the member was blocked.'),
+    'type' => 'token',
+    'options list' => 'group_membership_status_types',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'blocked_status',
+  );
+
+  $group_membership['blocked_on'] = array(
+    'label' => t('Blocked on'),
+    'description' => t('The date when the member was blocked.'),
+    'type' => 'date',
+    'getter callback' => 'entity_property_verbatim_date_get',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'blocked_on',
+  );
+
+  $group_membership['blocked_by'] = array(
+    'label' => t('Blocked by'),
+    'description' => t('The user who blocked the member.'),
+    'type' => 'user',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'blocked_by',
+  );
+
+  $group_membership['joined_on'] = array(
+    'label' => t('Joined on'),
+    'description' => t('The date when the member joined.'),
+    'type' => 'date',
+    'getter callback' => 'entity_property_verbatim_date_get',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'joined_on',
+  );
+
+  $group_membership['requested_on'] = array(
+    'label' => t('Requested on'),
+    'description' => t('The date when the member requested to join.'),
+    'type' => 'date',
+    'getter callback' => 'entity_property_verbatim_date_get',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'requested_on',
+  );
+
+  $group_membership['approved_on'] = array(
+    'label' => t('Approved on'),
+    'description' => t('The date when the member was approved.'),
+    'type' => 'date',
+    'getter callback' => 'entity_property_verbatim_date_get',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'approved_on',
+  );
+
+  $group_membership['approved_by'] = array(
+    'label' => t('Approved by'),
+    'description' => t('The user who approved the member.'),
+    'type' => 'user',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'approved_by',
+  );
+
   return $info;
 }
 
