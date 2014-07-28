@@ -406,24 +406,28 @@ function group_membership_remove_role($mids, $role) {
 
 /**
  * Group membership block callback.
- *
- * @todo Save the previous status.
  */
 function group_membership_block($mids) {
+  global $user;
+
   foreach (group_membership_load_multiple($mids) as $group_membership) {
+    $group_membership->blocked_status = $group_membership->status;
     $group_membership->status = 'blocked';
+    $group_membership->blocked_on = REQUEST_TIME;
+    $group_membership->blocked_by = $user->uid;
     $group_membership->save();
   }
 }
 
 /**
  * Group membership unblock callback.
- *
- * @todo Reinstate the previous status.
  */
 function group_membership_unblock($mids) {
   foreach (group_membership_load_multiple($mids) as $group_membership) {
-    $group_membership->status = 'active';
+    $group_membership->status = $group_membership->blocked_status;
+    $group_membership->blocked_status = '';
+    $group_membership->blocked_on = 0;
+    $group_membership->blocked_by = 0;
     $group_membership->save();
   }
 }
