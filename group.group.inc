@@ -278,7 +278,7 @@ function group_user_can_join(Group $group, $account, $group_membership) {
  *   The user that wants to join.
  */
 function group_user_join(Group $group, $account) {
-  $group->addMember($account->uid);
+  $group->addMember($account->uid, array('joined_on' => REQUEST_TIME));
   drupal_set_message(t('You have joined the group.'));
 }
 
@@ -308,17 +308,7 @@ function group_user_can_request_membership(Group $group, $account, $group_member
  *   The user that wants to join.
  */
 function group_user_request_membership(Group $group, $account) {
-  // @todo requested_on and requested_by?
-  $values = array(
-    'gid' => $group->gid,
-    'uid' => $account->uid,
-    'status' => 'requested',
-  );
-
-  // Create and save the membership.
-  $group_membership = entity_create('group_membership', $values);
-  $group_membership->save();
-
+  $group->addMember($account->uid, array('status' => 'requested', 'requested_on' => REQUEST_TIME));
   drupal_set_message(t('You have requested to join the group.'));
 }
 
