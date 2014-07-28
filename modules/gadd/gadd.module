@@ -60,7 +60,7 @@ function gadd_entity_property_info_alter(&$info) {
 function gadd_admin_paths() {
   if (variable_get('group_admin_theme')) {
     $paths = array(
-      'group/*/force' => TRUE,
+      'group/*/add' => TRUE,
     );
 
     return $paths;
