@@ -275,38 +275,32 @@ function group_schema() {
       'blocked_on' => array(
         'description' => 'The Unix timestamp when the membership was blocked.',
         'type' => 'int',
-        'default' => 0,
         'unsigned' => TRUE,
       ),
       'blocked_by' => array(
         'description' => 'The {users}.uid of the blocking user.',
         'type' => 'int',
-        'default' => 0,
         'unsigned' => TRUE,
       ),
       'joined_on' => array(
         'description' => 'The Unix timestamp when the user joined.',
         'type' => 'int',
-        'default' => 0,
         'unsigned' => TRUE,
       ),
       'requested_on' => array(
         'description' => 'The Unix timestamp when the user requested to join.',
         'type' => 'int',
-        'default' => 0,
         'unsigned' => TRUE,
       ),
       // @todo implement the fields below
       'approved_on' => array(
         'description' => 'The Unix timestamp when the membership was approved.',
         'type' => 'int',
-        'default' => 0,
         'unsigned' => TRUE,
       ),
       'approved_by' => array(
         'description' => 'The {users}.uid of the approving user.',
         'type' => 'int',
-        'default' => 0,
         'unsigned' => TRUE,
       ),
     ),
@@ -605,7 +599,6 @@ function group_update_7009() {
 
   $base = array(
     'type' => 'int',
-    'default' => 0,
     'unsigned' => TRUE,
   );
 

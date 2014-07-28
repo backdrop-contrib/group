@@ -426,8 +426,8 @@ function group_membership_unblock($mids) {
   foreach (group_membership_load_multiple($mids) as $group_membership) {
     $group_membership->status = $group_membership->blocked_status;
     $group_membership->blocked_status = '';
-    $group_membership->blocked_on = 0;
-    $group_membership->blocked_by = 0;
+    $group_membership->blocked_on = NULL;
+    $group_membership->blocked_by = NULL;
     $group_membership->save();
   }
 }
