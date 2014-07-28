@@ -40,8 +40,7 @@ function ginvite_entity_property_info_alter(&$info) {
     'label' => t('Invited on'),
     'description' => t('The date when the member was invited.'),
     'type' => 'date',
-    // @todo Enable when Entity API 1.3 is released.
-    //'getter callback' => 'entity_property_verbatim_date_get',
+    'getter callback' => 'entity_property_verbatim_date_get',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'invited_on',
   );

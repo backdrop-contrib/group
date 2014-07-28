@@ -47,7 +47,6 @@ function group_uninstall() {
 /**
  * Implements hook_schema().
  *
- * @todo Before releasing an alpha, check indexes.
  */
 function group_schema() {
   // Cannot name table 'group' as this is a keyword in SQL.
