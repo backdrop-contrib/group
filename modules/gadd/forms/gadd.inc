@@ -66,17 +66,11 @@ function gadd_add_member_form_submit($form, &$form_state) {
   global $user;
 
   $values = array(
-    'gid' => $form_state['build_info']['args'][0]->gid,
-    'uid' => $form_state['values']['uid'],
     'roles'=> array_filter($form_state['values']['roles']),
     'added_on' => REQUEST_TIME,
     'added_by' => $user->uid,
   );
 
-  // Create and save the membership.
-  $group_membership = entity_create('group_membership', $values);
-  $group_membership->save();
-
-  // Show a confirmation message.
+  $form_state['build_info']['args'][0]->addMember($form_state['values']['uid'], $values);
   drupal_set_message(t('Added %user', array('%user' => $form_state['values']['user'])));
 }
