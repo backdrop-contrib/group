@@ -13,7 +13,6 @@ function _ginvite_invited_on() {
   return array(
     'description' => 'The Unix timestamp when the invite was issued.',
     'type' => 'int',
-    'default' => 0,
     'unsigned' => TRUE,
   );
 }
@@ -27,7 +26,6 @@ function _ginvite_invited_by() {
   return array(
     'description' => 'The {users}.uid of the inviter.',
     'type' => 'int',
-    'default' => 0,
     'unsigned' => TRUE,
   );
 }
@@ -125,4 +123,12 @@ function ginvite_update_7001() {
   db_add_field('group_invite', 'invited_by', $invited_by);
   db_add_field('group_membership', 'invited_on', $invited_on);
   db_add_field('group_membership', 'invited_by', $invited_by);
+}
+
+/**
+ *  Remove default values from 'invited_on' and 'invited_by'.
+ */
+function ginvite_update_7002() {
+  db_change_field('group_membership', 'invited_on', 'invited_on', _ginvite_invited_on());
+  db_change_field('group_membership', 'invited_by', 'invited_by', _ginvite_invited_by());
 }

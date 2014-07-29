@@ -13,7 +13,6 @@ function _ggroup_parent_mid() {
   return array(
     'description' => 'The id of the membership this membership was inherited from.',
     'type' => 'int',
-    'default' => 0,
     'unsigned' => TRUE,
   );
 }
@@ -75,4 +74,12 @@ function ggroup_update_7001() {
  */
 function ggroup_update_7002() {
   db_add_field('group_membership', 'parent_mid', _ggroup_parent_mid());
+}
+
+
+/**
+ * Remove default value from 'parent_mid'.
+ */
+function ggroup_update_7003() {
+  db_change_field('group_membership', 'parent_mid', 'parent_mid', _ggroup_parent_mid());
 }

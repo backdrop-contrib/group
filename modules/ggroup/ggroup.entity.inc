@@ -104,7 +104,7 @@ function ggroup_entity_delete($entity, $type) {
           if (!empty($additions)) {
             $group_membership->roles = $additions;
             $group_membership->status = 'active';
-            $group_membership->parent_mid = 0;
+            $group_membership->parent_mid = NULL;
             $group_membership->save();
           }
         }
