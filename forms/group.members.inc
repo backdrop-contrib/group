@@ -411,11 +411,13 @@ function group_membership_block($mids) {
   global $user;
 
   foreach (group_membership_load_multiple($mids) as $group_membership) {
-    $group_membership->blocked_status = $group_membership->status;
-    $group_membership->status = 'blocked';
-    $group_membership->blocked_on = REQUEST_TIME;
-    $group_membership->blocked_by = $user->uid;
-    $group_membership->save();
+    if ($group_membership->status != 'blocked') {
+      $group_membership->blocked_status = $group_membership->status;
+      $group_membership->status = 'blocked';
+      $group_membership->blocked_on = REQUEST_TIME;
+      $group_membership->blocked_by = $user->uid;
+      $group_membership->save();
+    }
   }
 }
 
@@ -424,11 +426,13 @@ function group_membership_block($mids) {
  */
 function group_membership_unblock($mids) {
   foreach (group_membership_load_multiple($mids) as $group_membership) {
-    $group_membership->status = $group_membership->blocked_status;
-    $group_membership->blocked_status = '';
-    $group_membership->blocked_on = NULL;
-    $group_membership->blocked_by = NULL;
-    $group_membership->save();
+    if ($group_membership->status == 'blocked') {
+      $group_membership->status = $group_membership->blocked_status;
+      $group_membership->blocked_status = '';
+      $group_membership->blocked_on = NULL;
+      $group_membership->blocked_by = NULL;
+      $group_membership->save();
+    }
   }
 }
 
