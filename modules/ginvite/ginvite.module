@@ -132,6 +132,23 @@ function ginvite_get_invites($mail) {
 }
 
 /**
+ * Get group invitations for a given group.
+ *
+ * @param Group $group
+ *   The group to retrieve invites for.
+ *
+ * @return array
+ *   An array of database records keyed by the invite id.
+ */
+function ginvite_get_group_invites(Group $group) {
+  return db_select('group_invite', 'gi')
+    ->fields('gi')
+    ->condition('gid', $group->gid)
+    ->execute()
+    ->fetchAllAssoc('iid');
+}
+
+/**
  * Implements hook_entity_delete().
  *
  * Removes any unused invites for deleted groups.

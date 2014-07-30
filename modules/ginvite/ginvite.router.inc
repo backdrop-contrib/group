@@ -36,6 +36,37 @@ function ginvite_menu() {
     'weight' => 5,
   );
 
+  $items['group/%group/invite/mail/%/edit'] = array(
+    'title' => 'Edit invitation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ginvite_by_mail_edit_form', 1, 4),
+    'access callback' => 'group_access',
+    'access arguments' => array('manage mail invitations', 1),
+    'file' => 'admin/ginvite.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['group/%group/invite/mail/%/delete'] = array(
+    'title' => 'Delete invitation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ginvite_by_mail_delete_form', 1, 4),
+    'access callback' => 'group_access',
+    'access arguments' => array('manage mail invitations', 1),
+    'file' => 'admin/ginvite.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['group/%group/invite/mail-list'] = array(
+    'title' => 'E-mail invitations',
+    'page callback' => 'ginvite_by_mail_list',
+    'page arguments' => array(1),
+    'access callback' => 'group_access',
+    'access arguments' => array('manage mail invitations', 1),
+    'file' => 'admin/ginvite.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  );
+
   $items['user/%user/group/invite'] = array(
     'title' => 'My invites',
     'title callback' => 'ginvite_user_page_title',

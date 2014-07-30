@@ -19,6 +19,10 @@ function ginvite_group_permission() {
       'description' => t('Invite members by their e-mail address'),
       'warning' => t('Registered e-mail addresses will get a user invite instead.'),
     ),
+    'manage mail invitations' => array(
+      'title' => t('Manage e-mail invitations'),
+      'description' => t('View, edit or delete unused e-mail invitations'),
+    ),
   );
 
   return $permissions;
