@@ -412,28 +412,6 @@ function group_membership_decline($mids) {
 }
 
 /**
- * Group membership add role callback.
- */
-function group_membership_add_role($mids, $role) {
-  $roles = array($role);
-
-  foreach (group_membership_load_multiple($mids) as $group_membership) {
-    $group_membership->grantRoles($roles);
-  }
-}
-
-/**
- * Group membership remove role callback.
- */
-function group_membership_remove_role($mids, $role) {
-  $roles = array($role);
-
-  foreach (group_membership_load_multiple($mids) as $group_membership) {
-    $group_membership->revokeRoles($roles);
-  }
-}
-
-/**
  * Group membership block callback.
  */
 function group_membership_block($mids) {
@@ -462,6 +440,28 @@ function group_membership_unblock($mids) {
       $group_membership->blocked_by = NULL;
       $group_membership->save();
     }
+  }
+}
+
+/**
+ * Group membership add role callback.
+ */
+function group_membership_add_role($mids, $role) {
+  $roles = array($role);
+
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    $group_membership->grantRoles($roles);
+  }
+}
+
+/**
+ * Group membership remove role callback.
+ */
+function group_membership_remove_role($mids, $role) {
+  $roles = array($role);
+
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    $group_membership->revokeRoles($roles);
   }
 }
 
