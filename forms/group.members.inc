@@ -383,6 +383,35 @@ function group_membership_multiple_delete_confirm_submit($form, &$form_state) {
 }
 
 /**
+ * Group membership approve callback.
+ */
+function group_membership_approve($mids) {
+  global $user;
+
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    if ($group_membership->status == 'requested') {
+      $group_membership->status = 'active';
+      $group_membership->approved_on = REQUEST_TIME;
+      $group_membership->approved_by = $user->uid;
+      $group_membership->save();
+    }
+  }
+}
+
+/**
+ * Group membership decline callback.
+ */
+function group_membership_decline($mids) {
+  global $user;
+
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    if ($group_membership->status == 'requested') {
+      $group_membership->delete();
+    }
+  }
+}
+
+/**
  * Group membership add role callback.
  */
 function group_membership_add_role($mids, $role) {

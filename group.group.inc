@@ -144,6 +144,18 @@ function group_group_member_operations(Group $group) {
     'form callback' => TRUE,
   );
 
+  $operations['approve'] = array(
+    'label' => t('Approved selected membership requests'),
+    'callback' => 'group_membership_approve',
+    'optgroup' => t('Approve or decline membership requests'),
+  );
+
+  $operations['decline'] = array(
+    'label' => t('Decline selected membership requests'),
+    'callback' => 'group_membership_decline',
+    'optgroup' => t('Approve or decline membership requests'),
+  );
+
   $operations['block'] = array(
     'label' => t('Block selected members'),
     'callback' => 'group_membership_block',
