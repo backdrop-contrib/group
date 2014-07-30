@@ -387,6 +387,7 @@ function group_membership_multiple_delete_confirm_submit($form, &$form_state) {
  */
 function group_membership_approve($mids) {
   global $user;
+  $count = 0;
 
   foreach (group_membership_load_multiple($mids) as $group_membership) {
     if ($group_membership->status == 'requested') {
@@ -394,21 +395,30 @@ function group_membership_approve($mids) {
       $group_membership->approved_on = REQUEST_TIME;
       $group_membership->approved_by = $user->uid;
       $group_membership->save();
+
+      $count++;
     }
   }
+
+  $message = format_plural($count, 'Approved 1 membership request.', 'Approved @count membership requests.');
+  drupal_set_message($message);
 }
 
 /**
  * Group membership decline callback.
  */
 function group_membership_decline($mids) {
-  global $user;
+  $count = 0;
 
   foreach (group_membership_load_multiple($mids) as $group_membership) {
     if ($group_membership->status == 'requested') {
       $group_membership->delete();
+      $count++;
     }
   }
+
+  $message = format_plural($count, 'Declined 1 membership request.', 'Declined @count membership requests.');
+  drupal_set_message($message);
 }
 
 /**
@@ -416,6 +426,7 @@ function group_membership_decline($mids) {
  */
 function group_membership_block($mids) {
   global $user;
+  $count = 0;
 
   foreach (group_membership_load_multiple($mids) as $group_membership) {
     if ($group_membership->status != 'blocked') {
@@ -424,14 +435,21 @@ function group_membership_block($mids) {
       $group_membership->blocked_on = REQUEST_TIME;
       $group_membership->blocked_by = $user->uid;
       $group_membership->save();
+
+      $count++;
     }
   }
+
+  $message = format_plural($count, 'Blocked 1 member.', 'Blocked @count members.');
+  drupal_set_message($message);
 }
 
 /**
  * Group membership unblock callback.
  */
 function group_membership_unblock($mids) {
+  $count = 0;
+
   foreach (group_membership_load_multiple($mids) as $group_membership) {
     if ($group_membership->status == 'blocked') {
       $group_membership->status = $group_membership->blocked_status;
@@ -439,8 +457,13 @@ function group_membership_unblock($mids) {
       $group_membership->blocked_on = NULL;
       $group_membership->blocked_by = NULL;
       $group_membership->save();
+
+      $count++;
     }
   }
+
+  $message = format_plural($count, 'Unblocked 1 member.', 'Unblocked @count members.');
+  drupal_set_message($message);
 }
 
 /**
