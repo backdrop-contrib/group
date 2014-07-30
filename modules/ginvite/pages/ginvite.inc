@@ -82,7 +82,7 @@ function ginvite_user_page($account) {
 }
 
 /**
- * Act upon acccepting a group invitation from the user page.
+ * Act upon accepting a group invitation from the user page.
  *
  * @see ginvite_user_page()
  */

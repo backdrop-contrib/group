@@ -530,7 +530,7 @@ function group_membership_edit_form_submit($form, &$form_state) {
   $group_membership = $group->getMember($account->uid);
   $group_membership->changeRoles($form_state['values']['roles']);
 
-  drupal_set_message(t('The membership was edited.'));
+  drupal_set_message(t('The membership was successfully edited.'));
 }
 
 /**
