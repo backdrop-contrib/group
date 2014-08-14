@@ -498,7 +498,7 @@ function gnode_query_node_access_alter(QueryAlterableInterface $query) {
 
     // If we still don't have a table and field to join {node} with, throw an
     // exception.
-    if (empty($base_alias) && empty($base_field)) {
+    if (empty($base_alias) || empty($base_field)) {
       throw new Exception(t('Query tagged for node access but there is no join possible to {node}. Add foreign keys to {node}.nid in schema to fix.'));
     }
 
