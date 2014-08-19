@@ -57,6 +57,168 @@ function node_group_permission() {
 }
 
 /**
+ * Retrieve all group ids a user can create a node of a given type in.
+ *
+ * @param string $type
+ *   The node type the user is attempting to create.
+ * @param object $account
+ *   (optional) The account of the user.
+ *
+ * @return array
+ *   An array of group ids (gids).
+ */
+function gnode_group_node_create_gids($type, $account = NULL) {
+  global $user;
+
+  if (!isset($account)) {
+    $account = $user;
+  }
+
+  // If the user can bypass group access, return all group ids.
+  if (user_access('bypass group access', $account)) {
+    return db_select('groups', 'g')->fields('g')->execute()->fetchCol();
+  }
+
+  // Otherwise, start gathering group ids.
+  $gids = array();
+
+  // Check for all group types if an outsider can create nodes of the given
+  // node type in them.
+  foreach (group_types() as $group_type) {
+    $has_access = in_array('administer group', $group_type->outsider_permissions);
+    $has_access = $has_access || in_array("create $type", $group_type->outsider_permissions);
+
+    // If the group type allows access to outsiders, we add all of the groups
+    // the user is an outsider to.
+    if ($has_access) {
+      $gids = array_merge($gids, group_outsider_gids($account->uid, $group_type->name));
+    }
+  }
+
+  // Add all of the user's groups in which he has creation rights.
+  foreach (group_load_by_member($account->uid) as $group) {
+    $has_access = group_access('administer group', $group, $account);
+    $has_access = $has_access || group_access("create $type", $group, $account);
+
+    if ($has_access) {
+      $gids[] = $group->gid;
+    }
+  }
+
+  $gids = array_unique($gids);
+  sort($gids);
+
+  return $gids;
+}
+
+/**
+ * Determines whether a user could create a node in a Group context.
+ *
+ * @param string $type
+ *   The node type the user is attempting to create.
+ * @param object $account
+ *   (optional) The account of the user.
+ *
+ * @return bool
+ *   Whether the user has creation rights.
+ */
+function gnode_group_node_create_access($type, $account = NULL) {
+  // This flag can be manipulated to not have Group Node interfere with the
+  // results of hook_node_access(). This can be useful if you need to figure
+  // out whether a user had node creation rights before Group Node decided
+  // to allow such action.
+  $skip = &drupal_static(__FUNCTION__, FALSE);
+
+  if ($skip) {
+    return FALSE;
+  }
+
+  global $user;
+  if (!isset($account)) {
+    $account = $user;
+  }
+
+  // If the user can bypass group access, he is allowed access.
+  if (user_access('bypass group access', $account)) {
+    return TRUE;
+  }
+
+  // Check for all group types if an outsider can create nodes of the given
+  // node type in them.
+  foreach (group_types() as $group_type) {
+    $has_access = in_array('administer group', $group_type->outsider_permissions);
+    $has_access = $has_access || in_array("create $type", $group_type->outsider_permissions);
+
+    // If the group type allows access to outsiders and the provided user
+    // has as at least one group of this type he is an outsider to, we
+    // allow access.
+    if ($has_access && group_outsider_gids($account->uid, $group_type->name)) {
+      return TRUE;
+    }
+  }
+
+  // Check the user's groups for creation rights.
+  foreach (group_load_by_member($account->uid) as $group) {
+    $has_access = group_access('administer group', $group, $account);
+    $has_access = $has_access || group_access("create $type", $group, $account);
+
+    if ($has_access) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Determines whether a user could create a node in a site-wide context.
+ *
+ * This function does not take Group Node's hook_node_access() implementation
+ * into account. It just figures out if a user can create a node outside of any
+ * Group entity.
+ *
+ * This is mostly useful because in order to have Node behave properly, we need
+ * to implement hook_node_access() just a little too permissive, making it hard
+ * to find out what rights the user had before we started interfering.
+ *
+ * @param string $type
+ *   The node type the user is attempting to create.
+ * @param object $account
+ *   (optional) The account of the user.
+ *
+ * @return bool
+ *   Whether the user has creation rights.
+ */
+function gnode_global_node_create_access($type, $account = NULL) {
+  global $user;
+
+  if (!isset($account)) {
+    $account = $user;
+  }
+
+  // In order to figure out whether the user can create nodes outside of a
+  // group, we first have to delete the cached node_access entry for this node
+  // type.
+  $rights = &drupal_static('node_access', array());
+  unset($rights[$account->uid][$type]['create']);
+
+  // Then we flag gnode_group_node_create_access() to not interfere with the results of
+  // node_access() and run the latter to get the result we want.
+  $skip = &drupal_static('gnode_group_node_create_access');
+  $skip = TRUE;
+  $return = node_access('create', $type);
+
+  // After we have established whether the user has global node creation
+  // rights, we need to once again unflag gnode_group_node_create_access() and remove
+  // the node type's (skewed) entry from the node_access() cache.
+  $skip = FALSE;
+  unset($rights[$account->uid][$type]['create']);
+
+  // After all this, it is safe to return the retrieved result.
+  return $return;
+}
+
+/**
  * Implements hook_node_access().
  *
  * Because the grant system for node access can quickly become very taxing on
@@ -71,33 +233,8 @@ function node_group_permission() {
 function gnode_node_access($node, $op, $account) {
   if (is_string($node)) {
     if ($op == 'create') {
-      // If the user can bypass group access, he is allowed access.
-      if (user_access('bypass group access', $account)) {
+      if (gnode_group_node_create_access($node, $account)) {
         return NODE_ACCESS_ALLOW;
-      }
-
-      // Check for all group types if an outsider can create nodes of the given
-      // node type in them.
-      foreach (group_types() as $type => $group_type) {
-        $has_access = in_array('administer group', $group_type->outsider_permissions);
-        $has_access = $has_access || in_array("create $node", $group_type->outsider_permissions);
-
-        // If the group type allows access to outsiders and the provided user
-        // has as at least one group of this type he is an outsider to, we
-        // allow access.
-        if ($has_access && group_outsider_gids($account->uid, $type)) {
-          return NODE_ACCESS_ALLOW;
-        }
-      }
-
-      // Check the user's groups for creation rights.
-      foreach (group_load_by_member($account->uid) as $group) {
-        $has_access = group_access('administer group', $group, $account);
-        $has_access = $has_access || group_access("create $node", $group, $account);
-
-        if ($has_access) {
-          return NODE_ACCESS_ALLOW;
-        }
       }
     }
   }
@@ -186,21 +323,65 @@ function gnode_node_add($group, $node_type) {
  * @see gnode_node_submit()
  */
 function gnode_form_node_form_alter(&$form, $form_state) {
-  global $user;
-
   $node = $form_state['node'];
   $gid = !empty($node->group) ? $node->group : 0;
 
-  // Fix group for people that can't bypass access.
-  if (!user_access('bypass group access')) {
+  $can_bypass_access = user_access('bypass group access');
+
+  // Fix the group if the node was already set to one and the author can't
+  // bypass group access checks.
+  if ($gid && !$can_bypass_access) {
     $form['gid'] = array(
       '#type' => 'value',
       '#value' => $gid,
       '#parents' => array('group_settings', 'gid'),
     );
+
+    return;
   }
 
-  // Fill in the selected group but allow changes.
+  $global_node_create_access = gnode_global_node_create_access($node->type);
+  $group_access_warning = t("<strong>By selecting a group, the node will inherit the group's access control</strong>.");
+
+  // Otherwise add a vertical tab for group selection.
+  $form['group_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Group settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('node-form-group-information'),
+    ),
+    '#attached' => array(
+      'js' => array(drupal_get_path('module', 'gnode') . '/misc/gnode.js'),
+    ),
+    '#tree' => TRUE,
+    '#weight' => -50,
+  );
+
+  // Show a select of all the groups the author can create the node in.
+  if (!$can_bypass_access) {
+    $options = array();
+    foreach (group_load_multiple(gnode_group_node_create_gids($node->type)) as $group) {
+      $options[$group->gid] = $group->label() . " (GID: $group->gid)";
+    }
+
+    $description = $global_node_create_access
+      ? t('Optionally select the group to attach this node to.')
+      : t('Because you are not allowed to create this content outside of a group, you are required to select one here.');
+
+    $form['group_settings']['gid'] = array(
+      '#type' => 'select',
+      '#title' => t('Parent group'),
+      '#description' => $description . '<br />'. $group_access_warning,
+      '#options' => $options,
+      '#required' => !$global_node_create_access,
+      '#empty_value' => '',
+    );
+  }
+
+  // Show an autocomplete field to select the group with.
   else {
     $group_name = '';
 
@@ -210,32 +391,17 @@ function gnode_form_node_form_alter(&$form, $form_state) {
       $group_name = "$title (GID: $gid)";
     }
 
-    // Add a vertical tab with an autocomplete field.
-    $form['group_settings'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Group settings'),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
-      '#group' => 'additional_settings',
-      '#attributes' => array(
-        'class' => array('node-form-group-information'),
-      ),
-      '#attached' => array(
-        'js' => array(drupal_get_path('module', 'gnode') . '/misc/gnode.js'),
-      ),
-      '#tree' => TRUE,
-      '#weight' => -50,
-    );
+    $description = $global_node_create_access
+      ? t('Enter the name of the group to attach this node to. Leave blank for no group.')
+      : t('Because you are not allowed to create this content outside of a group, you are required to enter the name of one here.');
 
     $form['group_settings']['group'] = array(
       '#type' => 'textfield',
       '#title' => t('Parent group'),
       '#autocomplete_path' => 'group/autocomplete',
       '#default_value' => $group_name,
-      '#description' => t("Enter the name of the group to attach this node to. Leave blank for no group.<br /><strong>By selecting a group, the node will inherit the group's access control</strong>."),
-      // If the user can't create this node outside of a group, he is not allowed
-      // to move it to the sitewide scope either.
-      '#required' => !node_access('create', $node->type),
+      '#description' => $description . '<br />'. $group_access_warning,
+      '#required' => !$global_node_create_access,
     );
   }
 }
@@ -246,10 +412,6 @@ function gnode_form_node_form_alter(&$form, $form_state) {
  * Validates and processes the 'parent group' field.
  *
  * @see gnode_form_node_form_alter()
- *
- * @todo If gid is still 0, it could mean someone accessed the global creation
- *       page while only having the permission to create a node on the group
- *       level.
  */
 function gnode_node_validate($node, $form, &$form_state) {
   $values = $form_state['values']['group_settings'];
