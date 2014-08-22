@@ -109,6 +109,10 @@ class GroupTypeUIController extends EntityDefaultUIController {
    *   The overview form state which will be used for submitting.
    */
   public function overviewFormSubmit($form, &$form_state) {
+    if (empty($form_state['values']['weights'])) {
+      return;
+    }
+
     foreach ($form_state['values']['weights'] as $name => $weight) {
       $group_type = group_type_load($name);
 
