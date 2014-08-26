@@ -251,8 +251,7 @@ class Group extends Entity {
   /**
    * Add a user to a group.
    *
-   * If the user was already a member of the group, the specified roles
-   * will be added to the user's active membership.
+   * If the user is already a member of the group, nothing changes.
    *
    * @param int $uid
    *   The uid of the member.
