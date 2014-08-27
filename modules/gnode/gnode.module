@@ -539,9 +539,6 @@ function _gnode_node_access_info($account, $op) {
       $type_access = FALSE;
       $user_access = FALSE;
 
-      // Shorten variable name for readability's sake.
-      $permissions = $group_type->outsider_permissions;
-
       switch ($op) {
         case 'view':
           $type_access = group_access("view $node_type", $group, $account);
