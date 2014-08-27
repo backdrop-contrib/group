@@ -91,6 +91,10 @@ function hook_entity_info() {
  *   have a clear, consistent security warning that is the same across the
  *   site. Use the 'description' key instead to provide any information that
  *   is specific to the permission you are defining.
+ * - limit to: (optional) A bit flag to define which membership types can use
+ *   this permission. Possible flags are GROUP_LIMIT_ANONYMOUS,
+ *   GROUP_LIMIT_OUTSIDER and GROUP_LIMIT_MEMBER. Defaults to GROUP_LIMIT_ALL,
+ *   which allows the permission to be set for any type of membership.
  *
  * @see hook_permission()
  */

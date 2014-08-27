@@ -62,8 +62,12 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
   }
   asort($modules);
 
+  // We keep track of checkbox options for all three membership types. This
+  // allows us to have certain checkboxes missing in case they are prohibited
+  // for a membership type.
+  $options = array('anonymous'=> array(), 'outsider'=> array(), 'member'=> array());
+
   // Populate the checkbox options and rows for every possible permission.
-  $options = array();
   foreach ($modules as $module => $module_name) {
     if ($permissions = module_invoke($module, 'group_permission')) {
       // Add the module name first so we can show a separating row.
@@ -74,11 +78,7 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
 
       // Then add a row for every permission defined by the module.
       foreach ($permissions as $pname => $permission) {
-        // Add the permission to the checkbox options. The label of each option
-        // will be properly set in theme_group_permission_form().
-        $options[$pname] = '';
-
-        // Set the warning message, if any.
+        // Set the default warning message, if any.
         $warning = !empty($permission['restrict access'])
           ? t('Warning: Give to trusted roles only; this permission has security implications.')
           : '';
@@ -88,7 +88,20 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
           'description' => '',
           'restrict access' => FALSE,
           'warning' => $warning,
+          'limit to' => GROUP_LIMIT_ALL,
         );
+
+        // Add the permission to the checkbox options. The label of each option
+        // will be properly set in theme_group_permission_form().
+        if ($permission['limit to'] & GROUP_LIMIT_ANONYMOUS) {
+          $options['anonymous'][$pname] = '';
+        }
+        if ($permission['limit to'] & GROUP_LIMIT_OUTSIDER) {
+          $options['outsider'][$pname] = '';
+        }
+        if ($permission['limit to'] & GROUP_LIMIT_MEMBER) {
+          $options['member'][$pname] = '';
+        }
 
         // Theme the permission name and description.
         $form['permissions'][$pname] = array(
@@ -127,10 +140,13 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
     // Add this role's disabled status to the tracker.
     $all_disabled = $all_disabled && $disabled;
 
+    // Retrieve the correct key for the options array.
+    $options_key = ($rname == 'anonymous' || $rname == 'outsider') ? $rname : 'member';
+
     // Build the checkboxes for every role.
     $form['checkboxes'][$rname] = array(
       '#type' => 'checkboxes',
-      '#options' => $options,
+      '#options' => $options[$options_key],
       '#default_value' => isset($status[$rname]) ? $status[$rname] : array(),
       '#attributes' => array('class' => array('rid-' . $rname)),
       '#disabled' => $disabled,

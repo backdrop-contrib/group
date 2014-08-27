@@ -33,16 +33,16 @@ function group_group_permission() {
     'join group' => array(
       'title' => t('Join group'),
       'description' => t('Should not be used in combination with "Request group membership"'),
-      'warning' => t('This permission has no effect when given to members.'),
+      'limit to' => GROUP_LIMIT_OUTSIDER,
     ),
     'request membership' => array(
       'title' => t('Request group membership'),
       'description' => t('Should not be used in combination with "Join group"'),
-      'warning' => t('This permission has no effect when given to members.'),
+      'limit to' => GROUP_LIMIT_OUTSIDER,
     ),
     'leave group' => array(
       'title' => t('Leave group'),
-      'warning' => t('This permission has no effect when given to outsiders.'),
+      'limit to' => GROUP_LIMIT_MEMBER,
     ),
     'view group' => array(
       'title' => t('View group'),

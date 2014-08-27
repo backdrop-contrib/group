@@ -60,22 +60,37 @@ function theme_group_permission_form($variables) {
       );
 
       foreach (element_children($form['checkboxes']) as $rname) {
-        // Title content for both the label as the checkbox itself.
-        $title = $group_roles[$rname]->label() . ': ' . $form['permissions'][$pname]['#markup'];
+        if (isset($form['checkboxes'][$rname][$pname])) {
+          // Title content for both the label as the checkbox itself.
+          $title = $group_roles[$rname]->label() . ': ' . $form['permissions'][$pname]['#markup'];
 
-        $form['checkboxes'][$rname][$pname]['#title'] = $title;
-        $form['checkboxes'][$rname][$pname]['#title_display'] = 'invisible';
-        $form['checkboxes'][$rname][$pname]['#attributes']['title'] = $title;
+          $form['checkboxes'][$rname][$pname]['#title'] = $title;
+          $form['checkboxes'][$rname][$pname]['#title_display'] = 'invisible';
+          $form['checkboxes'][$rname][$pname]['#attributes']['title'] = $title;
 
-        $row[] = array(
-          'data' => drupal_render($form['checkboxes'][$rname][$pname]),
-          'class' => array('checkbox'),
-        );
+          $row[] = array(
+            'data' => drupal_render($form['checkboxes'][$rname][$pname]),
+            'class' => array('checkbox'),
+          );
+        }
+        else {
+          $row[] = array(
+            'data' => 'x',
+            'class' => array('group-permission-incompatible'),
+            'title' => t('"@permission" is incompatible with "@role"', array(
+              '@permission' => $form['permissions'][$pname]['#markup'],
+              '@role' => $group_roles[$rname]->label(),
+            )),
+          );
+        }
       }
     }
 
     $rows[] = $row;
   }
+
+  // Add css for incompatible permissions.
+  drupal_add_css('.group-permission-incompatible {color: #8c2e0b;text-align:center;}', array('type' => 'inline'));
 
   // Compose the table header.
   $header = array(t('Permission'));

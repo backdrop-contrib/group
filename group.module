@@ -5,6 +5,16 @@
  */
 
 /**
+ * Define bit flags to limit group permissions with.
+ *
+ * @see hook_group_permission()
+ */
+define('GROUP_LIMIT_ANONYMOUS', 0x01);
+define('GROUP_LIMIT_OUTSIDER', 0x02);
+define('GROUP_LIMIT_MEMBER', 0x04);
+define('GROUP_LIMIT_ALL', 0x07);
+
+/**
  * Load our helper functions without polluting the .module file.
  */
 module_load_include('inc', 'group', 'helpers/group.entity');
