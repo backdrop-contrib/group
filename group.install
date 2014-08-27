@@ -108,6 +108,12 @@ function group_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'anonymous_permissions' => array(
+        'description' => 'The anonymous permissions for this group type.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
       'outsider_permissions' => array(
         'description' => 'The outsider permissions for this group type.',
         'type' => 'text',
@@ -625,4 +631,17 @@ function group_update_7009() {
   // Add 'approved_by'.
   $field = array('description' => 'The {users}.uid of the approving user.') + $base;
   db_add_field('group_membership', 'approved_by', $field);
+}
+
+/**
+ * Add anonymous permissions to {group_type}.
+ */
+function group_update_7010() {
+  db_add_field('group_type', 'anonymous_permissions', array(
+    'description' => 'The anonymous permissions for this group type.',
+    'type' => 'text',
+    'not null' => TRUE,
+    'serialize' => TRUE,
+    'initial' => serialize(array()),
+  ));
 }

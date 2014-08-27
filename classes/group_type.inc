@@ -38,7 +38,7 @@ class GroupType extends Entity {
    * Retrieve all possible roles for a group type.
    *
    * @param bool $special
-   *   Include special roles 'outsider' and 'member'. Defaults to TRUE.
+   *   Include special roles 'anonymous', 'outsider' and 'member'.
    * @param bool $reset
    *   Whether to reset the internal cache.
    *
@@ -51,6 +51,12 @@ class GroupType extends Entity {
     if (empty($this->entityCache) || $reset) {
       // We're about to fake two type specific roles: outsider and member.
       $values = array('type' => $this->name, 'global' => 0);
+
+      // Fake the anonymous role.
+      $values['name'] = 'anonymous';
+      $values['label'] = t('Anonymous');
+      $values['permissions'] = $this->anonymous_permissions;
+      $group_roles['anonymous'] = entity_create('group_role', $values);
 
       // Fake the outsider role.
       $values['name'] = 'outsider';
@@ -65,7 +71,7 @@ class GroupType extends Entity {
       $group_roles['member'] = entity_create('group_role', $values);
 
       // Unset the is_new flags to avoid confusion.
-      unset($group_roles['outsider']->is_new, $group_roles['member']->is_new);
+      unset($group_roles['anonymous']->is_new, $group_roles['outsider']->is_new, $group_roles['member']->is_new);
 
       // Add the local roles for this group type.
       $query = new EntityFieldQuery();
@@ -95,8 +101,7 @@ class GroupType extends Entity {
     $group_roles = $this->entityCache;
 
     if (!$special) {
-      unset($group_roles['outsider']);
-      unset($group_roles['member']);
+      unset($group_roles['anonymous'], $group_roles['outsider'], $group_roles['member']);
     }
 
     return $group_roles;

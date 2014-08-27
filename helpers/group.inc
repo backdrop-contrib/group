@@ -94,7 +94,13 @@ function group_autocomplete_result_gid($result) {
 }
 
 /**
- * Get the ids of the groups a user is an outsider to.
+ * Get the ids of the groups someone isn't a member of.
+ *
+ * Note: seeing as anonymous users cannot become a member of a group, this
+ * function returns all group ids when provided with the anonymous account
+ * (UID: 0), though still optionally filtered by group type.
+ *
+ * @todo Rename before release?
  *
  * @param int $uid
  *   The id of the user to retrieve group ids for.
@@ -120,7 +126,7 @@ function group_outsider_gids($uid, $type = '') {
  * Check whether a group role machine name exists.
  */
 function group_role_exists($name) {
-  return in_array($name, array('outsider', 'member')) || !!group_role_load($name);
+  return in_array($name, array('anonymous', 'outsider', 'member')) || !!group_role_load($name);
 }
 
 /**

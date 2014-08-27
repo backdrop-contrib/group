@@ -74,6 +74,9 @@ function gnode_group_node_create_gids($type, $account = NULL) {
     $account = $user;
   }
 
+  // Determine whether the account could be 'anonymous' or 'outsider'.
+  $account_exists = (bool) $account->uid;
+
   // If the user can bypass group access, return all group ids.
   if (user_access('bypass group access', $account)) {
     return db_select('groups', 'g')->fields('g')->execute()->fetchCol();
@@ -85,11 +88,15 @@ function gnode_group_node_create_gids($type, $account = NULL) {
   // Check for all group types if an outsider can create nodes of the given
   // node type in them.
   foreach (group_types() as $group_type) {
-    $has_access = in_array('administer group', $group_type->outsider_permissions);
-    $has_access = $has_access || in_array("create $type", $group_type->outsider_permissions);
+    // Retrieve the permissions to check for creation rights.
+    $check_permissions = $account_exists ? $group_type->outsider_permissions : $group_type->anonymous_permissions;
+
+    $has_access = in_array('administer group', $check_permissions);
+    $has_access = $has_access || in_array("create $type", $check_permissions);
 
     // If the group type allows access to outsiders, we add all of the groups
-    // the user is an outsider to.
+    // the user is an outsider to. This would be all groups in case we are
+    // checking for an anonymous user.
     if ($has_access) {
       $gids = array_merge($gids, group_outsider_gids($account->uid, $group_type->name));
     }
@@ -143,11 +150,17 @@ function gnode_group_node_create_access($type, $account = NULL) {
     return TRUE;
   }
 
+  // Determine whether the account could be 'anonymous' or 'outsider'.
+  $account_exists = (bool) $account->uid;
+
   // Check for all group types if an outsider can create nodes of the given
   // node type in them.
   foreach (group_types() as $group_type) {
-    $has_access = in_array('administer group', $group_type->outsider_permissions);
-    $has_access = $has_access || in_array("create $type", $group_type->outsider_permissions);
+    // Retrieve the permissions to check for creation rights.
+    $check_permissions = $account_exists ? $group_type->outsider_permissions : $group_type->anonymous_permissions;
+
+    $has_access = in_array('administer group', $check_permissions);
+    $has_access = $has_access || in_array("create $type", $check_permissions);
 
     // If the group type allows access to outsiders and the provided user
     // has as at least one group of this type he is an outsider to, we
@@ -471,12 +484,18 @@ function _gnode_node_access_info($account, $op) {
   // Gather the machine names of all node types.
   $node_types = array_keys(node_type_get_types());
 
+  // Determine whether the account could be 'anonymous' or 'outsider'.
+  $account_exists = (bool) $account->uid;
+
   // Check access for groups the user is an outsider to.
   foreach (group_types() as $type => $group_type) {
     if ($outsider_gids = group_outsider_gids($account->uid, $type)) {
+      // Retrieve the permissions to check for rights.
+      $permissions = $account_exists ? $group_type->outsider_permissions : $group_type->anonymous_permissions;
+
       // If you can administer the group, you have full access to every node
       // in that group. Add these group ids to 'full access'.
-      if (in_array('administer group', $group_type->outsider_permissions)) {
+      if (in_array('administer group', $permissions)) {
         foreach ($outsider_gids as $gid) {
           $return['full access'][$gid] = $gid;
         }
@@ -487,9 +506,6 @@ function _gnode_node_access_info($account, $op) {
         // Use booleans for readability's sake.
         $type_access = FALSE;
         $user_access = FALSE;
-
-        // Shorten variable name for readability's sake.
-        $permissions = $group_type->outsider_permissions;
 
         switch ($op) {
           case 'view':

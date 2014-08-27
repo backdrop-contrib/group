@@ -404,7 +404,9 @@ class Group extends Entity {
       }
     }
 
-    return group_type_load($this->type)->outsider_permissions;
+    return user_is_logged_in()
+      ? group_type_load($this->type)->outsider_permissions
+      : group_type_load($this->type)->anonymous_permissions;
   }
 
   /**

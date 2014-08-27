@@ -102,6 +102,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
     $values += array(
       'name' => '',
       'label' => '',
+      'anonymous_permissions' => array(),
       'outsider_permissions' => array(),
       'member_permissions' => array(),
       'config' => array(),

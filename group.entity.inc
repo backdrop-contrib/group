@@ -275,6 +275,15 @@ function group_entity_property_info() {
     'schema field' => 'label',
   );
 
+  $group_type['anonymous_permissions'] = array(
+    'label' => t('Anonymous permissions'),
+    'description' => t('The anonymous permissions for the group type.'),
+    'type' => 'list<text>',
+    'options list' => 'group_permissions',
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema field' => 'anonymous_permissions',
+  );
+
   $group_type['outsider_permissions'] = array(
     'label' => t('Outsider permissions'),
     'description' => t('The outsider permissions for the group type.'),

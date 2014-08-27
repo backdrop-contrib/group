@@ -46,13 +46,13 @@ function ggroup_config_form($form, &$form_state, GroupType $group_type) {
       $sub_group_role = $sub_group_role->label();
     }
 
-    // Outsider cannot be inherited.
-    unset($options['outsider']);
+    // Anonymous or outsider cannot be inherited.
+    unset($options['anonymous'], $options['outsider']);
 
     // Configuration for inheritance is shown on a per group role basis.
     foreach ($group_type->getRoles() as $role => $group_role) {
-      // Outsider cannot be inherited.
-      if ($role == 'outsider') {
+      // Anonymous or outsider cannot be inherited.
+      if ($role == 'anonymous' || $role == 'outsider') {
         continue;
       }
 

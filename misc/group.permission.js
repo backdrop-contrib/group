@@ -30,7 +30,7 @@
                     .attr('title', Drupal.t("This permission is inherited from the member role."))
                     .hide();
 
-                $('input[type=checkbox]', this).not('.rid-outsider, .rid-member').addClass('real-checkbox').each(function () {
+                $('input[type=checkbox]', this).not('.rid-anonymous, .rid-outsider, .rid-member').addClass('real-checkbox').each(function () {
                     $dummy.clone().insertAfter(this);
                 });
 
