@@ -42,7 +42,7 @@ function group_membership_actions_form_submit($form, &$form_state) {
   // Retrieve the membership (if it exists).
   $group_membership = $group->getMember($account->uid);
 
-  // Call the clicked actions's callback.
+  // Call the clicked action's callback.
   foreach (group_membership_action_info() as $action => $info) {
     if (isset($values[$action]) && $values['op'] == $values[$action]) {
       call_user_func($info['action callback'], $group, $account, $group_membership);
