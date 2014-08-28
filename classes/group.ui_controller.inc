@@ -212,12 +212,11 @@ class GroupUIController extends EntityDefaultUIController {
 
   /**
    * Operation form submit callback.
-   *
-   * @todo Version 7.x-2.x: Look into using EntityContentUIController.
    */
   public function operationFormSubmit($form, &$form_state) {
     parent::operationFormSubmit($form, $form_state);
-    // The manage entity path is unset for the content entity UI.
+
+    // Redirect to the front page after deleting a group.
     $form_state['redirect'] = '<front>';
   }
 
