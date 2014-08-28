@@ -316,7 +316,6 @@ function group_entity_property_info() {
     'description' => t('The group roles a user gets when creating a group.'),
     'type' => 'list<group_role>',
     'options list' => 'group_role_labels',
-    'getter callback' => 'entity_property_verbatim_get',
     'setter callback' => 'entity_property_verbatim_set',
     'computed' => TRUE,
   );
