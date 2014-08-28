@@ -298,7 +298,6 @@ function group_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
       ),
-      // @todo implement the fields below
       'approved_on' => array(
         'description' => 'The Unix timestamp when the membership was approved.',
         'type' => 'int',
