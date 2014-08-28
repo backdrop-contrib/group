@@ -619,8 +619,6 @@ function group_entity_update($entity, $type) {
  */
 function group_entity_save($entity, $type) {
   if (!empty($entity->group)) {
-    $entity_info = entity_get_info($type);
-
     // Retrieve the entity id and bundle.
     list($entity_id, $revision_id, $bundle) = entity_extract_ids($type, $entity);
 
