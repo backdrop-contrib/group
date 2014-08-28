@@ -100,8 +100,6 @@ function group_autocomplete_result_gid($result) {
  * function returns all group ids when provided with the anonymous account
  * (UID: 0), though still optionally filtered by group type.
  *
- * @todo Rename before release?
- *
  * @param int $uid
  *   The id of the user to retrieve group ids for.
  * @param string $type
@@ -110,7 +108,7 @@ function group_autocomplete_result_gid($result) {
  * @return array
  *   An array of group ids (gids).
  */
-function group_outsider_gids($uid, $type = '') {
+function group_non_member_gids($uid, $type = '') {
   $query = db_select('groups', 'g');
   $query->addField('g', 'gid');
   $query->where('g.gid NOT IN (SELECT gid FROM {group_membership} WHERE uid = :uid)', array(':uid' => $uid));

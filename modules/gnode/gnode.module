@@ -85,7 +85,7 @@ function gnode_group_node_create_gids($type, $account = NULL) {
   // Otherwise, start gathering group ids.
   $gids = array();
 
-  // Check for all group types if an outsider can create nodes of the given
+  // Check for all group types if a non-member can create nodes of the given
   // node type in them.
   foreach (group_types() as $group_type) {
     // Retrieve the permissions to check for creation rights.
@@ -94,11 +94,11 @@ function gnode_group_node_create_gids($type, $account = NULL) {
     $has_access = in_array('administer group', $check_permissions);
     $has_access = $has_access || in_array("create $type", $check_permissions);
 
-    // If the group type allows access to outsiders, we add all of the groups
-    // the user is an outsider to. This would be all groups in case we are
+    // If the group type allows access to non-members, we add all of the groups
+    // the user is not a member of. This would be all groups in case we are
     // checking for an anonymous user.
     if ($has_access) {
-      $gids = array_merge($gids, group_outsider_gids($account->uid, $group_type->name));
+      $gids = array_merge($gids, group_non_member_gids($account->uid, $group_type->name));
     }
   }
 
@@ -153,7 +153,7 @@ function gnode_group_node_create_access($type, $account = NULL) {
   // Determine whether the account could be 'anonymous' or 'outsider'.
   $account_exists = (bool) $account->uid;
 
-  // Check for all group types if an outsider can create nodes of the given
+  // Check for all group types if a non-member can create nodes of the given
   // node type in them.
   foreach (group_types() as $group_type) {
     // Retrieve the permissions to check for creation rights.
@@ -162,10 +162,10 @@ function gnode_group_node_create_access($type, $account = NULL) {
     $has_access = in_array('administer group', $check_permissions);
     $has_access = $has_access || in_array("create $type", $check_permissions);
 
-    // If the group type allows access to outsiders and the provided user
-    // has as at least one group of this type he is an outsider to, we
-    // allow access.
-    if ($has_access && group_outsider_gids($account->uid, $group_type->name)) {
+    // If the group type allows access to non-members and the provided user
+    // has as at least one group of this type he is not a member of, we allow
+    // access.
+    if ($has_access && group_non_member_gids($account->uid, $group_type->name)) {
       return TRUE;
     }
   }
@@ -487,16 +487,16 @@ function _gnode_node_access_info($account, $op) {
   // Determine whether the account could be 'anonymous' or 'outsider'.
   $account_exists = (bool) $account->uid;
 
-  // Check access for groups the user is an outsider to.
+  // Check access for groups the user is not a member of.
   foreach (group_types() as $type => $group_type) {
-    if ($outsider_gids = group_outsider_gids($account->uid, $type)) {
+    if ($non_member_gids = group_non_member_gids($account->uid, $type)) {
       // Retrieve the permissions to check for rights.
       $permissions = $account_exists ? $group_type->outsider_permissions : $group_type->anonymous_permissions;
 
       // If you can administer the group, you have full access to every node
       // in that group. Add these group ids to 'full access'.
       if (in_array('administer group', $permissions)) {
-        foreach ($outsider_gids as $gid) {
+        foreach ($non_member_gids as $gid) {
           $return['full access'][$gid] = $gid;
         }
         continue;
@@ -521,7 +521,7 @@ function _gnode_node_access_info($account, $op) {
         // If the user has access to this node type, we add all nodes of that
         // node type (within the given group) to the list of accessible nodes.
         if ($type_access) {
-          foreach ($outsider_gids as $gid) {
+          foreach ($non_member_gids as $gid) {
             $return['type access'][$node_type][$gid] = $gid;
           }
         }
@@ -530,7 +530,7 @@ function _gnode_node_access_info($account, $op) {
         // all nodes of that node type (within the given group) where the user
         // is the author to the list of accessible nodes.
         elseif ($user_access) {
-          foreach ($outsider_gids as $gid) {
+          foreach ($non_member_gids as $gid) {
             $return['user access'][$node_type][$gid] = $gid;
           }
         }
