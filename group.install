@@ -8,12 +8,15 @@
  * Implements hook_install().
  */
 function group_install() {
+  $t = get_t();
+
+  // Enable the editing of Group entities in the admin theme.
   variable_set('group_admin_theme', '1');
 
   // Create a first global admin role and give it full permissions.
   $group_admin = entity_create('group_role', array(
     'name' => 'group_admin',
-    'label' => t('Administrator'),
+    'label' => $t('Administrator'),
     'weight' => 10,
     'permissions' => array_keys(module_invoke_all('group_permission')),
   ));
@@ -46,7 +49,6 @@ function group_uninstall() {
 
 /**
  * Implements hook_schema().
- *
  */
 function group_schema() {
   // Cannot name table 'group' as this is a keyword in SQL.

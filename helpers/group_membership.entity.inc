@@ -17,7 +17,7 @@
  *
  * @see entity_load()
  */
-function group_membership_load_multiple($mids = array(), $reset = FALSE) {
+function group_membership_load_multiple(array $mids = array(), $reset = FALSE) {
   return entity_load('group_membership', $mids, array(), $reset);
 }
 
@@ -31,7 +31,7 @@ function group_membership_load_multiple($mids = array(), $reset = FALSE) {
  * @return array
  *   An array of GroupMembership entities, keyed by their membership ids.
  */
-function group_memberships($filters = array()) {
+function group_memberships(array $filters = array()) {
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'group_membership');
 

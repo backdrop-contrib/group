@@ -215,15 +215,15 @@ function gnode_global_node_create_access($type, $account = NULL) {
   $rights = &drupal_static('node_access', array());
   unset($rights[$account->uid][$type]['create']);
 
-  // Then we flag gnode_group_node_create_access() to not interfere with the results of
-  // node_access() and run the latter to get the result we want.
+  // Then we flag gnode_group_node_create_access() to not interfere with the
+  // results of node_access() and run the latter to get the result we want.
   $skip = &drupal_static('gnode_group_node_create_access');
   $skip = TRUE;
   $return = node_access('create', $type);
 
   // After we have established whether the user has global node creation
-  // rights, we need to once again unflag gnode_group_node_create_access() and remove
-  // the node type's (skewed) entry from the node_access() cache.
+  // rights, we need to once again unflag gnode_group_node_create_access() and
+  // remove the node type's (skewed) entry from the node_access() cache.
   $skip = FALSE;
   unset($rights[$account->uid][$type]['create']);
 
@@ -267,6 +267,7 @@ function gnode_node_access($node, $op, $account) {
       case "view":
         $has_access = $has_access || group_access("view $node->type", $group, $account);
         break;
+
       case "update":
       case "delete":
         $has_access = $has_access || group_access("$op any $node->type", $group, $account);
@@ -297,7 +298,7 @@ function gnode_node_access($node, $op, $account) {
  *
  * @see node_add()
  */
-function gnode_node_add($group, $node_type) {
+function gnode_node_add(Group $group, $node_type) {
   global $user;
 
   module_load_include('inc', 'node', 'node.pages');
@@ -387,7 +388,7 @@ function gnode_form_node_form_alter(&$form, $form_state) {
     $form['group_settings']['gid'] = array(
       '#type' => 'select',
       '#title' => t('Parent group'),
-      '#description' => $description . '<br />'. $group_access_warning,
+      '#description' => $description . '<br />' . $group_access_warning,
       '#options' => $options,
       '#required' => !$global_node_create_access,
       '#empty_value' => '',
@@ -413,7 +414,7 @@ function gnode_form_node_form_alter(&$form, $form_state) {
       '#title' => t('Parent group'),
       '#autocomplete_path' => 'group/autocomplete',
       '#default_value' => $group_name,
-      '#description' => $description . '<br />'. $group_access_warning,
+      '#description' => $description . '<br />' . $group_access_warning,
       '#required' => !$global_node_create_access,
     );
   }
@@ -475,7 +476,7 @@ function gnode_node_submit($node, $form, &$form_state) {
  *     access to every node of the node type indicated by the array key of
  *     which he is also the author.
  *
- * @see gnode_query_node_access_alter().
+ * @see gnode_query_node_access_alter()
  */
 function _gnode_node_access_info($account, $op) {
   // Initialize the array that will hold group ids.
@@ -511,6 +512,7 @@ function _gnode_node_access_info($account, $op) {
           case 'view':
             $type_access = in_array("view $node_type", $permissions);
             break;
+
           case 'update':
           case 'delete':
             $type_access = in_array("$op any $node_type", $permissions);
@@ -559,6 +561,7 @@ function _gnode_node_access_info($account, $op) {
         case 'view':
           $type_access = group_access("view $node_type", $group, $account);
           break;
+
         case 'update':
         case 'delete':
           $type_access = group_access("$op any $node_type", $group, $account);
@@ -618,7 +621,7 @@ function _gnode_get_table_nid_reference($table) {
 /**
  * Implements hook_query_TAG_alter().
  *
- * @see _gnode_node_access_info().
+ * @see _gnode_node_access_info()
  */
 function gnode_query_node_access_alter(QueryAlterableInterface $query) {
   global $user;

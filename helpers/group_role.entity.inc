@@ -62,7 +62,7 @@ function group_role_load($name) {
  *
  * @see entity_load()
  */
-function group_role_load_multiple($rids = array(), $reset = FALSE) {
+function group_role_load_multiple(array $rids = array(), $reset = FALSE) {
   return entity_load('group_role', $rids, array(), $reset);
 }
 
@@ -72,6 +72,6 @@ function group_role_load_multiple($rids = array(), $reset = FALSE) {
  * @param array $rids
  *   The ids of the group roles you want to delete.
  */
-function group_role_delete_multiple($rids) {
+function group_role_delete_multiple(array $rids) {
   entity_delete_multiple('group_role', $rids);
 }

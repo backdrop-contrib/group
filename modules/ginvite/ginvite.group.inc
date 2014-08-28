@@ -68,13 +68,13 @@ function ginvite_group_membership_action_info() {
  *   The group the invitation is for.
  * @param object $account
  *   The user the invitation is for.
- * @param GroupMembership $group_membership
+ * @param GroupMembership|false $group_membership
  *   The group membership object to check for the invitation.
  *
  * @return bool
  *   Whether the user has an invitation.
  */
-function ginvite_user_is_invited($group, $account, $group_membership) {
+function ginvite_user_is_invited(Group $group, $account, $group_membership) {
   return !empty($group_membership) && $group_membership->status == 'invited';
 }
 
@@ -85,10 +85,10 @@ function ginvite_user_is_invited($group, $account, $group_membership) {
  *   The group the invitation is for.
  * @param object $account
  *   The user the invitation is for.
- * @param GroupMembership $group_membership
+ * @param GroupMembership|false $group_membership
  *   The group membership object for the invitation.
  */
-function ginvite_user_accept($group, $account, $group_membership) {
+function ginvite_user_accept(Group $group, $account, $group_membership) {
   $group_membership->status = 'active';
   $group_membership->save();
   drupal_set_message(t('You have accepted the group invitation.'));
@@ -101,10 +101,10 @@ function ginvite_user_accept($group, $account, $group_membership) {
  *   The group the invitation is for.
  * @param object $account
  *   The user the invitation is for.
- * @param GroupMembership $group_membership
+ * @param GroupMembership|false $group_membership
  *   The group membership object for the invitation.
  */
-function ginvite_user_decline($group, $account, $group_membership) {
+function ginvite_user_decline(Group $group, $account, $group_membership) {
   $group_membership->delete();
   drupal_set_message(t('You have declined the group invitation.'));
 }

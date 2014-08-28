@@ -351,7 +351,7 @@ function group_user_can_leave(Group $group, $account, $group_membership) {
  * @param GroupMembership $group_membership
  *   The group membership of the user that wants to leave.
  */
-function group_user_leave(Group $group, $account, $group_membership) {
+function group_user_leave(Group $group, $account, GroupMembership $group_membership) {
   $group_membership->delete();
   drupal_set_message(t('You have left the group.'));
 }

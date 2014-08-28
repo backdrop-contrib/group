@@ -21,7 +21,7 @@
  * @return bool
  *   Whether the user has the requested permission.
  */
-function group_access($permission, $group, $account = NULL) {
+function group_access($permission, Group $group, $account = NULL) {
   global $user;
 
   if (!isset($account)) {

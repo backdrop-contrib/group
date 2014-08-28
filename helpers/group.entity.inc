@@ -17,7 +17,7 @@
  *
  * @see entity_load()
  */
-function group_load_multiple($gids = array(), $reset = FALSE) {
+function group_load_multiple(array $gids = array(), $reset = FALSE) {
   return entity_load('group', $gids, array(), $reset);
 }
 
@@ -120,6 +120,6 @@ function group_load_by_member($uid, $type = NULL) {
  * @param array $gids
  *   The ids of the groups you want to delete.
  */
-function group_delete_multiple($gids) {
+function group_delete_multiple(array $gids) {
   entity_delete_multiple('group', $gids);
 }

@@ -188,12 +188,15 @@ function group_entity_access($op, Group $group = NULL, $account = NULL, $entity_
   switch ($op) {
     case 'create':
       return !empty($group_type) && user_access("create $group_type group", $account);
+
     case 'view':
       return group_access('administer group', $group, $account)
         || group_access('view group', $group, $account);
+
     case 'update':
       return group_access('administer group', $group, $account)
         || group_access('edit group', $group, $account);
+
     case 'delete':
       return group_access('administer group', $group, $account)
         || group_access('delete group', $group, $account);

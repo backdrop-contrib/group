@@ -175,7 +175,7 @@ function ginvite_entity_delete($entity, $type) {
 function ginvite_mail($key, &$message, $params) {
   if ($key == 'invite') {
     $options = array(
-      'langcode' => $message['language']->language
+      'langcode' => $message['language']->language,
     );
 
     $body_message  = 'Hi there!' . "\n\n";

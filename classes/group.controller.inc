@@ -42,8 +42,8 @@ class GroupController extends EntityAPIController {
 
       // On the off chance that someone tried to load the group when acting upon
       // the GroupMembership save above, the field cache for this group needs to
-      // be cleared. Otherwise, the newly created group will keep loading without
-      // its field data available until the caches are cleared.
+      // be cleared. Otherwise, the newly created group will keep loading
+      // without its field data available until the caches are cleared.
       //
       // For now, this is the approach we're taking seeing as the alternative is
       // to copy over EntityAPIController::invoke() entirely, forcing us to keep
@@ -80,7 +80,7 @@ class GroupController extends EntityAPIController {
         $entity_info = entity_get_info($entity_type);
         $single = $entity_info['group entity'] == 'single';
 
-        foreach ($bundles as $bundle => $entities) {
+        foreach ($bundles as $entities) {
           // Keep track of the entities we want to delete along with the group.
           $delete_ids = array();
 
@@ -121,7 +121,7 @@ class GroupController extends EntityAPIController {
    * We first set up the values that are specific to the group schema
    * but then also run the EntityAPIController counterpart.
    *
-   * @param $values
+   * @param array $values
    *   An array of values to set, keyed by property name.
    *
    * @return Group

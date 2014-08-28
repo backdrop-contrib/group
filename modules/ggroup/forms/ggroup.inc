@@ -12,6 +12,8 @@
  * Generate the subgroup creation form.
  */
 function ggroup_add_subgroup_form($group, GroupType $group_type) {
+  $form_state = array();
+
   $subgroup = entity_create('group', array(
     'group' => $group->gid,
     'type' => $group_type->name,

@@ -103,9 +103,9 @@ class GroupTypeUIController extends EntityDefaultUIController {
   /**
    * Overview form submit callback.
    *
-   * @param $form
+   * @param array $form
    *   The form array of the overview form.
-   * @param $form_state
+   * @param array $form_state
    *   The overview form state which will be used for submitting.
    */
   public function overviewFormSubmit($form, &$form_state) {
@@ -254,7 +254,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
 
     // Cell for the cross drag&drop element.
     $row['data']['drag'] = array(
-      'class' => array('entry-cross')
+      'class' => array('entry-cross'),
     );
 
     // Weight item for the tabledrag.
@@ -269,7 +269,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
           'class' => array('group-type-weight'),
         ),
         '#disabled' => $type_fixed,
-      )
+      ),
     );
 
     // Add the type label.
@@ -285,7 +285,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
       'data' => array(
         '#theme' => 'entity_status',
         '#status' => $group_type->status,
-      )
+      ),
     );
 
     // Add the edit action.

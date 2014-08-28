@@ -103,7 +103,7 @@ class GroupUIController extends EntityDefaultUIController {
       'type' => MENU_LOCAL_TASK,
       'weight' => -5,
       // @todo Properly implement contextual links.
-      //'context' => MENU_CONTEXT_INLINE,
+      // 'context' => MENU_CONTEXT_INLINE,
     );
 
     $items['group/%group/delete'] = array(
@@ -169,8 +169,6 @@ class GroupUIController extends EntityDefaultUIController {
     // If the form was rebuilt from an operation, we show that form instead.
     if ($form_state['rebuild']) {
       $args = array_merge(array($form, &$form_state), $form_state['rebuild_info']['args']);
-      $function = $form_state['rebuild_info']['callback'];
-
       return call_user_func_array($form_state['rebuild_info']['callback'], $args);
     }
 

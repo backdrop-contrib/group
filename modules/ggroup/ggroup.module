@@ -168,7 +168,7 @@ function ggroup_get_inherited_roles(GroupMembership $group_membership) {
  *   used to boost performance when targeting specific subgroups to (re)run
  *   inheritance towards.
  */
-function ggroup_run_member_inheritance(GroupMembership $parent, $filter = array()) {
+function ggroup_run_member_inheritance(GroupMembership $parent, array $filter = array()) {
   // Retrieve the membership status info.
   $status_info = group_membership_status_info();
 

@@ -91,7 +91,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * We first set up the values that are specific to the group type schema
    * but then also run the EntityAPIControllerExportable counterpart.
    *
-   * @param $values
+   * @param array $values
    *   An array of values to set, keyed by property name.
    *
    * @return GroupType

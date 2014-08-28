@@ -61,9 +61,10 @@ class GroupMembershipController extends EntityAPIController {
   public function invoke($hook, $group_membership) {
     if ($hook == 'update' || $hook == 'insert') {
       // Below we take care of the 'roles' property that was set on the
-      // GroupMembership; saving new roles to and removing revoked roles from the
-      // database. For new GroupMembership entities, we can simply grant all of
-      // the roles. For existing ones, we need to run some integrity checks.
+      // GroupMembership; saving new roles to and removing revoked roles from
+      // the database. For new GroupMembership entities, we can simply grant
+      // all of the roles. For existing ones, we need to run some integrity
+      // checks.
       if (!empty($group_membership->is_new)) {
         $grant = $group_membership->roles;
       }
@@ -140,7 +141,7 @@ class GroupMembershipController extends EntityAPIController {
    * We first set up the values that are specific to the group schema
    * but then also run the EntityAPIController counterpart.
    *
-   * @param $values
+   * @param array $values
    *   An array of values to set, keyed by property name.
    *
    * @return GroupMembership

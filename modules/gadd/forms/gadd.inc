@@ -44,7 +44,7 @@ function gadd_add_member_form_validate($form, &$form_state) {
   $username = $form_state['values']['user'];
 
   // Check if the username exists.
-  if (! ($account = user_load_by_name($username)) ) {
+  if (!($account = user_load_by_name($username))) {
     form_set_error('user', t('User %user not found', array('%user' => $username)));
   }
 
@@ -66,7 +66,7 @@ function gadd_add_member_form_submit($form, &$form_state) {
   global $user;
 
   $values = array(
-    'roles'=> array_filter($form_state['values']['roles']),
+    'roles' => array_filter($form_state['values']['roles']),
     'added_on' => REQUEST_TIME,
     'added_by' => $user->uid,
   );

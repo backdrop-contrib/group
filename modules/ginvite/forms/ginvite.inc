@@ -62,7 +62,7 @@ function ginvite_by_user_form_validate($form, &$form_state) {
   $username = $form_state['values']['user'];
 
   // Check if the username exists.
-  if (! ($account = user_load_by_name($username)) ) {
+  if (!($account = user_load_by_name($username))) {
     form_set_error('user', t('User %user not found', array('%user' => $username)));
   }
 
@@ -136,7 +136,7 @@ function ginvite_by_mail_form_validate($form, &$form_state) {
     }
 
     // Then check if the membership already exists.
-    elseif($group->getMember($account->uid)) {
+    elseif ($group->getMember($account->uid)) {
       $message = '%email is already registered to a member of this group.';
       form_set_error('mail', t($message, array('%email' => $mail)));
     }

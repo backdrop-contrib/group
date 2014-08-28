@@ -64,7 +64,7 @@ function group_type_form($form, &$form_state, GroupType $group_type, $op = 'edit
  */
 function group_type_form_submit(&$form, &$form_state) {
   $group_type = entity_ui_form_submit_build_entity($form, $form_state);
-  $saved = $group_type->save();
+  $group_type->save();
 
   $form_state['redirect'] = 'admin/group/type';
 }

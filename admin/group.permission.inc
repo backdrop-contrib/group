@@ -65,7 +65,7 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
   // We keep track of checkbox options for all three membership types. This
   // allows us to have certain checkboxes missing in case they are prohibited
   // for a membership type.
-  $options = array('anonymous'=> array(), 'outsider'=> array(), 'member'=> array());
+  $options = array('anonymous' => array(), 'outsider' => array(), 'member' => array());
 
   // Populate the checkbox options and rows for every possible permission.
   foreach ($modules as $module => $module_name) {

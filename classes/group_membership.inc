@@ -66,17 +66,18 @@ class GroupMembership extends Entity {
    *   An associative array, where the key holds the role name and the value
    *   determines whether to grant or revoke that role. Any value that
    *   evaluates to TRUE will cause the role to be granted. Any value that
-   *   evaluates to FALSE will cause the role to be revoked.
-   *   @code
-   *     array(
-   *       'group_admin' => 0,         // Revoke 'group_admin'
-   *       'group_admin' => FALSE,     // Revoke 'group_admin'
-   *       'sub_admin' => 1,           // Grant 'sub_admin'
-   *       'sub_admin' => TRUE,        // Grant 'sub_admin'
-   *       'sub_admin' => 'sub_admin', // Grant 'sub_admin'
-   *     )
-   *   @endcode
-   *   Existing roles are not changed, unless specified in $roles.
+   *   evaluates to FALSE will cause the role to be revoked. Existing roles are
+   *   not changed, unless specified in $roles.
+   *
+   * @code
+   *   array(
+   *     'group_admin' => 0,         // Revoke 'group_admin'
+   *     'group_admin' => FALSE,     // Revoke 'group_admin'
+   *     'sub_admin' => 1,           // Grant 'sub_admin'
+   *     'sub_admin' => TRUE,        // Grant 'sub_admin'
+   *     'sub_admin' => 'sub_admin', // Grant 'sub_admin'
+   *   )
+   * @endcode
    *
    * @see GroupMembershipController::save()
    */

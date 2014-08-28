@@ -42,8 +42,8 @@ class GroupMembershipViewsController extends EntityDefaultViewsController {
         'group_membership' => array(
           'left_field' => 'mid',
           'field' => 'mid',
-        )
-      )
+        ),
+      ),
     );
 
     $data['group_membership_role']['role'] = array(

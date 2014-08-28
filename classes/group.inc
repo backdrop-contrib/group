@@ -215,7 +215,7 @@ class Group extends Entity {
    * @param Group $group
    *   The subgroup to attach to the group.
    */
-  public function addSubgroup($group) {
+  public function addSubgroup(Group $group) {
     $this->addEntity($group->gid, 'group', $group->type);
   }
 
@@ -260,7 +260,7 @@ class Group extends Entity {
    *   'roles' property. You cannot overwrite the group id (gid) or user id
    *   (uid) with this method. Leave blank to make the user 'just a member'.
    */
-  public function addMember($uid, $values = array()) {
+  public function addMember($uid, array $values = array()) {
     if (!$this->getMember($uid)) {
       $values = array('gid' => $this->gid, 'uid' => $uid) + $values;
       $group_membership = entity_create('group_membership', $values);

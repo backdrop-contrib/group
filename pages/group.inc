@@ -12,12 +12,9 @@
  *
  * @param string $search
  *   The partial title of the group.
- *
- * @return string
- *   A JSONified array of matches.
  */
 function group_autocomplete($search = '') {
-  return group_autocomplete_by_type(NULL, $search);
+  group_autocomplete_by_type(NULL, $search);
 }
 
 /**
@@ -31,9 +28,6 @@ function group_autocomplete($search = '') {
  *   traverse all known group types when no type is provided.
  * @param string $search
  *   The partial title of the group.
- *
- * @return string
- *   A JSONified array of matches.
  *
  * @todo Individual group access check.
  */
@@ -77,7 +71,7 @@ function group_add_page() {
   }
 
   if ($content) {
-    $output =  theme('admin_block_content', array('content' => $content));
+    $output = theme('admin_block_content', array('content' => $content));
   }
   else {
     $message = 'There are no group types available to you. Go to the <a href="@create-group">group type creation page</a> to add one or check the <a href="@group-permissions">Group module permissions</a>.';

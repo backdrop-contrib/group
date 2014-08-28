@@ -7,7 +7,7 @@
 /**
  * Generate the group invite page for a given user.
  *
- * @param User $account
+ * @param object $account
  *   The user to display data for.
  *
  * @return array

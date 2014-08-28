@@ -88,24 +88,25 @@ class GroupRole extends Entity {
    *
    * This function may be used to grant and revoke multiple permissions at once.
    * For example, when a form exposes checkboxes to configure permissions for a
-   * role, the form submit handler may directly pass the submitted values for the
-   * checkboxes form element to this function.
+   * role, the form submit handler may directly pass the submitted values for
+   * the checkboxes form element to this function.
    *
    * @param $permissions
-   *   An associative array, where the key holds the permission name and the value
-   *   determines whether to grant or revoke that permission. Any value that
-   *   evaluates to TRUE will cause the permission to be granted. Any value that
-   *   evaluates to FALSE will cause the permission to be revoked.
-   *   @code
-   *     array(
-   *       'administer users' => 0,      // Revoke 'administer users'
-   *       'administer group' => FALSE,  // Revoke 'administer group'
-   *       'create subgroups' => 1,      // Grant 'create subgroups'
-   *       'edit group' => TRUE,         // Grant 'edit group'
-   *       'view group' => 'view group', // Grant 'view group'
-   *     )
-   *   @endcode
+   *   An associative array, where the key holds the permission name and the
+   *   value determines whether to grant or revoke that permission. Any value
+   *   that evaluates to TRUE will cause the permission to be granted. Any
+   *   value that evaluates to FALSE will cause the permission to be revoked.
    *   Existing permissions are not changed, unless specified in $permissions.
+   *
+   * @code
+   *   array(
+   *     'administer users' => 0,      // Revoke 'administer users'
+   *     'administer group' => FALSE,  // Revoke 'administer group'
+   *     'create subgroups' => 1,      // Grant 'create subgroups'
+   *     'edit group' => TRUE,         // Grant 'edit group'
+   *     'view group' => 'view group', // Grant 'view group'
+   *   )
+   * @endcode
    *
    * @see GroupRole::grantPermissions()
    * @see GroupRole::revokePermissions()

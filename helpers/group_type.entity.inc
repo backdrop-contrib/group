@@ -62,7 +62,7 @@ function group_type_load($name) {
  *
  * @see entity_load()
  */
-function group_type_load_multiple($tids = array(), $reset = FALSE) {
+function group_type_load_multiple(array $tids = array(), $reset = FALSE) {
   return entity_load('group_type', $tids, array(), $reset);
 }
 
@@ -72,6 +72,6 @@ function group_type_load_multiple($tids = array(), $reset = FALSE) {
  * @param array $tids
  *   The ids of the group types you want to delete.
  */
-function group_type_delete_multiple($tids) {
+function group_type_delete_multiple(array $tids) {
   entity_delete_multiple('group_type', $tids);
 }

@@ -13,8 +13,6 @@ function group_member_overview_form($form, &$form_state, Group $group) {
   // If the form was rebuilt from an operation, we show that form instead.
   if ($form_state['rebuild']) {
     $args = array_merge(array($form, &$form_state), $form_state['rebuild_info']['args']);
-    $function = $form_state['rebuild_info']['callback'];
-
     return call_user_func_array($form_state['rebuild_info']['callback'], $args);
   }
 
@@ -135,9 +133,11 @@ function group_member_filters_form_submit($form, &$form_state) {
         }
       }
       break;
+
     case t('Undo'):
       array_pop($_SESSION['group_member_filters']);
       break;
+
     case t('Reset'):
       $_SESSION['group_member_filters'] = array();
       break;
@@ -233,9 +233,6 @@ function group_member_options_form_submit($form, &$form_state) {
  *   The pager limit for the result page.
  */
 function group_members_form(Group $group, $pager_limit) {
-  // Retrieve the destination url for any 'edit' or 'delete' link only once.
-  $destination = drupal_get_destination();
-
   $options = array();
   $header = array(
     'membername' => array(
@@ -280,7 +277,7 @@ function group_members_form(Group $group, $pager_limit) {
     );
 
     $member_roles = array();
-    foreach ($wrapper->roles->getIterator() as $delta => $group_role_wrapper) {
+    foreach ($wrapper->roles->getIterator() as $group_role_wrapper) {
       $member_roles[] = $group_role_wrapper->label();
     }
 
@@ -348,7 +345,7 @@ function group_membership_multiple_delete_confirm($form, &$form_state, $mids) {
   foreach (group_membership_load_multiple($mids) as $mid => $group_membership) {
     $wrapper = entity_metadata_wrapper('group_membership', $group_membership);
 
-    if (!isset($gid)){
+    if (!isset($gid)) {
       $gid = $group_membership->gid;
     }
 

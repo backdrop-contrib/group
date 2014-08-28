@@ -45,14 +45,14 @@ class group_handler_field_membership_role extends views_handler_field_prerender_
   }
 
   function document_self_tokens(&$tokens) {
-    $tokens['[' . $this->options['id'] . '-label' . ']'] = t('The human readable name of the group role.');
-    $tokens['[' . $this->options['id'] . '-name' . ']'] = t('The machine name of the group role.');
+    $tokens['[' . $this->options['id'] . '-label]'] = t('The human readable name of the group role.');
+    $tokens['[' . $this->options['id'] . '-name]'] = t('The machine name of the group role.');
   }
 
   function add_self_tokens(&$tokens, $item) {
     if (!empty($item['label'])) {
-      $tokens['[' . $this->options['id'] . '-label' . ']'] = $item['label'];
-      $tokens['[' . $this->options['id'] . '-name' . ']'] = $item['name'];
+      $tokens['[' . $this->options['id'] . '-label]'] = $item['label'];
+      $tokens['[' . $this->options['id'] . '-name]'] = $item['name'];
     }
   }
 }

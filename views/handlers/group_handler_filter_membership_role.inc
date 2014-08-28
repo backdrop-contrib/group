@@ -15,7 +15,8 @@ class group_handler_filter_membership_role extends views_handler_filter_many_to_
   }
 
   /**
-   * Override empty and not empty operator labels to be clearer for membership roles.
+   * Override empty and not empty operator labels to be clearer for membership
+   * roles.
    */
   function operators() {
     $operators = parent::operators();

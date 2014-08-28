@@ -127,7 +127,7 @@ function ginvite_update_7001() {
 }
 
 /**
- *  Remove default values from 'invited_on' and 'invited_by'.
+ * Remove default values from 'invited_on' and 'invited_by'.
  */
 function ginvite_update_7002() {
   db_change_field('group_membership', 'invited_on', 'invited_on', _ginvite_invited_on());

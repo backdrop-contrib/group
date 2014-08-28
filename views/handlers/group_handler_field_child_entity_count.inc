@@ -11,7 +11,7 @@
  * aggregate functions ("Use aggregation" under Advanced). The key difference
  * is that this handler allows multiple count fields in one view.
  *
- * You should only use this 'field' on views with just a single occurence of
+ * You should only use this 'field' on views with just a single occurrence of
  * the {groups} table, any higher amount will lead to unexpected results.
  *
  * @ingroup views_relationship_handlers

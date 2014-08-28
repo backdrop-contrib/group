@@ -118,9 +118,9 @@ class GroupRoleUIController extends EntityDefaultUIController {
   /**
    * Overview form submit callback.
    *
-   * @param $form
+   * @param array $form
    *   The form array of the overview form.
-   * @param $form_state
+   * @param array $form_state
    *   The overview form state which will be used for submitting.
    */
   public function overviewFormSubmit($form, &$form_state) {
@@ -143,19 +143,18 @@ class GroupRoleUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Generates the render array for an overview table for group roles
-   * matching the given conditions.
+   * Generate an overview table for group roles matching the given conditions.
    *
    * Builds a tabledrag without having to write a theme function for it.
    * See http://dropbucket.org/node/204.
    *
-   * @param $conditions
+   * @param array $conditions
    *   An array of conditions as needed by entity_load().
    *
    * @return array
    *   A renderable array.
    */
-  protected function roleTable($conditions = array()) {
+  protected function roleTable(array $conditions = array()) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'group_role');
     $query->propertyOrderBy('weight');
@@ -289,7 +288,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
     if ($this->tabledrag) {
       // Cell for the cross drag&drop element.
       $row['data']['drag'] = array(
-        'class' => array('entry-cross')
+        'class' => array('entry-cross'),
       );
 
       // Weight item for the tabledrag.
@@ -304,7 +303,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
             'class' => array('group-role-weight'),
           ),
           '#disabled' => $role_fixed,
-        )
+        ),
       );
     }
 
@@ -323,7 +322,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
           'data' => array(
             '#theme' => 'entity_status',
             '#status' => $group_role->status,
-          )
+          ),
         );
       }
 
