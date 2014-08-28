@@ -5,8 +5,6 @@
  *
  * This plugin allows you to allow or deny access based on the group roles a
  * member has in a group.
- *
- * @todo: What if there are no group roles yet?
  */
 
 /**
@@ -31,14 +29,23 @@ $plugin = array(
  * Settings form for the group role access plugin.
  */
 function group_group_role_access_settings(&$form, &$form_state, $conf) {
-  $form['settings']['roles'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Group role'),
-    '#description' => t('Only the checked group roles will be granted access.'),
-    '#options' => group_role_labels(),
-    '#default_value' => $conf['roles'],
-    '#required' => TRUE,
-  );
+  if ($options = group_role_labels()) {
+    $form['settings']['roles'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Group role'),
+      '#description' => t('Only the checked group roles will be granted access.'),
+      '#options' => $options,
+      '#default_value' => $conf['roles'],
+      '#required' => TRUE,
+    );
+  }
+  else {
+    $form['settings']['info'] = array(
+      '#markup' => t('There are no group roles yet, so this will always deny access.'),
+      '#prefix' => '<p>',
+      '#suffix' => '</p>',
+    );
+  }
 
   return $form;
 }
