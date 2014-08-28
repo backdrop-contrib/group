@@ -18,8 +18,8 @@ function ggroup_entity_info_alter(&$entity_info) {
  * Informs Drupal of the changes we made to {group_membership}.
  */
 function ggroup_entity_property_info_alter(&$info) {
-  $properties = &$info['group_membership']['properties'];
-  $properties['parent_membership'] = array(
+  $group_membership = &$info['group_membership']['properties'];
+  $group_membership['parent_membership'] = array(
     'label' => t('Parent membership'),
     'description' => t('The membership from which this one was inherited.'),
     'type' => 'group_membership',
