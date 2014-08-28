@@ -302,15 +302,24 @@ function group_entity_property_info() {
     'schema field' => 'member_permissions',
   );
 
-  // @todo Describe the struct through 'property info' key.
-  /*$group_type['config'] = array(
+  $group_type['config'] = array(
     'label' => t('Group type configuration'),
     'description' => t('The specific configuration for the group type.'),
     'type' => 'struct',
     'options list' => 'group_permissions',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'config',
-  );*/
+  );
+
+  $group_type['config']['property info']['creator_roles'] = array(
+    'label' => t('Creator roles'),
+    'description' => t('The group roles a user gets when creating a group.'),
+    'type' => 'list<group_role>',
+    'options list' => 'group_role_labels',
+    'getter callback' => 'entity_property_verbatim_get',
+    'setter callback' => 'entity_property_verbatim_set',
+    'computed' => TRUE,
+  );
 
   $group_type['weight'] = array(
     'label' => t('Weight'),

@@ -12,7 +12,7 @@
 function group_type_config_form($form, &$form_state, GroupType $group_type) {
   // Load the saved configuration.
   $defaults = isset($group_type->config['creator_roles'])
-    ? $group_type->config['creator_roles']
+    ? drupal_map_assoc($group_type->config['creator_roles'])
     : array();
 
   // Get the available group roles for this group type.
@@ -51,6 +51,6 @@ function group_type_config_form($form, &$form_state, GroupType $group_type) {
  */
 function group_type_config_form_submit($form, &$form_state) {
   $group_type = $form_state['build_info']['args'][0];
-  $group_type->config['creator_roles'] = $form_state['values']['creator_roles'];
+  $group_type->config['creator_roles'] = array_values(array_filter($form_state['values']['creator_roles']));
   $group_type->save();
 }

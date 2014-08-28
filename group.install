@@ -645,3 +645,16 @@ function group_update_7010() {
     'initial' => serialize(array()),
   ));
 }
+
+/**
+ * Make sure the creator_roles data in {group_type}.config is consistent.
+ */
+function group_update_7011() {
+  // Turn all creator_roles data into a numerical array.
+  foreach (group_types() as $group_type) {
+    if (!empty($group_type->config['creator_roles'])) {
+      $group_type->config['creator_roles'] = array_values(array_filter($group_type->config['creator_roles']));
+      $group_type->save();
+    }
+  }
+}

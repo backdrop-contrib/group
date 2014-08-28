@@ -33,7 +33,7 @@ class GroupController extends EntityAPIController {
       // Retrieve the default roles for this group type.
       $group_type = group_type_load($group->type);
       $roles = isset($group_type->config['creator_roles'])
-        ? array_filter($group_type->config['creator_roles'])
+        ? $group_type->config['creator_roles']
         : array();
 
       // Add the current user as the first member.
