@@ -24,14 +24,33 @@ function group_roles($names = FALSE) {
  *
  * Ideally used for populating option lists.
  *
+ * @param bool $prefix_type
+ *   (optional) Whether to prefix the group role label with a context label.
+ *   This is 'Global' for global roles or the group type label otherwise.
+ *
  * @return array
  *   An array of GroupRole labels, keyed by their machine names.
  */
-function group_role_labels() {
+function group_role_labels($prefix_type = FALSE) {
   $group_roles = group_roles();
-  foreach ($group_roles as &$group_role) {
-    $group_role = $group_role->label();
+
+  // Only load the group types if we want to prefix the group role labels.
+  if ($prefix_type) {
+    $group_types = group_type_labels();
+
+    foreach ($group_roles as &$group_role) {
+      $prefix = $group_role->global ? t('Global') : $group_types[$group_role->type];
+      $group_role = "$prefix: " . $group_role->label();
+    }
   }
+
+  // Otherwise, stick to a simple loop.
+  else {
+    foreach ($group_roles as &$group_role) {
+      $group_role = $group_role->label();
+    }
+  }
+
   return $group_roles;
 }
 

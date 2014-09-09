@@ -29,7 +29,9 @@ $plugin = array(
  * Settings form for the group role access plugin.
  */
 function group_group_role_access_settings(&$form, &$form_state, $conf) {
-  if ($options = group_role_labels()) {
+  if ($options = group_role_labels(TRUE)) {
+    asort($options);
+
     $form['settings']['roles'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Group role'),
@@ -81,10 +83,10 @@ function group_group_role_access_check($conf, $context) {
  */
 function group_group_role_access_summary($conf, $context) {
   $names = array();
-  $group_roles = group_roles();
+  $group_roles = group_role_labels(TRUE);
 
   foreach (array_filter($conf['roles']) as $role) {
-    $names[] = $group_roles[$role]->label();
+    $names[] = $group_roles[$role];
   }
 
   $message_single = '@identifier has group role "@roles"';
