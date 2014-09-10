@@ -44,10 +44,8 @@ function group_views_api() {
  * Implements hook_ctools_plugin_directory().
  */
 function group_ctools_plugin_directory($module, $plugin) {
-  // We currently only support CTools plugins.
-  if ($module == 'ctools') {
-    return "plugins/ctools/$plugin";
-  }
+  // We arrange our plugins by the defining module.
+  return "plugins/$module/$plugin";
 }
 
 /**
