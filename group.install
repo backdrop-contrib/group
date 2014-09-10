@@ -30,6 +30,7 @@ function group_install() {
  */
 function group_uninstall() {
   variable_del('group_admin_theme');
+  variable_del('group_pm_group_view_disabled');
 
   // Bypass entity_load() as we cannot use it here.
   $types = db_select('group_type', 'gt')
