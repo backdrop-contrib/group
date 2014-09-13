@@ -50,7 +50,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
   public function hook_menu() {
     $items = parent::hook_menu();
 
-    $items[$this->path]['title'] = t('Group roles');
+    $items[$this->path]['title'] = 'Group roles';
     $items[$this->path]['type'] = MENU_LOCAL_TASK;
     $items[$this->path]['weight'] = 0;
 
