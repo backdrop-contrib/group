@@ -3,8 +3,8 @@
  * @file
  * Group overview admin UI.
  *
- * @see Group::overviewForm()
- * @see Group::overviewFormSubmit()
+ * @see GroupUIController::overviewForm()
+ * @see GroupUIController::overviewFormSubmit()
  */
 
 /**

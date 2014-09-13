@@ -48,7 +48,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
     }
 
     // Delete the group types after setting our flags so those flags are still
-    // being passed on to other modules implementing hook_group_delete().
+    // being passed on to other modules implementing hook_group_type_delete().
     parent::delete($ids, $transaction);
 
     // Rebuild the menu cache so the group/add page works.
