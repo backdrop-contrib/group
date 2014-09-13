@@ -60,7 +60,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('group_permission_form', NULL, 4),
       'access callback' => 'user_access',
-      'access arguments' => array('administer group types'),
+      'access arguments' => array('configure group module'),
       'file' => 'admin/group.permission.inc',
       'file path' => drupal_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,

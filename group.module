@@ -109,10 +109,7 @@ function group_permission() {
   $permissions = array(
     'configure group module' => array(
       'title' => t('Configure Group module'),
-      'restrict access' => TRUE,
-    ),
-    'administer group types' => array(
-      'title' => t('Administer group types, their roles and permissions'),
+      'description' => t('Configure group types, group roles, member fields, etc.'),
       'restrict access' => TRUE,
     ),
     'bypass group access' => array(

@@ -66,7 +66,7 @@ function _group_add_access() {
     }
   }
 
-  if (user_access('administer group types')) {
+  if (user_access('configure group module')) {
     // There are no group types defined that the user has permission to create,
     // but the user does have the permission to administer the group types, so
     // grant them access to the page anyway.
@@ -82,7 +82,7 @@ function _group_add_access() {
  * @see GroupTypeUiController::hook_menu()
  */
 function group_type_add_role_access(GroupType $group_type) {
-  return user_access('administer group types') && !entity_has_status('group_type', $group_type, ENTITY_FIXED);
+  return user_access('configure group module') && !entity_has_status('group_type', $group_type, ENTITY_FIXED);
 }
 
 /**

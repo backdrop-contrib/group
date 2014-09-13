@@ -88,7 +88,7 @@ function group_entity_info() {
       'name' => 'name',
       'label' => 'label',
     ),
-    'access callback' => 'group_type_access',
+    'access callback' => 'group_configure_access',
     'label callback' => 'entity_class_label',
     'module' => 'group',
     'admin ui' => array(
@@ -115,7 +115,7 @@ function group_entity_info() {
       'label' => 'label',
     ),
     // Roles are bound to group types.
-    'access callback' => 'group_type_access',
+    'access callback' => 'group_configure_access',
     'label callback' => 'entity_class_label',
     'module' => 'group',
     'admin ui' => array(
@@ -160,7 +160,7 @@ function group_entity_info_alter(&$entity_info) {
         'path' => 'admin/group/type/manage/%group_type',
         'real path' => 'admin/group/type/manage/' . $name,
         'bundle argument' => 4,
-        'access arguments' => array('administer group types'),
+        'access arguments' => array('configure group module'),
       ),
     );
   }
@@ -206,10 +206,10 @@ function group_entity_access($op, Group $group = NULL, $account = NULL, $entity_
 }
 
 /**
- * Entity API access callback for group types and roles.
+ * Entity API access callback for group module configuration entities.
  */
-function group_type_access($op, $group_type_or_role, $account = NULL, $entity_type = NULL) {
-  return user_access('administer group types', $account);
+function group_configure_access($op, $entity, $account = NULL, $entity_type = NULL) {
+  return user_access('configure group module', $account);
 }
 
 /**
