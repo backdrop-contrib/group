@@ -434,5 +434,40 @@ function hook_group_membership_action_info() {
 }
 
 /**
+ * Provide information about group membership profiles exposed by your module.
+ *
+ * Group membership profiles will show up on the admin/group/member overview
+ * page and are expected to be bundles or pseudo-bundles for group memberships.
+ *
+ * An example of a pseudo-bundle is the Profile2 module for users: It doesn't
+ * really add bundles to a user, but in a way it still allows you to attach
+ * fields to a user. Same goes for the Group member profiles (gprofile) module.
+ *
+ * This hook only facilitates the showing of your extra GroupMembership bundles
+ * in a coherent admin UI. All functionality regarding bundles should still be
+ * taken care of by the implementing module.
+ *
+ * @return array
+ *   An array of profiles (membership bundles), keyed by their machine name
+ *   with each entry having the following keys:
+ *   - label: The human readable label for the membership profile.
+ *   - entity status: The status for the entity as defined by Entity API. If
+ *     your profile isn't an entity, set this to ENTITY_IN_CODE if it should
+ *     not be edited or ENTITY_CUSTOM if it is editable.
+ *   - path: The administration path for the profile. This is where the 'edit'
+ *     link will point to in the overview. All other paths, such as 'delete'
+ *     will be derived from this path.
+ */
+function hook_group_membership_profile_info() {
+  $profiles['special'] = array(
+    'label' => t('Special profile'),
+    'entity status' => ENTITY_FIXED,
+    'path' => 'admin/group/member/mymodule/myprofile',
+  );
+
+  return $profiles;
+}
+
+/**
  * @} End of "addtogroup hooks".
  */

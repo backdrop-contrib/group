@@ -22,6 +22,14 @@ function group_group_permission() {
     'access member overview' => array(
       'title' => t('Access the member overview page'),
     ),
+    'access member pages' => array(
+      'title' => t('View the individual member pages'),
+    ),
+    'edit own membership' => array(
+      'title' => t('Edit own membership'),
+      'description' => t('Edit own membership information'),
+      'limit to' => GROUP_LIMIT_MEMBER,
+    ),
     'edit group' => array(
       'title' => t('Edit group'),
       'description' => t('Edit the group information'),

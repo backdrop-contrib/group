@@ -10,6 +10,7 @@
  * @see GroupUiController::hook_menu()
  * @see GroupRoleUiController::hook_menu()
  * @see GroupTypeUiController::hook_menu()
+ * @see GroupMembershipUiController::hook_menu()
  */
 function group_menu() {
   $items['user/%user/group'] = array(
@@ -86,33 +87,21 @@ function group_type_add_role_access(GroupType $group_type) {
 }
 
 /**
- * Access callback: Checks if a user has access to their own membership.
- *
- * This is most commonly used for tasks that a user can perform on their own
- * membership such as cancelling their membership.
- *
- * This should not be used for administrative tasks over a membership such as
- * setting group roles or the blocking or unblocking of someone's membership.
- * The group permission 'administer members' should be used for that.
- *
- * @see GroupUiController::hook_menu()
- */
-function group_membership_access(Group $group, $account) {
-  global $user;
-
-  // Short-circuit if the current user is the subject of the membership.
-  // Otherwise, check if the current user can administer all members or
-  // bypass group access.
-  return $user->uid == $account->uid || group_access('administer members', $group, $user);
-}
-
-/**
  * Title callback: Returns the group title.
  *
  * @see GroupUiController::hook_menu()
  */
 function group_page_title(Group $group) {
   return $group->label();
+}
+
+/**
+ * Title callback: Returns the group membership title.
+ * *
+ * @see GroupMembershipUiController::hook_menu()
+ */
+function group_membership_page_title(GroupMembership $group_membership) {
+  return strip_tags($group_membership->label());
 }
 
 /**

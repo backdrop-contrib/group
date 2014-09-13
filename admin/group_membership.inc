@@ -1,7 +1,9 @@
 <?php
 /**
  * @file
- * Group member overview admin UI.
+ * Group membership overview admin UI.
+ *
+ * @see GroupMembershipUIController::hook_menu()
  */
 
 /**
@@ -272,7 +274,7 @@ function group_members_form(Group $group, $pager_limit) {
     $wrapper = entity_metadata_wrapper('group_membership', $group_membership);
 
     $options[$group_membership->mid] = array(
-      'membername' => l($wrapper->user->label(), "user/$group_membership->uid"),
+      'membername' => l($wrapper->user->label(), "group/$group_membership->gid/member/$group_membership->uid"),
       'status' => $statuses[$group_membership->status],
     );
 
@@ -486,57 +488,15 @@ function group_membership_remove_role($mids, $role) {
 }
 
 /**
- * Group membership edit form.
- */
-function group_membership_edit_form($form, &$form_state, Group $group, $account) {
-  $group_membership = $group->getMember($account->uid);
-
-  $message = 'Edit membership for %user in %group';
-  $replace = array(
-    '%user' => $account->name,
-    '%group' => $group->label(),
-  );
-  drupal_set_title(t($message, $replace), PASS_THROUGH);
-
-  $roles = array();
-  foreach ($group->getRoles(FALSE) as $group_role) {
-    $roles[$group_role->name] = $group_role->label();
-  }
-
-  $form['roles'] = array(
-    '#title' => t('Group roles'),
-    '#type' => 'checkboxes',
-    '#options' => $roles,
-    '#default_value' => $group_membership->roles,
-  );
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Edit membership'),
-  );
-
-  return $form;
-}
-
-/**
- * Group membership edit submit callback.
- */
-function group_membership_edit_form_submit($form, &$form_state) {
-  list($group, $account) = $form_state['build_info']['args'];
-
-  $group_membership = $group->getMember($account->uid);
-  $group_membership->changeRoles($form_state['values']['roles']);
-
-  drupal_set_message(t('The membership was successfully edited.'));
-}
-
-/**
  * Group membership cancel form.
  */
-function group_membership_cancel_form($form, &$form_state, Group $group, $account) {
+function group_membership_cancel_form($form, &$form_state, GroupMembership $group_membership) {
   global $user;
 
-  $unsubscribe_self = $user->uid == $account->uid;
+  $account = user_load($group_membership->uid);
+  $group = group_load($group_membership->gid);
+
+  $unsubscribe_self = $user->uid == $group_membership->uid;
 
   $message = $unsubscribe_self
     ? 'Are you sure you want to unsubscribe from %group?'
@@ -562,8 +522,8 @@ function group_membership_cancel_form($form, &$form_state, Group $group, $accoun
  * Group membership cancel submit callback.
  */
 function group_membership_cancel_form_submit($form, &$form_state) {
-  list($group, $account) = $form_state['build_info']['args'];
-  $group->removeMember($account->uid);
+  $group_membership = $form_state['build_info']['args'][0];
+  $group_membership->delete();
 
   drupal_set_message(t('The membership was cancelled.'));
 }

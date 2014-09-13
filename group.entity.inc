@@ -134,14 +134,34 @@ function group_entity_info() {
     'entity class' => 'GroupMembership',
     'controller class' => 'GroupMembershipController',
     'base table' => 'group_membership',
+    'fieldable' => TRUE,
     'entity keys' => array(
       'id' => 'mid',
     ),
+    'access callback' => 'group_configure_access',
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
+    'bundles' => array(
+      'group_membership' => array(
+        'label' => t('Group member'),
+        'admin' => array(
+          'path' => 'admin/group/member/manage/group_membership',
+          'access arguments' => array('configure group module'),
+        ),
+      ),
+    ),
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Member page'),
+        'custom settings' => FALSE,
+      ),
+    ),
     'module' => 'group',
-    // The admin part of group memberships is tied to the group the membership
-    // belongs to. Please refer to GroupUIController for these page callbacks.
+    'admin ui' => array(
+      'path' => 'admin/group/member',
+      'controller class' => 'GroupMembershipUIController',
+    ),
+    'extra fields controller class' => 'GroupMembershipExtraFieldsController',
     'views controller class' => 'GroupMembershipViewsController',
   );
 
@@ -210,6 +230,39 @@ function group_entity_access($op, Group $group = NULL, $account = NULL, $entity_
  */
 function group_configure_access($op, $entity, $account = NULL, $entity_type = NULL) {
   return user_access('configure group module', $account);
+}
+
+/**
+ * Entity API access callback for group memberships.
+ *
+ * Only used for 'view', 'update' and 'delete'; 'create' is usually handled by
+ * membership actions such as "Join group" and 'Request membership". Same goes
+ * for 'delete', actually, but we only allow administrative deletes here.
+ */
+function group_membership_access($op, GroupMembership $group_membership = NULL, $account = NULL) {
+  if (!empty($group_membership)) {
+    $group = group_load($group_membership->gid);
+
+    global $user;
+    if (!isset($account)) {
+      $account = $user;
+    }
+
+    switch ($op) {
+      case 'view':
+        return $group_membership->uid == $account->uid
+        || group_access('access member pages', $group, $account);
+
+      case 'update':
+        return group_access('administer members', $group, $account)
+        || group_access('edit own membership', $group, $account);
+
+      case 'delete':
+        return group_access('administer members', $group, $account);
+    }
+  }
+
+  return FALSE;
 }
 
 /**

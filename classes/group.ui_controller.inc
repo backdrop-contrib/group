@@ -117,43 +117,6 @@ class GroupUIController extends EntityDefaultUIController {
       'type' => MENU_CALLBACK,
     );
 
-    // Below are router definitions for group memberships. They are put here
-    // because they are inherently tied to groups. It would not make sense to
-    // write a separate admin UI for all group memberships within a site.
-    $items['group/%group/member'] = array(
-      'title' => 'Members',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('group_member_overview_form', 1),
-      'access callback' => 'group_access',
-      'access arguments' => array('access member overview', 1),
-      'file' => 'forms/group.members.inc',
-      'file path' => drupal_get_path('module', 'group'),
-      'type' => MENU_LOCAL_TASK,
-      'weight' => 0,
-    );
-
-    $items['group/%group/member/%user/edit'] = array(
-      'title' => 'Edit membership',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('group_membership_edit_form', 1, 3),
-      'access callback' => 'group_access',
-      'access arguments' => array('administer members', 1),
-      'file' => 'forms/group.members.inc',
-      'file path' => drupal_get_path('module', 'group'),
-      'type' => MENU_CALLBACK,
-    );
-
-    $items['group/%group/member/%user/cancel'] = array(
-      'title' => 'Cancel membership',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('group_membership_cancel_form', 1, 3),
-      'access callback' => 'group_membership_access',
-      'access arguments' => array(1, 3),
-      'file' => 'forms/group.members.inc',
-      'file path' => drupal_get_path('module', 'group'),
-      'type' => MENU_CALLBACK,
-    );
-
     return $items;
   }
 
