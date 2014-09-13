@@ -296,16 +296,8 @@ class GroupTypeUIController extends EntityDefaultUIController {
 
     // Add the Field UI actions.
     if (module_exists('field_ui')) {
-      if (!$type_fixed) {
-        $row['data']['manage fields'] = l(t('manage fields'), "$this->path/manage/$name/fields");
-        $row['data']['manage display'] = l(t('manage display'), "$this->path/manage/$name/display");
-      }
-      else {
-        $row['data']['manage fields'] = array(
-          'data' => '',
-          'colspan' => 2,
-        );
-      }
+      $row['data']['manage fields'] = l(t('manage fields'), "$this->path/manage/$name/fields");
+      $row['data']['manage display'] = l(t('manage display'), "$this->path/manage/$name/display");
     }
 
     // Add the Group Translation action.
