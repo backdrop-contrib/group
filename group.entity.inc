@@ -137,6 +137,8 @@ function group_entity_info() {
     'entity keys' => array(
       'id' => 'mid',
     ),
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
     'module' => 'group',
     // The admin part of group memberships is tied to the group the membership
     // belongs to. Please refer to GroupUIController for these page callbacks.

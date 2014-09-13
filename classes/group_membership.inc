@@ -10,6 +10,26 @@
 class GroupMembership extends Entity {
 
   /**
+   * Defines the entity label if the 'entity_class_label' callback is used.
+   */
+  protected function defaultLabel() {
+    $message = 'Member %account in %group';
+    $replace = array(
+      '%account' => format_username(user_load($this->uid)),
+      '%group' => group_load($this->gid)->label(),
+    );
+
+    return t($message, $replace);
+  }
+
+  /**
+   * Specifies the default uri, which is picked up by uri() by default.
+   */
+  protected function defaultURI() {
+    return array('path' => "group/$this->gid/member/$this->uid" );
+  }
+
+  /**
    * Grant roles to a membership.
    *
    * This is merely a helper function that sets the 'roles' property and then
