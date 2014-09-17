@@ -36,6 +36,11 @@ class GProfileTypeController extends EntityAPIControllerExportable {
         $gprofiles = gprofile_load_by_type($gprofile_type->name);
         $pids = array_merge($pids, array_keys($gprofiles));
       }
+
+      // Add Internationalization module support.
+      if (module_exists('i18n_string')) {
+        i18n_string_object_remove('gprofile_type', $gprofile_type);
+      }
     }
 
     // Delete all profiles of the deleted, but not reverted types.
@@ -46,6 +51,21 @@ class GProfileTypeController extends EntityAPIControllerExportable {
     // Delete the profile types after setting our flags so those flags are still
     // being passed on to other modules implementing hook_gprofile_type_delete().
     parent::delete($ids, $transaction);
+  }
+
+
+  /**
+   * Save a group member profile type.
+   *
+   * @see EntityAPIController::save()
+   */
+  public function save($gprofile_type, DatabaseTransaction $transaction = NULL) {
+    // Add Internationalization module support.
+    if (module_exists('i18n_string')) {
+      i18n_string_object_update('gprofile_type', $gprofile_type);
+    }
+
+    return parent::save($gprofile_type, $transaction);
   }
 
   /**

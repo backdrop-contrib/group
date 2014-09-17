@@ -226,35 +226,3 @@ function gprofile_group_membership_view(GroupMembership $group_membership, $view
     }
   }
 }
-
-/**
- * Implements hook_gprofile_type_insert().
- */
-function gprofile_gprofile_type_insert(GProfileType $gprofile_type) {
-  gprofile_gprofile_type_save($gprofile_type);
-}
-
-/**
- * Implements hook_gprofile_type_update().
- */
-function gprofile_gprofile_type_update(GProfileType $gprofile_type) {
-  gprofile_gprofile_type_save($gprofile_type);
-}
-
-/**
- * Helper for hook_gprofile_type_insert() and hook_entity_update().
- */
-function gprofile_gprofile_type_save(GProfileType $gprofile_type) {
-  if (module_exists('i18n_string')) {
-    i18n_string_object_update('gprofile_type', $gprofile_type);
-  }
-}
-
-/**
- * Implements hook_gprofile_type_delete().
- */
-function gprofile_gprofile_type_delete(GProfileType $gprofile_type) {
-  if (module_exists('i18n_string')) {
-    i18n_string_object_remove('gprofile_type', $gprofile_type);
-  }
-}
