@@ -1,0 +1,12 @@
+name = Group member profiles
+description = Allows you to create multiple fieldable member profiles, which can be attached to a member.
+core = 7.x
+package = Group
+
+dependencies[] = group
+
+files[] = classes/gprofile.inc
+files[] = classes/gprofile.extra_fields_controller.inc
+files[] = classes/gprofile_type.inc
+files[] = classes/gprofile_type.controller.inc
+files[] = classes/gprofile_type.ui_controller.inc
