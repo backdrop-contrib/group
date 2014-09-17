@@ -72,7 +72,9 @@ function group_membership_form_submit($form, &$form_state) {
  * @see group_membership_form_submit()
  * @see entity_form_submit_build_entity()
  */
-function group_membership_restore_roles_eb($entity_type, GroupMembership $group_membership, $form, $form_state) {
-  $original = entity_load_unchanged('group_membership', $group_membership->mid);
-  $group_membership->roles = $original->roles;
+function group_membership_restore_roles_eb($entity_type, $entity, $form, $form_state) {
+  if ($entity_type == 'group_membership') {
+    $original = entity_load_unchanged($entity_type, $entity->mid);
+    $entity->roles = $original->roles;
+  }
 }
