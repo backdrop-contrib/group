@@ -205,7 +205,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
     if (module_exists('field_ui')) {
       array_push($ops, 'manage fields', 'manage display');
     }
-    if (module_exists('gi18n')) {
+    if (module_exists('i18n_string')) {
       $ops[] = 'translate';
     }
     array_push($ops, 'clone', 'delete', 'export');
@@ -301,7 +301,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
     }
 
     // Add the Group Translation action.
-    if (module_exists('gi18n')) {
+    if (module_exists('i18n_string')) {
       $row['data']['translate'] = l(t('translate'), "$this->path/manage/$name/translate");
     }
 

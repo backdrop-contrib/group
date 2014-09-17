@@ -98,6 +98,8 @@ function group_entity_info() {
     ),
     'features controller class' => 'GroupTypeFeaturesController',
     'views controller class' => 'EntityDefaultViewsController',
+    // Add Internationalization module support.
+    'i18n controller class' => 'EntityDefaultI18nStringController',
   );
 
   $info['group_role'] = array(
@@ -125,6 +127,8 @@ function group_entity_info() {
     ),
     'features controller class' => 'GroupRoleFeaturesController',
     'views controller class' => 'EntityDefaultViewsController',
+    // Add Internationalization module support.
+    'i18n controller class' => 'EntityDefaultI18nStringController',
   );
 
   $info['group_membership'] = array(
@@ -331,6 +335,9 @@ function group_entity_property_info() {
     'type' => 'text',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'label',
+    // Add Internationalization module support.
+    'translatable' => TRUE,
+    'i18n string' => TRUE,
   );
 
   $group_type['anonymous_permissions'] = array(
@@ -432,6 +439,9 @@ function group_entity_property_info() {
     'type' => 'text',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'label',
+    // Add Internationalization module support.
+    'translatable' => TRUE,
+    'i18n string' => TRUE,
   );
 
   $group_role['global'] = array(

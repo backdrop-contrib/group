@@ -22,6 +22,11 @@ class GroupRoleController extends EntityAPIControllerExportable {
 
         // Flag parent type as ENTITY_CUSTOM.
         $group_role->flagTypeCustom();
+
+        // Add Internationalization module support.
+        if (module_exists('i18n_string')) {
+          i18n_string_object_remove('group_role', $group_role);
+        }
       }
     }
 
@@ -63,6 +68,11 @@ class GroupRoleController extends EntityAPIControllerExportable {
     // will check whether or not there is a parent group type that needs to be
     // flagged as ENTITY_CUSTOM.
     $group_role->flagTypeCustom();
+
+    // Add Internationalization module support.
+    if (module_exists('i18n_string')) {
+      i18n_string_object_update('group_role', $group_role);
+    }
 
     return parent::save($group_role, $transaction);
   }

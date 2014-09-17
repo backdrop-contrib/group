@@ -40,6 +40,11 @@ class GroupTypeController extends EntityAPIControllerExportable {
         $groups = group_load_by_type($group_type->name);
         $gids = array_merge($gids, array_keys($groups));
       }
+
+      // Add Internationalization module support.
+      if (module_exists('i18n_string')) {
+        i18n_string_object_remove('group_type', $group_type);
+      }
     }
 
     // Delete all groups of the group types that weren't being reverted.
@@ -81,6 +86,11 @@ class GroupTypeController extends EntityAPIControllerExportable {
 
     // Rebuild the menu cache so the group/add page works.
     menu_rebuild();
+
+    // Add Internationalization module support.
+    if (module_exists('i18n_string')) {
+      i18n_string_object_update('group_type', $group_type);
+    }
 
     return $return;
   }

@@ -226,7 +226,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
     // Translate links should always be available, regardless of context or
     // whether or not the entity has a fixed status.
-    if (module_exists('gi18n')) {
+    if (module_exists('i18n_string')) {
       $ops[] = 'translate';
     }
 
