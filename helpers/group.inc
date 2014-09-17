@@ -212,15 +212,14 @@ function group_membership_profile_info() {
   $profiles = &drupal_static(__FUNCTION__);
 
   if (!isset($profiles)) {
-    $profiles = module_invoke_all('group_membership_profile_info');
-
     $info = entity_get_info('group_membership');
     $profiles['group_membership'] = array(
       'label' => t('Default profile'),
       'entity status' => ENTITY_FIXED,
       'path' => $info['bundles']['group_membership']['admin']['path'],
-      'weight' => 0,
     );
+
+    $profiles += module_invoke_all('group_membership_profile_info');
   }
 
   return $profiles;
