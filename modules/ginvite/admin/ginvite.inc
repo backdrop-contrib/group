@@ -58,7 +58,7 @@ function ginvite_by_mail_list(Group $group) {
             '#items' => $roles,
           ),
         ),
-        l(user_load($data->invited_by)->name, "user/$data->invited_by"),
+        l(format_username(user_load($data->invited_by)), "user/$data->invited_by"),
         format_date($data->invited_on),
         array(
           'data' => array(

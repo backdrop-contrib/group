@@ -507,7 +507,7 @@ function group_membership_cancel_form($form, &$form_state, GroupMembership $grou
     : 'Yes, cancel the membership';
 
   $replace = array(
-    '%user' => $account->name,
+    '%user' => format_username($account),
     '%group' => $group->label(),
   );
 

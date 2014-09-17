@@ -15,7 +15,7 @@ function group_membership_form($form, &$form_state, GroupMembership $group_membe
 
   $message = 'Edit membership for %user in %group';
   $replace = array(
-    '%user' => $account->name,
+    '%user' => format_username($account),
     '%group' => $group->label(),
   );
   drupal_set_title(t($message, $replace), PASS_THROUGH);

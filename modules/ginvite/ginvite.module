@@ -186,7 +186,7 @@ function ginvite_mail($key, &$message, $params) {
     $body_message .= 'Kind regards,' . "\n";
     $body_message .= 'The @site team';
     $body_replace = array(
-      '@user' => $params['user']->name,
+      '@user' => format_username($params['user']),
       '@group' => $params['group']->title,
       '@site' => variable_get('site_name', 'Drupal'),
       '@url' => url('user/register', array('absolute' => TRUE)),

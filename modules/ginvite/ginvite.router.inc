@@ -112,5 +112,5 @@ function ginvite_user_page_title($account) {
     return t('My invites');
   }
 
-  return t("@user's invites", array('@user' => $account->name));
+  return t("@user's invites", array('@user' => format_username($account)));
 }

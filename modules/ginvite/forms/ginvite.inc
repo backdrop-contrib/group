@@ -144,7 +144,7 @@ function ginvite_by_mail_form_validate($form, &$form_state) {
     // If nothing fails, set the required values for an invite by user.
     else {
       $form_state['values']['uid'] = $account->uid;
-      $form_state['values']['user'] = $account->name;
+      $form_state['values']['user'] = format_username($account);
     }
   }
 

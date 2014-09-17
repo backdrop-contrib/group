@@ -114,5 +114,5 @@ function group_user_page_title($account) {
     return t('My groups');
   }
 
-  return t("@user's groups", array('@user' => $account->name));
+  return t("@user's groups", array('@user' => format_username($account)));
 }
