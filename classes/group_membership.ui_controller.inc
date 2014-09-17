@@ -178,7 +178,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
     if ($field_ui) {
       array_push($ops, 'manage fields', 'manage display');
     }
-    if (module_exists('gi18n')) {
+    if (module_exists('i18n_string')) {
       $ops[] = 'translate';
     }
     array_push($ops, 'clone', 'delete', 'export');
@@ -213,6 +213,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
    */
   protected function profileTableRow($name, $profile) {
     $profile_fixed = ($profile['entity status'] & ENTITY_FIXED) == ENTITY_FIXED;
+    $profile_default = $name == 'group_membership';
 
     // Add the type label.
     $row['label'] = $profile['label'];
@@ -236,14 +237,14 @@ class GroupMembershipUIController extends EntityDefaultUIController {
       $row['manage display'] = l(t('manage display'), $profile['path'] . '/display');
     }
 
-    if ($this->profile_count > 1 ) {
-      // Add the Group Translation action.
-      if (module_exists('gi18n')) {
-        $row['translate'] = l(t('translate'), $profile['path'] . '/translate');
+    if ($this->profile_count > 1) {
+      // Add the translation action.
+      if (module_exists('i18n_string')) {
+        $row['translate'] = $profile_default ? '' : l(t('translate'), $profile['path'] . '/translate');
       }
 
       // Add the clone action.
-      $row['clone'] = l(t('clone'), $profile['path'] . '/clone');
+      $row['clone'] = $profile_default ? '' : l(t('clone'), $profile['path'] . '/clone');
 
       // Don't show delete action for fixed or default types.
       if ($profile_fixed || $profile['entity status'] == ENTITY_IN_CODE) {
@@ -255,20 +256,20 @@ class GroupMembershipUIController extends EntityDefaultUIController {
         // Show revert action for overridden roles.
         if (entity_has_status('group_type', $profile, ENTITY_OVERRIDDEN)) {
           $what = t('revert');
-          $path = $profile['path'] . 'revert';
+          $path = $profile['path'] . '/revert';
         }
 
         // Show delete action for custom types.
         else {
           $what = t('delete');
-          $path = $profile['path'] . 'delete';
+          $path = $profile['path'] . '/delete';
         }
 
-        $row['delete'] = l($what, $path, array('query' => drupal_get_destination()));
+        $row['delete'] = $profile_default ? '' : l($what, $path, array('query' => drupal_get_destination()));
       }
 
       // Add the export action.
-      $row['export'] = l(t('export'), $profile['path'] . 'export');
+      $row['export'] = $profile_default ? '' : l(t('export'), $profile['path'] . '/export');
     }
 
     return $row;
