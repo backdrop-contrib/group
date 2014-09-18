@@ -195,8 +195,19 @@ function gprofile_entity_property_info_alter(&$info) {
  * Add the 'profiles' key to GroupMembership objects.
  */
 function gprofile_group_membership_load(array $group_memberships) {
+  // Gather all loaded memberships' profile data.
+  $query = db_select('gprofile', 'gp')
+    ->fields('gp', array('mid', 'pid'))
+    ->condition('mid', array_keys($group_memberships), 'IN');
+
+  // Gather the profiles per group membership id.
+  foreach ($query->execute() as $record) {
+    $profiles[$record->mid][] = $record->pid;
+  }
+
+  // Add the group profiles onto the memberships.
   foreach ($group_memberships as $mid => $group_membership) {
-    $group_membership->profiles = gprofile_load_by_member($mid);
+    $group_membership->profiles = isset($profiles[$mid]) ? $profiles[$mid] : array();
   }
 }
 
@@ -204,7 +215,7 @@ function gprofile_group_membership_load(array $group_memberships) {
  * Implements hook_group_membership_delete().
  */
 function gprofile_group_membership_delete(GroupMembership $group_membership) {
-  foreach ($group_membership->profiles as $gprofile) {
+  foreach (gprofile_load_by_member($group_membership->mid) as $gprofile) {
     $gprofile->delete();
   }
 }
