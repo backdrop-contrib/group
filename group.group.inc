@@ -165,7 +165,7 @@ function group_group_member_operations(Group $group) {
   );
 
   $operations['approve'] = array(
-    'label' => t('Approved selected membership requests'),
+    'label' => t('Approve selected membership requests'),
     'callback' => 'group_membership_approve',
     'optgroup' => t('Approve or decline membership requests'),
   );
