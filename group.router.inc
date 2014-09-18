@@ -87,6 +87,26 @@ function group_type_add_role_access(GroupType $group_type) {
 }
 
 /**
+ * Access callback: Whether the user can join a group through a form.
+ *
+ * @see GroupMembershipUiController::hook_menu()
+ */
+function group_membership_join_form_access(Group $group, $account) {
+  module_load_include('inc', 'group', 'group.group');
+  return group_user_can_join_form($group, $account, $group->getMember($account->uid));
+}
+
+/**
+ * Access callback: Whether the user can request a membership through a form.
+ *
+ * @see GroupMembershipUiController::hook_menu()
+ */
+function group_membership_request_form_access(Group $group, $account) {
+  module_load_include('inc', 'group', 'group.group');
+  return group_user_can_request_membership_form($group, $account, $group->getMember($account->uid));
+}
+
+/**
  * Title callback: Returns the group title.
  *
  * @see GroupUiController::hook_menu()
@@ -97,7 +117,7 @@ function group_page_title(Group $group) {
 
 /**
  * Title callback: Returns the group membership title.
- * *
+ *
  * @see GroupMembershipUiController::hook_menu()
  */
 function group_membership_page_title(GroupMembership $group_membership) {
@@ -115,4 +135,22 @@ function group_user_page_title($account) {
   }
 
   return t("@user's groups", array('@user' => format_username($account)));
+}
+
+/**
+ * Title callback for the 'join group' form.
+ *
+ * @see GroupMembershipUiController::hook_menu()
+ */
+function group_membership_join_title(Group $group) {
+  return t('Join @group', array('@group' => $group->label()));
+}
+
+/**
+ * Title callback for the 'request membership' form.
+ *
+ * @see GroupMembershipUiController::hook_menu()
+ */
+function group_membership_request_title(Group $group) {
+  return t('Request membership for @group', array('@group' => $group->label()));
 }

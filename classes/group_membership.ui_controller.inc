@@ -35,8 +35,6 @@ class GroupMembershipUIController extends EntityDefaultUIController {
 
   /**
    * Provides definitions for implementing hook_menu().
-   * 
-   * Overridden to limit the output.
    */
   public function hook_menu() {
     $items[$this->path] = array(
@@ -114,18 +112,53 @@ class GroupMembershipUIController extends EntityDefaultUIController {
       'type' => MENU_CALLBACK,
     );
 
+    // Below are router definitions for joining a group.
+    $items['group/%group/member/%user/join'] = array(
+      'title' => 'Join group',
+      'title callback' => 'group_membership_join_title',
+      'title arguments' => array(1),
+      'page callback' => 'group_membership_join_form_builder',
+      'page arguments' => array(1, 3, 'group_membership_join_form'),
+      'access callback' => 'group_membership_join_form_access',
+      'access arguments' => array(1, 3),
+      'file' => 'forms/group_membership.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_CALLBACK,
+    );
+
+    $items['group/%group/member/%user/request'] = array(
+      'title' => 'Request group membership',
+      'title callback' => 'group_membership_request_title',
+      'title arguments' => array(1),
+      'page callback' => 'group_membership_join_form_builder',
+      'page arguments' => array(1, 3, 'group_membership_request_form'),
+      'access callback' => 'group_membership_request_form_access',
+      'access arguments' => array(1, 3),
+      'file' => 'forms/group_membership.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'type' => MENU_CALLBACK,
+    );
+
     return $items;
   }
 
   /**
    * Provides definitions for implementing hook_forms().
-   * 
+   *
    * Overridden to limit the output.
    */
   public function hook_forms() {
     $forms['group_membership_overview_form'] = array(
       'callback' => 'entity_ui_overview_form',
       'wrapper_callback' => 'entity_ui_form_defaults',
+    );
+
+    $forms['group_membership_join_form'] = array(
+      'callback' => 'group_membership_form',
+    );
+
+    $forms['group_membership_request_form'] = array(
+      'callback' => 'group_membership_form',
     );
 
     return $forms;

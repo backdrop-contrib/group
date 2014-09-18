@@ -8,6 +8,8 @@
  * Implements hook_group_permission().
  */
 function group_group_permission() {
+  $combo_warning = '<br />' . t('Enabling multiple means of joining a group may result in a weird user experience');
+
   $permissions = array(
     'administer group' => array(
       'title' => t('Administer group'),
@@ -40,12 +42,22 @@ function group_group_permission() {
     ),
     'join group' => array(
       'title' => t('Join group'),
-      'description' => t('Should not be used in combination with "Request group membership"'),
+      'description' => t('Join with the click of a button') . $combo_warning,
+      'limit to' => GROUP_LIMIT_OUTSIDER,
+    ),
+    'join group form' => array(
+      'title' => t('Join group (form)'),
+      'description' => t('Join by filling out the member form') . $combo_warning,
       'limit to' => GROUP_LIMIT_OUTSIDER,
     ),
     'request membership' => array(
       'title' => t('Request group membership'),
-      'description' => t('Should not be used in combination with "Join group"'),
+      'description' => t('Request to join the group with the click of a button') . $combo_warning,
+      'limit to' => GROUP_LIMIT_OUTSIDER,
+    ),
+    'request membership form' => array(
+      'title' => t('Request group membership (form)'),
+      'description' => t('Request to join the group by filling out a member form') . $combo_warning,
       'limit to' => GROUP_LIMIT_OUTSIDER,
     ),
     'leave group' => array(
@@ -255,11 +267,25 @@ function group_group_membership_action_info() {
     'action callback' => 'group_user_join',
   );
 
+  $info['group_join_form'] = array(
+    'label' => t('Join'),
+    'description' => t('Fill out your details to join this group'),
+    'access callback' => 'group_user_can_join_form',
+    'action callback' => 'group_user_join_form',
+  );
+
   $info['group_request_membership'] = array(
     'label' => t('Request membership'),
     'description' => t('This group requires admin approval to join'),
     'access callback' => 'group_user_can_request_membership',
     'action callback' => 'group_user_request_membership',
+  );
+
+  $info['group_request_membership_form'] = array(
+    'label' => t('Request membership'),
+    'description' => t('Fill out a membership request'),
+    'access callback' => 'group_user_can_request_membership_form',
+    'action callback' => 'group_user_request_membership_form',
   );
 
   $info['group_leave'] = array(
@@ -303,6 +329,35 @@ function group_user_join(Group $group, $account) {
 }
 
 /**
+ * Check whether a user can join a group through a form.
+ *
+ * @param Group $group
+ *   The group to check access for.
+ * @param object $account
+ *   The user to check access for.
+ * @param GroupMembership|false $group_membership
+ *   The group membership if one exists already.
+ *
+ * @return bool
+ *   Whether the user can join the group.
+ */
+function group_user_can_join_form(Group $group, $account, $group_membership) {
+  return empty($group_membership) && group_access('join group form', $group, $account);
+}
+
+/**
+ * Display the member join form.
+ *
+ * @param Group $group
+ *   The group to join.
+ * @param object $account
+ *   The user that wants to join.
+ */
+function group_user_join_form(Group $group, $account) {
+  drupal_goto("group/$group->gid/member/$account->uid/join");
+}
+
+/**
  * Check whether a user can request to join a group.
  *
  * @param Group $group
@@ -330,6 +385,35 @@ function group_user_can_request_membership(Group $group, $account, $group_member
 function group_user_request_membership(Group $group, $account) {
   $group->addMember($account->uid, array('status' => 'requested', 'requested_on' => REQUEST_TIME));
   drupal_set_message(t('You have requested to join the group.'));
+}
+
+/**
+ * Check whether a user can request to join a group through a form.
+ *
+ * @param Group $group
+ *   The group to check access for.
+ * @param object $account
+ *   The user to check access for.
+ * @param GroupMembership|false $group_membership
+ *   The group membership if one exists already.
+ *
+ * @return bool
+ *   Whether the user can request a membership for the group.
+ */
+function group_user_can_request_membership_form(Group $group, $account, $group_membership) {
+  return empty($group_membership) && group_access('request membership form', $group, $account);
+}
+
+/**
+ * Display the member request form.
+ *
+ * @param Group $group
+ *   The group to join.
+ * @param object $account
+ *   The user that wants to join.
+ */
+function group_user_request_membership_form(Group $group, $account) {
+  drupal_goto("group/$group->gid/member/$account->uid/request");
 }
 
 /**
