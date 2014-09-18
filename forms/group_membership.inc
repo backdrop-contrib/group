@@ -20,17 +20,20 @@ function group_membership_form($form, &$form_state, GroupMembership $group_membe
   );
   drupal_set_title(t($message, $replace), PASS_THROUGH);
 
-  $roles = array();
-  foreach ($group->getRoles(FALSE) as $group_role) {
-    $roles[$group_role->name] = $group_role->label();
-  }
+  // Only show the role selector if the current user can administer members.
+  if (group_access('administer members', $group)) {
+    $roles = array();
+    foreach ($group->getRoles(FALSE) as $group_role) {
+      $roles[$group_role->name] = $group_role->label();
+    }
 
-  $form['roles'] = array(
-    '#title' => t('Group roles'),
-    '#type' => 'checkboxes',
-    '#options' => $roles,
-    '#default_value' => $group_membership->roles,
-  );
+    $form['roles'] = array(
+      '#title' => t('Group roles'),
+      '#type' => 'checkboxes',
+      '#options' => $roles,
+      '#default_value' => $group_membership->roles,
+    );
+  }
 
   // Load fields based on group type.
   field_attach_form('group_membership', $group_membership, $form, $form_state, entity_language('group_membership', $group_membership));
@@ -57,7 +60,15 @@ function group_membership_form_validate($form, &$form_state) {
  */
 function group_membership_form_submit($form, &$form_state) {
   $group_membership = entity_ui_form_submit_build_entity($form, $form_state);
-  $group_membership->changeRoles($form_state['values']['roles']);
+
+  // If roles were edited, change and save them.
+  if (!empty($form_state['values']['roles'])) {
+    $group_membership->changeRoles($form_state['values']['roles']);
+  }
+  // Otherwise just save the membership.
+  else {
+    $group_membership->save();
+  }
 
   drupal_set_message(t('The membership was successfully edited.'));
 }
