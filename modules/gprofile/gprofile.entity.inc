@@ -192,7 +192,10 @@ function gprofile_entity_property_info_alter(&$info) {
 /**
  * Implements hook_group_membership_load().
  *
- * Add the 'profiles' key to GroupMembership objects.
+ * Add the 'profiles' key to GroupMembership objects. This is mainly used for
+ * building the membership view modes and for entity metadata wrappers.
+ *
+ * @see gprofile_entity_property_info_alter().
  */
 function gprofile_group_membership_load(array $group_memberships) {
   // Gather all loaded memberships' profile data.
@@ -215,6 +218,8 @@ function gprofile_group_membership_load(array $group_memberships) {
  * Implements hook_group_membership_delete().
  */
 function gprofile_group_membership_delete(GroupMembership $group_membership) {
+  // Do not use the 'profiles' property here because we want to make sure the
+  // list of member profiles wasn't manipulated before delete them all.
   foreach (gprofile_load_by_member($group_membership->mid) as $gprofile) {
     $gprofile->delete();
   }
@@ -230,7 +235,7 @@ function gprofile_group_membership_view(GroupMembership $group_membership, $view
     $group = group_load($group_membership->gid);
     $account = user_load($group_membership->uid);
 
-    foreach ($group_membership->profiles as $gprofile) {
+    foreach (gprofile_load_multiple($group_membership->profiles) as $gprofile) {
       if (group_access("use $gprofile->type profile", $group, $account)) {
         $group_membership->content["profile_$gprofile->type"] = $gprofile->view('full', NULL, TRUE);
       }
