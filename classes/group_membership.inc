@@ -146,6 +146,35 @@ class GroupMembership extends Entity {
   }
 
   /**
+   * Checks if a membership has a certain group permission.
+   *
+   * For most circumstances, you should use group_access() to check if a
+   * GroupMembership has a certain permission. On some occasions, however, you
+   * may want to check for a permission on a GroupMembership instance that
+   * hasn't been saved to the database yet.
+   *
+   * @param string $permission
+   *   The group permission to check for.
+   *
+   * @return bool
+   *   Whether the member has access.
+   */
+  public function hasPermission($permission) {
+    // Short-circuit if the membership subject can bypass group access.
+    if (user_access('bypass group access', user_load($this->uid))) {
+      return TRUE;
+    }
+
+    // Otherwise make sure the membership is active.
+    $info = group_membership_status_info();
+    if (!empty($info[$this->status]['active'])) {
+      return in_array($permission, $this->getPermissions());
+    }
+
+    return FALSE;
+  }
+
+  /**
    * Get all active memberships for a user.
    *
    * @param int $uid
