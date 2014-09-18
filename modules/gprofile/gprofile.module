@@ -27,11 +27,11 @@ function gprofile_type_exists($name) {
  */
 function gprofile_form_group_membership_form_alter(&$form, &$form_state) {
   $group_membership = $form_state['group_membership'];
-  $group = group_load($group_membership->gid);
-  $account = user_load($group_membership->uid);
 
   foreach (gprofile_types() as $name => $gprofile_type) {
-    if (group_access("use $name profile", $group, $account)) {
+    // We use GroupMembership::hasPermission because we could be dealing with
+    // an unsaved group membership here (join or request forms).
+    if ($group_membership->hasPermission("use $name profile")) {
       $field_name = "gprofile_$name";
 
       $form[$field_name] = array(
@@ -53,7 +53,7 @@ function gprofile_form_group_membership_form_alter(&$form, &$form_state) {
       // If unavailable, create a blank one instead.
       if (empty($gprofile)) {
         $values = array(
-          'mid' => $group_membership->mid,
+          'mid' => !empty($group_membership->mid) ? $group_membership->mid : -1,
           'type' => $name,
         );
 
@@ -70,8 +70,8 @@ function gprofile_form_group_membership_form_alter(&$form, &$form_state) {
 
   // If we added form elements, we need to handle their submissions too.
   if (!empty($form_state['gprofiles'])) {
-    array_unshift($form['#validate'], 'gprofile_group_membership_validate');
-    array_unshift($form['#submit'], 'gprofile_group_membership_submit');
+    $form['#validate'][] = 'gprofile_group_membership_validate';
+    $form['#submit'][] = 'gprofile_group_membership_submit';
   }
 }
 
@@ -88,8 +88,16 @@ function gprofile_group_membership_validate(&$form, &$form_state) {
  * Submit handler for editing profiles onto a membership.
  */
 function gprofile_group_membership_submit(&$form, &$form_state) {
+  $group_membership = $form_state['group_membership'];
+
   foreach ($form_state['gprofiles'] as $field_name => $gprofile) {
     field_attach_submit('gprofile', $gprofile, $form[$field_name], $form_state);
+
+    // We should have a membership id by now.
+    if ($gprofile->mid == -1) {
+      $gprofile->mid = $group_membership->mid;
+    }
+
     $gprofile->save();
   }
 }
