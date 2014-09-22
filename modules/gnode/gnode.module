@@ -11,7 +11,7 @@
 /**
  * Load our router functions without polluting the .module file.
  */
-module_load_include('inc', 'gnode', 'gnode.router');
+require_once 'gnode.router.inc';
 
 /**
  * Implements hook_entity_info_alter().

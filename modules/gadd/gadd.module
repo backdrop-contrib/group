@@ -7,7 +7,7 @@
 /**
  * Load our router functions without polluting the .module file.
  */
-module_load_include('inc', 'gadd', 'gadd.router');
+require_once 'gadd.router.inc';
 
 /**
  * Implements hook_schema_alter().

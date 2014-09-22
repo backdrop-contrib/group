@@ -7,7 +7,7 @@
 /**
  * Load our router functions without polluting the .module file.
  */
-module_load_include('inc', 'ginvite', 'ginvite.router');
+require_once 'ginvite.router.inc';
 
 /**
  * Implements hook_schema_alter().

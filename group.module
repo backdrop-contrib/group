@@ -17,21 +17,21 @@ define('GROUP_LIMIT_ALL', 0x07);
 /**
  * Load our helper functions without polluting the .module file.
  */
-module_load_include('inc', 'group', 'helpers/group.entity');
-module_load_include('inc', 'group', 'helpers/group_membership.entity');
-module_load_include('inc', 'group', 'helpers/group_role.entity');
-module_load_include('inc', 'group', 'helpers/group_type.entity');
-module_load_include('inc', 'group', 'helpers/group');
+require_once 'helpers/group.entity.inc';
+require_once 'helpers/group_membership.entity.inc';
+require_once 'helpers/group_role.entity.inc';
+require_once 'helpers/group_type.entity.inc';
+require_once 'helpers/group.inc';
 
 /**
  * Load our entity functions without polluting the .module file.
  */
-module_load_include('inc', 'group', 'group.entity');
+require_once 'group.entity.inc';
 
 /**
  * Load our router functions without polluting the .module file.
  */
-module_load_include('inc', 'group', 'group.router');
+require_once 'group.router.inc';
 
 /**
  * Implements hook_views_api().

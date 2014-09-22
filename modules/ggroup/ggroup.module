@@ -12,12 +12,12 @@
 /**
  * Load our entity functions without polluting the .module file.
  */
-module_load_include('inc', 'ggroup', 'ggroup.entity');
+require_once 'ggroup.entity.inc';
 
 /**
  * Load our router functions without polluting the .module file.
  */
-module_load_include('inc', 'ggroup', 'ggroup.router');
+require_once 'ggroup.router.inc';
 
 /**
  * Implements hook_schema_alter().

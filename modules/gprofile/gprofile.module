@@ -7,13 +7,13 @@
 /**
  * Load our helper functions without polluting the .module file.
  */
-module_load_include('inc', 'gprofile', 'helpers/gprofile.entity');
-module_load_include('inc', 'gprofile', 'helpers/gprofile_type.entity');
+require_once 'helpers/gprofile.entity.inc';
+require_once 'helpers/gprofile_type.entity.inc';
 
 /**
  * Load our entity functions without polluting the .module file.
  */
-module_load_include('inc', 'gprofile', 'gprofile.entity');
+require_once 'gprofile.entity.inc';
 
 /**
  * Check whether a group member profile type machine name exists.
