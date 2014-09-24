@@ -13,6 +13,9 @@ function group_install() {
   // Enable the editing of Group entities in the admin theme.
   variable_set('group_admin_theme', '1');
 
+  // Add Pathauto module support.
+  variable_set('pathauto_group_pattern', 'group/[group:title]');
+
   // Create a first global admin role and give it full permissions.
   $group_admin = entity_create('group_role', array(
     'name' => 'group_admin',

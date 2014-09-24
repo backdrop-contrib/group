@@ -107,12 +107,42 @@ class GroupController extends EntityAPIController {
       // Gather the membership ids to delete.
       $memberships = group_membership_load_by_group($group->gid);
       $mids = array_merge($mids, array_keys($memberships));
+
+      // Add Path module support.
+      if (module_exists('path')) {
+        $this->deletePath($group);
+      }
+
+      // Add Pathauto module support.
+      if (module_exists('pathauto')) {
+        pathauto_entity_path_delete_all('group', $group, "group/$group->gid");
+      }
     }
 
     // Delete group memberships.
     group_membership_delete_multiple($mids);
 
     parent::delete($ids, $transaction);
+  }
+
+  /**
+   * Save a group.
+   *
+   * @see EntityAPIController::save()
+   */
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
+    // Add Path module support.
+    if (module_exists('path')) {
+      $this->savePath($entity);
+    }
+
+    // Add Pathauto module support.
+    if (module_exists('pathauto')) {
+      module_load_include('inc', 'group', 'group.pathauto');
+      group_pathauto_update_alias($entity, empty($entity->is_new) ? 'update' : 'insert');
+    }
+
+    return parent::save($entity, $transaction);
   }
 
   /**
@@ -135,5 +165,46 @@ class GroupController extends EntityAPIController {
     );
 
     return parent::create($values);
+  }
+
+  /**
+   * Updates a group path alias upon saving.
+   *
+   * @param Group $group
+   *   The group being saved.
+   */
+  public function savePath(Group $group) {
+    if (isset($group->path)) {
+      $path = $group->path;
+      $path['alias'] = trim($path['alias']);
+
+      // Delete old alias if user erased it.
+      if (empty($group->is_new)) {
+        if (!empty($path['pid']) && empty($path['alias'])) {
+          path_delete($path['pid']);
+        }
+      }
+
+      // Only save a non-empty alias.
+      if (!empty($path['alias'])) {
+        // Ensure fields for programmatic executions.
+        $langcode = entity_language('group', $group);
+
+        $path['source'] = 'group/' . $group->gid;
+        $path['language'] = isset($langcode) ? $langcode : LANGUAGE_NONE;
+
+        path_save($path);
+      }
+    }
+  }
+
+  /**
+   * Removes group path alias upon deletion.
+   *
+   * @param Group $group
+   *   The group being deleted.
+   */
+  public function deletePath(Group $group) {
+    path_delete(array('source' => 'group/' . $group->gid));
   }
 }

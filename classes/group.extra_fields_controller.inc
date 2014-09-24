@@ -29,6 +29,15 @@ class GroupExtraFieldsController extends EntityDefaultExtraFieldsController {
         'description' => t('The form containing various membership actions such as: join, leave, request membership, ...'),
         'weight' => -4,
       );
+
+      // Add Path module support.
+      if (module_exists('path')) {
+        $extra['group'][$type]['form']['path'] = array(
+          'label' => t('URL path settings'),
+          'description' => t('Path module form elements'),
+          'weight' => 99,
+        );
+      }
     }
 
     return $extra;

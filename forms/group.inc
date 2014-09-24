@@ -33,7 +33,19 @@ function group_form($form, &$form_state, Group $group, $op = 'edit') {
     '#size' => 30,
   );
 
-  // Load fields based on group type.
+  // Insert vertical tabs to add admin options to.
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 99,
+  );
+
+  // Add Path module support.
+  if (module_exists('path')) {
+    group_attach_path_form($group, $form, $form_state);
+  }
+
+  // Load fields based on group type, this will also enable Pathauto support by
+  // invoking the hook implementation pathauto_field_attach_form().
   field_attach_form('group', $group, $form, $form_state, entity_language('group', $group));
 
   $form['actions'] = array('#type' => 'actions');
@@ -85,4 +97,66 @@ function group_form_submit($form, &$form_state) {
  */
 function group_form_submit_delete($form, &$form_state) {
   $form_state['redirect'] = 'group/' . $form_state['group']->gid . '/delete';
+}
+
+/**
+ * Add in Path module support to the Group form.
+ */
+function group_attach_path_form(Group $group, &$form, &$form_state) {
+  $path = array();
+
+  if (!empty($group->gid)) {
+    $conditions = array('source' => 'group/' . $group->gid);
+    $langcode = entity_language('group', $group);
+
+    if ($langcode != LANGUAGE_NONE) {
+      $conditions['language'] = $langcode;
+    }
+
+    $path = path_load($conditions);
+    if ($path === FALSE) {
+      $path = array();
+    }
+  }
+
+  $path += array(
+    'pid' => NULL,
+    'source' => isset($group->gid) ? 'group/' . $group->gid : NULL,
+    'alias' => '',
+    'language' => isset($langcode) ? $langcode : LANGUAGE_NONE,
+  );
+
+  $form['path'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('URL path settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => empty($path['alias']),
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('path-form'),
+    ),
+    '#attached' => array(
+      'js' => array(drupal_get_path('module', 'path') . '/path.js'),
+    ),
+    '#access' => user_access('create url aliases') || user_access('administer url aliases'),
+    '#weight' => 30,
+    '#tree' => TRUE,
+    '#element_validate' => array('path_form_element_validate'),
+  );
+
+  $form['path']['alias'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL alias'),
+    '#default_value' => $path['alias'],
+    '#maxlength' => 255,
+    '#description' => t('Optionally specify an alternative URL by which this group can be accessed. Use a relative path and don\'t add a trailing slash or the URL alias won\'t work.'),
+  );
+
+  // Add in the fixed values.
+  foreach (array('pid', 'source', 'language') as $fixed) {
+    $form['path'][$fixed] = array(
+      '#type' => 'value',
+      '#value' => $path[$fixed],
+    );
+  }
 }

@@ -106,6 +106,16 @@ function group_group_operations() {
     'form callback' => TRUE,
   );
 
+  // Add Pathauto module support.
+  if (module_exists('pathauto')) {
+    module_load_include('inc', 'group', 'group.pathauto');
+    $operations['pathauto_update_alias'] = array(
+      'label' => t('Update URL alias'),
+      'callback' => 'group_pathauto_update_alias_multiple',
+      'callback arguments' => array('bulkupdate', array('message' => TRUE)),
+    );
+  }
+
   return $operations;
 }
 
