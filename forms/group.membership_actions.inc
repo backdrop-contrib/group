@@ -5,6 +5,8 @@
  *
  * Generates the membership action buttons as defined in by other modules in
  * hook_group_membership_action_info().
+ *
+ * @todo Set 'name' on submits.
  */
 
 /**
