@@ -114,7 +114,7 @@ class GroupController extends EntityAPIController {
       }
 
       // Add Pathauto module support.
-      if (module_exists('pathauto')) {
+      if (module_exists('pathauto') && module_exists('entity_token')) {
         pathauto_entity_path_delete_all('group', $group, "group/$group->gid");
       }
     }
@@ -139,7 +139,7 @@ class GroupController extends EntityAPIController {
     }
 
     // Add Pathauto module support.
-    if (module_exists('pathauto')) {
+    if (module_exists('pathauto') && module_exists('entity_token')) {
       module_load_include('inc', 'group', 'group.pathauto');
       group_pathauto_update_alias($entity, empty($entity->is_new) ? 'update' : 'insert');
     }

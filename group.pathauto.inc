@@ -23,6 +23,10 @@ function group_pathauto($op) {
     return;
   }
 
+  if (!module_exists('entity_token')) {
+    return;
+  }
+
   $settings = array(
     'module' => 'group',
     'token_type' => 'group',
