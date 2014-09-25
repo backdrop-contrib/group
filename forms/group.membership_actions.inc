@@ -5,8 +5,6 @@
  *
  * Generates the membership action buttons as defined in by other modules in
  * hook_group_membership_action_info().
- *
- * @todo Set 'name' on submits.
  */
 
 /**
@@ -26,6 +24,7 @@ function group_membership_actions_form($form, &$form_state, Group $group, $accou
 
     $form[$action] = array(
       '#type' => 'submit',
+      '#name' => "op_$action",
       '#value' => $info['label'],
     );
   }
@@ -46,7 +45,7 @@ function group_membership_actions_form_submit($form, &$form_state) {
 
   // Call the clicked action's callback.
   foreach (group_membership_action_info() as $action => $info) {
-    if (isset($values[$action]) && $values['op'] == $values[$action]) {
+    if (isset($values["op_$action"])) {
       call_user_func($info['action callback'], $group, $account, $group_membership);
     }
   }
