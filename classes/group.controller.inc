@@ -131,6 +131,8 @@ class GroupController extends EntityAPIController {
    * @see EntityAPIController::save()
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
+    $return = parent::save($entity, $transaction);
+
     // Add Path module support.
     if (module_exists('path')) {
       $this->savePath($entity);
@@ -142,7 +144,7 @@ class GroupController extends EntityAPIController {
       group_pathauto_update_alias($entity, empty($entity->is_new) ? 'update' : 'insert');
     }
 
-    return parent::save($entity, $transaction);
+    return $return;
   }
 
   /**
