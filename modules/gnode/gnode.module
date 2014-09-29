@@ -342,16 +342,24 @@ function gnode_form_node_form_alter(&$form, $form_state) {
 
   $can_bypass_access = user_access('bypass group access');
 
-  // Fix the group if the node was already set to one and the author can't
-  // bypass group access checks.
-  if ($gid && !$can_bypass_access) {
-    $form['gid'] = array(
-      '#type' => 'value',
-      '#value' => $gid,
-      '#parents' => array('group_settings', 'gid'),
-    );
+  // If the user can't bypass group access and we already have a nid or gid, we
+  // are either on a node edit form or a Group Node add form. In such a case,
+  // we do not show anything.
+  if (!$can_bypass_access) {
+    // Fix the group if the node was already set to one.
+    if (!empty($gid)) {
+      $form['gid'] = array(
+        '#type' => 'value',
+        '#value' => $gid,
+        '#parents' => array('group_settings', 'gid'),
+      );
 
-    return;
+      return;
+    }
+    // Do nothing if we are on an ungrouped node's edit form.
+    elseif (!empty($node->nid)) {
+      return;
+    }
   }
 
   $global_node_create_access = gnode_global_node_create_access($node->type);
@@ -408,6 +416,15 @@ function gnode_form_node_form_alter(&$form, $form_state) {
     $description = $global_node_create_access
       ? t('Enter the name of the group to attach this node to. Leave blank for no group.')
       : t('Because you are not allowed to create this content outside of a group, you are required to enter the name of one here.');
+
+    // There is a special use case where a user may edit global nodes, but
+    // not create them and also may bypass group access. In such a case, he
+    // could move an ungrouped node to a group, or leave it ungrouped.
+    if (!empty($node->nid) && empty($gid) && !$global_node_create_access) {
+      $description = t('This node is not attached to a group. In order to keep it that way, leave this field blank. Alternatively, you may enter the name of the group to attach this node to.');
+      $description .= '<br />' . t('<strong>Warning:</strong> Because you are not allowed to create this content outside of a group, you will not be able to move it back to the sitewide scope.');
+      $global_node_create_access = TRUE;
+    }
 
     $form['group_settings']['group'] = array(
       '#type' => 'textfield',
