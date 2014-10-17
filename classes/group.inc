@@ -121,9 +121,9 @@ class Group extends Entity {
    * Get all child entities.
    *
    * @param bool $flat
-   *   Whether or not to flatten the result array.
+   *   (optional) Whether or not to flatten the result array.
    * @param bool $reset
-   *   Whether to reset the internal cache.
+   *   (optional) Whether to reset the internal cache.
    *
    * @return array
    *   An array of child entities, keyed by their type, bundle and entity id.
