@@ -841,6 +841,14 @@ function gnode_query_node_access_alter(QueryAlterableInterface $query) {
     // only. Group nodes should still bypass node access and check only for
     // group access conditions.
     else {
+      // We are about to put $group_access on the same level as $node_access.
+      // However, in case $group_access is empty, this will cause a database
+      // error to occur. To prevent this, we do nothing in said case. We take
+      // the default '#conjunction' entry into account when checking.
+      if (count($group_access->conditions()) < 2) {
+        return;
+      }
+
       $node_access = db_and();
 
       // Store the original node access condition.
