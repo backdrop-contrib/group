@@ -14,10 +14,11 @@ function ggroup_config_form($form, &$form_state, GroupType $group_type) {
     : array();
 
   $form['info'] = array(
-    '#markup' => t('Below you will find a collapsible fieldset for every known group type where you can choose whether groups of that type can become subgroups of this type.<br />Furthermore, you can configure which group roles are to be inherited by members of the parent group.'),
+    '#markup' => t('Below you will find a set of subgroup configuration options for every known group type.<br />When you allow a group type to be a subgroup of this one, you will also be able to configure membership inheritance.'),
   );
 
   // Set a value tree so we can easily copy over the submitted data later on.
+  $form['subgroup']['#type'] = 'vertical_tabs';
   $form['subgroup']['#tree'] = TRUE;
 
   // Shows a fieldset for each group type, allowing the user to check whether
