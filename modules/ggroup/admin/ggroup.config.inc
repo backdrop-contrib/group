@@ -13,6 +13,15 @@ function ggroup_config_form($form, &$form_state, GroupType $group_type) {
     ? $group_type->config['subgroup']
     : array();
 
+  // Get the group type's roles as inheritance source options.
+  $sources = $group_type->getRoles();
+  foreach ($sources as &$source) {
+    $source = $source->label();
+  }
+
+  // Anonymous or outsider cannot inherit.
+  unset($sources['anonymous'], $sources['outsider']);
+
   $form['info'] = array(
     '#markup' => t('Below you will find a set of subgroup configuration options for every known group type.<br />When you allow a group type to be a subgroup of this one, you will also be able to configure membership inheritance.'),
   );
@@ -41,31 +50,38 @@ function ggroup_config_form($form, &$form_state, GroupType $group_type) {
       '#default_value' => $default,
     );
 
-    // Get the group roles of the subgroup type as checkbox options.
-    $options = $sub_group_type->getRoles();
-    foreach ($options as &$sub_group_role) {
-      $sub_group_role = $sub_group_role->label();
+    // Get the subgroup type's roles as inheritance target options.
+    $targets = $sub_group_type->getRoles();
+    foreach ($targets as &$target) {
+      $target = $target->label();
     }
 
     // Anonymous or outsider cannot be inherited.
-    unset($options['anonymous'], $options['outsider']);
+    unset($targets['anonymous'], $targets['outsider']);
+
+    // Build a user friendly inheritance table.
+    $form['subgroup'][$type]['inheritance'] = array(
+      '#theme' => 'ggroup_inheritance_table',
+      // Sources and targets are used in the theme function.
+      'sources' => array('#type' => 'value', '#value' => $sources),
+      'targets' => array('#type' => 'value', '#value' => $targets),
+      // We use a form item wrapper so the #states property will work.
+      '#type' => 'item',
+      '#states' => array(
+        'visible' => array(
+          ':input[id="edit-subgroup-' . $type . '-enabled"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
 
     // Configuration for inheritance is shown on a per group role basis.
-    foreach ($group_type->getRoles() as $role => $group_role) {
-      // Anonymous or outsider cannot be inherited.
-      if ($role == 'anonymous' || $role == 'outsider') {
-        continue;
-      }
-
-      $message = 'Members who had the %group_role role automatically receive:';
-      $replace = array('%group_role' => $group_role->label());
-      $default = isset($defaults[$type][$role]) ? $defaults[$type][$role] : array();
-
-      $form['subgroup'][$type][$role] = array(
+    foreach ($sources as $source => $label) {
+      $form['subgroup'][$type]['inheritance'][$source] = array(
         '#type' => 'checkboxes',
-        '#title' => t($message, $replace),
-        '#options' => $options,
-        '#default_value' => $default,
+        '#options' => $targets,
+        '#default_value' => isset($defaults[$type][$source]) ? $defaults[$type][$source] : array(),
+        // Leave out the 'inheritance' key from the parents.
+        '#parents' => array('subgroup', $type, $source),
       );
     }
   }
@@ -104,6 +120,10 @@ function ggroup_config_form_submit($form, &$form_state) {
     // We don't need the enabled flag in exports either. The checkbox is mainly
     // there to allow us to use AJAX or other UX in the configuration form.
     unset($data['enabled']);
+
+    // Same goes for the inheritance key, which only contains the values we
+    // needed to pass along to the inheritance table theme function.
+    unset($data['inheritance']);
 
     // By setting data, we flag the subgroup type as enabled.
     $group_type->config['subgroup'][$type] = $data;

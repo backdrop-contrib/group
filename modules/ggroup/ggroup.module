@@ -39,6 +39,18 @@ function ggroup_schema_alter(&$schema) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function ggroup_theme() {
+  $theme['ggroup_inheritance_table'] = array(
+    'render element' => 'element',
+    'file' => 'theme/ggroup.config.inc',
+  );
+
+  return $theme;
+}
+
+/**
  * Determines the inheritance a membership triggers.
  *
  * @param GroupMembership $group_membership
