@@ -129,6 +129,10 @@ class GroupMembershipController extends EntityAPIController {
    * @todo Validation of added roles.
    */
   public function save($group_membership, DatabaseTransaction $transaction = NULL) {
+    if (!isset($group_membership->uid) || $group_membership->uid == 0) {
+      throw new EntityMalformedException(t("Group memberships cannot be created for anonymous users."));
+    }
+
     // Clean up the 'roles' property to avoid duplicates.
     $group_membership->roles = array_unique($group_membership->roles);
 

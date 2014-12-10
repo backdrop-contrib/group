@@ -251,7 +251,7 @@ class Group extends Entity {
   /**
    * Add a user to a group.
    *
-   * If the user is already a member of the group, nothing changes.
+   * If the user is anonymous or already a member, nothing changes.
    *
    * @param int $uid
    *   The uid of the member.
@@ -261,7 +261,7 @@ class Group extends Entity {
    *   (uid) with this method. Leave blank to make the user 'just a member'.
    */
   public function addMember($uid, array $values = array()) {
-    if (!$this->getMember($uid)) {
+    if ($uid != 0 && !$this->getMember($uid)) {
       $values = array('gid' => $this->gid, 'uid' => $uid) + $values;
       $group_membership = entity_create('group_membership', $values);
       $group_membership->save();

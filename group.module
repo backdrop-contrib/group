@@ -120,6 +120,7 @@ function group_permission() {
     ),
     'access group overview' => array(
       'title' => t('Access the group overview page'),
+      'warning' => t('Note: Anonymous users cannot join groups, even if you allow them to create one.'),
     ),
   );
 
