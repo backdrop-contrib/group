@@ -31,6 +31,9 @@ function ggroup_schema_alter(&$schema) {
   // Add the parent_mid field.
   $schema['group_membership']['fields']['parent_mid'] = _ggroup_parent_mid();
 
+  // Add the heritage field.
+  $schema['group_membership']['fields']['heritage'] = _ggroup_heritage();
+
   // Add the parent_mid foreign key.
   $schema['group_membership']['foreign keys']['parent_mid'] = array(
     'table' => 'group_membership',
@@ -115,62 +118,6 @@ function ggroup_get_inheritance(GroupMembership $group_membership) {
 }
 
 /**
- * Determines the inheritance a membership should have received.
- *
- * This function is a lightweight alternative to ggroup_get_inheritance(). It
- * allows you to quickly check what roles an inherited membership should have
- * received from its parent membership.
- *
- * @param GroupMembership $group_membership
- *   The membership to get inheritance data for.
- *
- * @return array|false
- *   An array of roles the membership should inherit. If a membership should be
- *   inherited without any roles, an empty array will be returned. If nothing
- *   was to be inherited, FALSE will be returned instead.
- */
-function ggroup_get_inherited_roles(GroupMembership $group_membership) {
-  // Create an EMW to reduce the code below.
-  $emw = entity_metadata_wrapper('group_membership', $group_membership);
-
-  // Retrieve the membership's group type machine name.
-  $type = $emw->group->group_type->raw();
-
-  // Retrieve the parent membership.
-  $parent = $emw->parent_membership->value();
-
-  // Retrieve the parent membership's group type configuration array.
-  $config = $emw->parent_membership->group->group_type->value()->config;
-
-  // Stop here if no configuration was found.
-  if (empty($config['subgroup'][$type])) {
-    return FALSE;
-  }
-
-  // Stores the roles the membership should have gotten.
-  $inherited = array();
-
-  // Check if the membership triggers any inherited roles.
-  foreach ($config['subgroup'][$type] as $role => $inherits) {
-    // If the member had the required role, grant the inherited roles.
-    if ($role == 'member' || in_array($role, $parent->roles)) {
-      $inherited += array_filter($inherits);
-    }
-  }
-
-  // Add the inherited roles to the list.
-  if (!empty($inherited)) {
-    // We don't need to set 'member' explicitly, so remove it.
-    unset($inherited['member']);
-
-    // Return $inherited as a valid roles array.
-    return array_keys($inherited);
-  }
-
-  return FALSE;
-}
-
-/**
  * Trigger the inheritance downwards for a membership.
  *
  * @param GroupMembership $parent
@@ -203,6 +150,33 @@ function ggroup_run_member_inheritance(GroupMembership $parent, array $filter = 
     if ($group_membership = group_membership_load($gid, $parent->uid)) {
       // Update the roles for clean inherited memberships.
       if ($group_membership->status == 'inherited') {
+        $group_membership->heritage['initial'] = $roles;
+        $group_membership->roles = $roles;
+        $group_membership->save();
+      }
+      // Retain modifications for overridden memberships.
+      elseif ($group_membership->status == 'inherited-overridden') {
+        $granted = $group_membership->heritage['granted'];
+        $revoked = $group_membership->heritage['revoked'];
+
+        // Update the initial heritage data.
+        $group_membership->heritage['initial'] = $roles;
+
+        // Check for previous grants that are now part of the heritage package
+        // and remove them from the heritage data.
+        $obsolete = array_intersect($granted, $roles);
+        $group_membership->heritage['granted'] = array_diff($granted, $obsolete);
+
+        // Check for previous revoked roles that are no longer part of the
+        // heritage package and remove them from the heritage data.
+        $obsolete = array_diff($revoked, $roles);
+        $group_membership->heritage['revoked'] = array_diff($revoked, $obsolete);
+
+        // Rebuild the roles property based on the newly calculated heritage.
+        $roles = array_merge($roles, $group_membership->heritage['granted']);
+        $roles = array_diff($roles, $group_membership->heritage['revoked']);
+
+        // Finally, update the inherited membership.
         $group_membership->roles = $roles;
         $group_membership->save();
       }
@@ -216,6 +190,11 @@ function ggroup_run_member_inheritance(GroupMembership $parent, array $filter = 
         'roles' => $roles,
         'status' => 'inherited',
         'parent_mid' => $parent->mid,
+        'heritage' => array(
+          'initial' => $roles,
+          'granted' => array(),
+          'revoked' => array(),
+        ),
       );
 
       $group_membership = entity_create('group_membership', $values);
