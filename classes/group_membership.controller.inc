@@ -77,6 +77,10 @@ class GroupMembershipController extends EntityAPIController {
 
         // Flag old roles for revoking.
         $revoke = array_diff($original->roles, $group_membership->roles);
+
+        // Inform update hooks if any roles have changed. This is merely a
+        // helper property so update hooks don't have to check again.
+        $group_membership->roles_changed = $grant || $revoke;
       }
 
       // Grant the roles by inserting them into {group_membership_role}.
