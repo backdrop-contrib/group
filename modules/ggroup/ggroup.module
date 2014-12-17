@@ -4,7 +4,7 @@
  * Contains Subgroup functionality for the Group module.
  *
  * Please note that this only adds a UI and access checks for creating
- * subgroups. Nothing stops you from still programatically creating
+ * subgroups. Nothing stops you from still programmatically creating
  * subgroups with Group::addSubgroup(). Using both at the same time is
  * strongly discouraged unless you know what you are doing.
  */

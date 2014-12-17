@@ -82,7 +82,7 @@ function ggroup_entity_update($entity, $type) {
  */
 function ggroup_entity_delete($entity, $type) {
   if ($type == 'group_membership') {
-    // Check for any memberships that had this one as its parent.
+    // Check for any memberships that had this one as their parent.
     $children = group_memberships(array('parent_mid' => $entity->mid));
 
     foreach ($children as $group_membership) {
