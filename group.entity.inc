@@ -371,7 +371,6 @@ function group_entity_property_info() {
     'label' => t('Group type configuration'),
     'description' => t('The specific configuration for the group type.'),
     'type' => 'struct',
-    'options list' => 'group_permissions',
     'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'config',
   );
