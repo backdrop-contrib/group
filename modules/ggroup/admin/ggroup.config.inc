@@ -86,12 +86,10 @@ function ggroup_config_form($form, &$form_state, GroupType $group_type) {
     }
   }
 
-  // @todo Implement this.
-  $warning = '<strong>' . t('Warning: not functional yet, this should be functional in beta1.') . '</strong><br />';
   $form['sync'] = array(
     '#type' => 'checkbox',
     '#title' => t('Re-synchronize inherited memberships'),
-    '#description' => $warning . t('Check this to re-synchronize all inherited memberships upon saving the group type.<br />Useful if you previously granted inherited memberships too few or too many permissions.'),
+    '#description' => t('Check this to re-synchronize all inherited memberships upon saving the group type.<br />Useful if you previously granted inherited memberships too few or too many permissions.'),
   );
 
   $form['submit'] = array(
@@ -132,6 +130,6 @@ function ggroup_config_form_submit($form, &$form_state) {
   $group_type->save();
 
   if (!empty($form_state['values']['sync'])) {
-    // @todo Resync the memberships.
+    ggroup_run_group_type_inheritance($group_type);
   }
 }

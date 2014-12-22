@@ -202,3 +202,96 @@ function ggroup_run_member_inheritance(GroupMembership $parent, array $filter = 
     }
   }
 }
+
+/**
+ * Run the inheritance logic for an entire group type.
+ *
+ * This is done as a batch operation because it could potentially try to load,
+ * alter and save a lot of GroupMembership entities.
+ *
+ * @param GroupType $group_type
+ *   The group type to (re-)run all inheritance for.
+ * @param bool $form_submit
+ *   (optional) Whether this function was called from a form submit.
+ */
+function ggroup_run_group_type_inheritance(GroupType $group_type, $form_submit = TRUE) {
+  // First select all group ids of this type.
+  $gids = db_select('groups', 'g')
+    ->fields('g', array('gid'))
+    ->condition('g.type', $group_type->name);
+
+  // Then select all membership ids matching those groups.
+  $mids = db_select('group_membership', 'gm')
+    ->fields('gm', array('mid'))
+    ->condition('gm.gid', $gids, 'IN')
+    ->execute()->fetchCol();
+
+  // Finally, start a batch running inheritance for all of them.
+  $batch = array(
+    'operations' => array(
+      array('ggroup_group_type_batch', array($mids)),
+    ),
+    'finished' => 'ggroup_group_type_batch_finished',
+    'title' => t('Running inheritance for group type: @type', array('@type'=> $group_type->label())),
+    'init_message' => t('Initializing group inheritance.'),
+    'progress_message' => t('@percentage% done.'),
+    'error_message' => t('The operation encountered an error.'),
+  );
+  batch_set($batch);
+
+  // Start the batch manually if this wasn't called from a form submit.
+  if ($form_submit === FALSE) {
+    batch_process("admin/group/type/manage/$group_type->name/config/subgroup");
+  }
+}
+
+/**
+ * Batch callback for mass running membership inheritance.
+ *
+ * @see ggroup_run_group_type_inheritance()
+ */
+function ggroup_group_type_batch($mids, &$context) {
+  if (!isset($context['sandbox']['progress'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = count($mids);
+  }
+
+  // Grab the next 25 items from the list.
+  $targets = array_slice($mids, $context['sandbox']['progress'], 25);
+
+  // Run inheritance for the selected items.
+  foreach (group_membership_load_multiple($targets) as $group_membership) {
+    ggroup_run_member_inheritance($group_membership);
+
+    $context['results'][] = $group_membership->mid;
+    $context['sandbox']['progress']++;
+  }
+
+  // Update the status message.
+  $message = 'Processed @current out of @total memberships.';
+  $replace = array(
+    '@current' => $context['sandbox']['progress'],
+    '@total' => $context['sandbox']['max']
+  );
+  $context['message'] = t($message, $replace);
+
+  // Update the progress counter.
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Batch 'finished' callback.
+ *
+ * @see ggroup_run_group_type_inheritance()
+ * @see ggroup_group_type_batch()
+ */
+function ggroup_group_type_batch_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(format_plural(count($results), 'One membership processed.', '@count memberships processed.'));
+  }
+  else {
+    drupal_set_message(t('Finished with an error.'), 'error');
+  }
+}
