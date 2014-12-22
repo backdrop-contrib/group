@@ -295,3 +295,50 @@ function ggroup_group_type_batch_finished($success, $results, $operations) {
     drupal_set_message(t('Finished with an error.'), 'error');
   }
 }
+
+/**
+ * Group membership revert inheritance callback.
+ *
+ * @see ggroup_group_member_operations()
+ */
+function ggroup_inheritance_revert($mids) {
+  $count = 0;
+
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    if ($group_membership->status == 'inherited-overridden') {
+      $group_membership->status = 'inherited';
+      $group_membership->roles = $group_membership->heritage['initial'];
+      $group_membership->heritage['granted'] = array();
+      $group_membership->heritage['revoked'] = array();
+      $group_membership->save();
+
+      $count++;
+    }
+  }
+
+  $message = format_plural($count, 'Reverted 1 membership.', 'Reverted @count memberships.');
+  drupal_set_message($message);
+}
+
+/**
+ * Group membership break inheritance callback.
+ *
+ * @see ggroup_group_member_operations()
+ */
+function ggroup_inheritance_break($mids) {
+  $count = 0;
+
+  foreach (group_membership_load_multiple($mids) as $group_membership) {
+    if (in_array($group_membership->status, array('inherited', 'inherited-overridden'))) {
+      $group_membership->status = 'active';
+      $group_membership->heritage = NULL;
+      $group_membership->parent_mid = NULL;
+      $group_membership->save();
+
+      $count++;
+    }
+  }
+
+  $message = format_plural($count, 'Broke heritage of 1 membership.', 'Broke heritage of @count memberships.');
+  drupal_set_message($message);
+}

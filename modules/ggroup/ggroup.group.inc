@@ -24,6 +24,27 @@ function ggroup_group_permission() {
 }
 
 /**
+ * Implements hook_group_member_operations().
+ *
+ * Callbacks are situated in ggroup.module.
+ */
+function ggroup_group_member_operations(Group $group) {
+  $operations['ggroup-revert'] = array(
+    'label' => t('Revert to default Inherited state'),
+    'callback' => 'ggroup_inheritance_revert',
+    'optgroup' => t('Inherited memberships'),
+  );
+
+  $operations['ggroup-decline'] = array(
+    'label' => t('Break free from inheritance'),
+    'callback' => 'ggroup_inheritance_break',
+    'optgroup' => t('Inherited memberships'),
+  );
+
+  return $operations;
+}
+
+/**
  * Implements hook_group_membership_status_info().
  */
 function ggroup_group_membership_status_info() {
