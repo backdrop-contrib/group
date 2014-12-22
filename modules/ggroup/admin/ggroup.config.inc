@@ -69,7 +69,7 @@ function ggroup_config_form($form, &$form_state, GroupType $group_type) {
       '#type' => 'item',
       '#states' => array(
         'visible' => array(
-          ':input[id="edit-subgroup-' . $type . '-enabled"]' => array('checked' => TRUE),
+          ':input[id="edit-subgroup-' . strtr($type, '_', '-') . '-enabled"]' => array('checked' => TRUE),
         ),
       ),
     );
