@@ -11,7 +11,7 @@
  * Returns HTML for a subgroup inheritance table.
  */
 function theme_ggroup_inheritance_table($variables) {
-  $element = $variables['form'];
+  $element = $variables['element'];
 
   $sources = $element['sources']['#value'];
   $targets = $element['targets']['#value'];
