@@ -216,6 +216,7 @@ class Group extends Entity {
    *   The subgroup to attach to the group.
    */
   public function addSubgroup(Group $group) {
+    drupal_set_message(t('Deprecation notice!<br />Group::addSubgroup() will soon be removed. Please use Group::addEntity() instead.'), 'warning');
     $this->addEntity($group->gid, 'group', $group->type);
   }
 
@@ -226,6 +227,7 @@ class Group extends Entity {
    *   The subgroup to remove from the group.
    */
   public function removeSubgroup(Group $group) {
+    drupal_set_message(t('Deprecation notice!<br />Group::removeSubgroup() will soon be removed. Please use Group::removeEntity() instead.'), 'warning');
     $this->removeEntity($group->gid, 'group');
   }
 
@@ -238,6 +240,8 @@ class Group extends Entity {
    *   A list of group entities.
    */
   public function getSubgroups() {
+    drupal_set_message(t('Deprecation notice!<br />Group::getSubgroups() will soon be removed. Please look towards solutions involving the use of use Group::getEntitiesOfType() instead.'), 'warning');
+
     // Get a list of direct child groups.
     $subgroups = $this->getEntitiesOfType('group');
 
@@ -310,6 +314,7 @@ class Group extends Entity {
    *   An array of GroupMembership entities.
    */
   public function getMembersRecursive() {
+    drupal_set_message(t('Deprecation notice!<br />Group::getMembersRecursive() will soon be removed. Please look towards solutions involving the use of use Group::getMembers() instead.'), 'warning');
     $members = $this->getMembers();
 
     foreach ($this->getSubgroups() as $subgroup) {
@@ -341,6 +346,8 @@ class Group extends Entity {
    *   The total amount of group members.
    */
   public function getMemberCountRecursive() {
+    drupal_set_message(t('Deprecation notice!<br />Group::getMemberCountRecursive() will soon be removed. Please look towards solutions involving the use of use Group::getMemberCount() instead.'), 'warning');
+
     // Retrieve the gids of the group's subgroups and add the group's gid.
     $gids = array_merge(array($this->gid), array_keys($this->getSubgroups()));
 
