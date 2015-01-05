@@ -252,14 +252,15 @@ function group_membership_access($op, GroupMembership $group_membership = NULL, 
       $account = $user;
     }
 
+    $is_own = $group_membership->uid == $account->uid;
+
     switch ($op) {
       case 'view':
-        return $group_membership->uid == $account->uid
-        || group_access('access member pages', $group, $account);
+        return $is_own || group_access('access member pages', $group, $account);
 
       case 'update':
         return group_access('administer members', $group, $account)
-        || group_access('edit own membership', $group, $account);
+        || ($is_own && group_access('edit own membership', $group, $account));
 
       case 'delete':
         return group_access('administer members', $group, $account);
