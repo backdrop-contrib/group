@@ -27,6 +27,9 @@ function group_group_permission() {
     'access member pages' => array(
       'title' => t('View the individual member pages'),
     ),
+    'access member metadata' => array(
+      'title' => t('View the individual member metadata: Join date, invited by, ...'),
+    ),
     'edit own membership' => array(
       'title' => t('Edit own membership'),
       'description' => t('Edit own membership information'),
@@ -226,22 +229,88 @@ function group_group_member_operation_links(GroupMembership $group_membership) {
   // Retrieve the destination url.
   $destination = drupal_get_destination();
 
+  // Load the group the member belongs to.
+  $group = group_load($group_membership->gid);
+
   // Add membership management links.
-  if (group_access('administer members', group_load($group_membership->gid))) {
+  if (group_access('administer members', $group)) {
     $operations['edit-membership'] = array(
       'title' => t('edit'),
-      'href' => 'group/' . $group_membership->gid . '/member/' . $group_membership->uid . '/edit',
+      'href' => 'group/' . $group->gid . '/member/' . $group_membership->uid . '/edit',
       'query' => $destination,
     );
 
     $operations['cancel-membership'] = array(
       'title' => t('cancel'),
-      'href' => 'group/' . $group_membership->gid . '/member/' . $group_membership->uid . '/cancel',
+      'href' => 'group/' . $group->gid . '/member/' . $group_membership->uid . '/cancel',
       'query' => $destination,
     );
   }
 
+  // Add the membership metadata link.
+  if (group_access('access member metadata', $group)) {
+    $operations['membership-metadata'] = array(
+      'title' => t('metadata'),
+      'href' => 'group/' . $group->gid . '/member/' . $group_membership->uid . '/metadata',
+    );
+  }
+
   return $operations;
+}
+
+/**
+ * Implements hook_group_membership_metadata().
+ */
+function group_group_membership_metadata(GroupMembership $group_membership) {
+  $metadata = array();
+
+  // Create an EMW to have easy access to the data we need.
+  $emw = entity_metadata_wrapper('group_membership', $group_membership);
+
+  if (!empty($group_membership->joined_on)) {
+    $metadata[] = array(
+      'description' => t('Joined on'),
+      'value' => format_date($emw->joined_on->value()),
+    );
+  }
+
+  if (!empty($group_membership->requested_on)) {
+    $metadata[] = array(
+      'description' => t('Requested membership on'),
+      'value' => format_date($emw->requested_on->value()),
+    );
+  }
+
+  if (!empty($group_membership->approved_on)) {
+    $metadata[] = array(
+      'description' => t('Approved on'),
+      'value' => format_date($emw->approved_on->value()),
+    );
+
+    $metadata[] = array(
+      'description' => t('Approved by'),
+      'value' => l($emw->approved_by->label(), 'user/' . $group_membership->approved_by),
+    );
+  }
+
+  if (!empty($group_membership->blocked_on)) {
+    $metadata[] = array(
+      'description' => t('Blocked on'),
+      'value' => format_date($emw->blocked_on->value()),
+    );
+
+    $metadata[] = array(
+      'description' => t('Blocked by'),
+      'value' => l($emw->blocked_by->label(), 'user/' . $group_membership->blocked_by),
+    );
+
+    $metadata[] = array(
+      'description' => t('Status before being blocked'),
+      'value' => $emw->blocked_status->label(),
+    );
+  }
+
+  return $metadata;
 }
 
 /**

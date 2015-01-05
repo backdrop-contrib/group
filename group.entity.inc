@@ -263,6 +263,9 @@ function group_membership_access($op, GroupMembership $group_membership = NULL, 
 
       case 'delete':
         return group_access('administer members', $group, $account);
+
+      case 'metadata':
+        return group_access('access member metadata', $group, $account);
     }
   }
 

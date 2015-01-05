@@ -352,6 +352,29 @@ function hook_group_member_operation_links(GroupMembership $group_membership) {
 }
 
 /**
+ * Provide human readable metadata for a membership.
+ *
+ * @param GroupMembership $group_membership
+ *   The membership to format the data for.
+ *
+ * @return array
+ *   An array of formatted data. Each entry is an array on its own with two
+ *   required keys: 'description' and 'value'.
+ */
+function hook_group_membership_metadata(GroupMembership $group_membership) {
+  $metadata = array();
+
+  if (!empty($group_membership->joined_on)) {
+    $metadata[] = array(
+      'description' => t('Joined on'),
+      'value' => format_date($group_membership->joined_on),
+    );
+  }
+
+  return $metadata;
+}
+
+/**
  * Provide information about group membership statuses exposed by your module.
  *
  * Membership statuses are usually simple strings such as Active or Blocked.

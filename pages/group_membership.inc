@@ -38,3 +38,33 @@ function group_membership_page(GroupMembership $group_membership) {
 
   return $group_membership->view('full', NULL, TRUE);
 }
+
+/**
+ * Generates a group membership's metadata page.
+ *
+ * @param GroupMembership $group_membership
+ *   The group membership object.
+ *
+ * @return array
+ *   A render array suitable for use by drupal_render().
+ */
+function group_membership_metadata(GroupMembership $group_membership) {
+  $rows = array();
+
+  // Loop over entries manually to keep indexes from messing things up.
+  foreach (module_invoke_all('group_membership_metadata', $group_membership) as $metadata) {
+    $rows[] = array($metadata['description'], $metadata['value']);
+  }
+
+  $table = array(
+    '#theme' => 'table',
+    '#header' => array(
+      'description' => t('Description'),
+      'value' => t('Value'),
+    ),
+    '#rows' => $rows,
+    '#empty' => t('No metadata could be retrieved for this member'),
+  );
+
+  return $table;
+}

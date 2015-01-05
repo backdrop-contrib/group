@@ -24,6 +24,27 @@ function ggroup_group_permission() {
 }
 
 /**
+ * Implements hook_group_membership_metadata().
+ */
+function ggroup_group_membership_metadata(GroupMembership $group_membership) {
+  $metadata = array();
+
+  // Create an EMW to have easy access to the data we need.
+  $emw = entity_metadata_wrapper('group_membership', $group_membership);
+
+  if (!empty($group_membership->parent_mid)) {
+    $parent = $emw->parent_membership->group->value();
+
+    $metadata[] = array(
+      'description' => t('Inherited from'),
+      'value' => l($parent->label(), 'group/' . $parent->gid),
+    );
+  }
+
+  return $metadata;
+}
+
+/**
  * Implements hook_group_member_operations().
  *
  * Callbacks are situated in ggroup.module.

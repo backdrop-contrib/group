@@ -87,6 +87,19 @@ class GroupMembershipUIController extends EntityDefaultUIController {
       'weight' => -10,
     );
 
+    $items['group/%group_membership/member/%/metadata'] = array(
+      'title' => 'Metadata',
+      'page callback' => 'group_membership_metadata',
+      'page arguments' => array(1),
+      'access callback' => 'group_membership_access',
+      'access arguments' => array('metadata', 1),
+      'file' => 'pages/group_membership.inc',
+      'file path' => drupal_get_path('module', 'group'),
+      'load arguments' => array(3),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 5,
+    );
+
     $items['group/%group_membership/member/%/edit'] = array(
       'title' => 'Edit',
       'page callback' => 'entity_ui_get_form',
