@@ -111,6 +111,15 @@ function ggroup_config_form_submit($form, &$form_state) {
 
   // We only store the enabled subgroup types to have cleaner exports.
   foreach ($form_state['values']['subgroup'] as $type => $data) {
+    // We have to check whether $data is an array because the vertical tabs set
+    // an extra string value to keep track of which tab was active. Prior to PHP
+    // 5.4, the empty() check below would incorrectly return FALSE, causing a
+    // WSOD when calling unset() on a string offset further down the line.
+    if (!is_array($data)) {
+      continue;
+    }
+
+    // Only act when the 'Enable as subgroup' checkbox was checked.
     if (empty($data['enabled'])) {
       continue;
     }
