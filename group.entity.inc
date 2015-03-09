@@ -385,7 +385,6 @@ function group_entity_property_info() {
     'type' => 'list<group_role>',
     'options list' => 'group_role_labels',
     'setter callback' => 'entity_property_verbatim_set',
-    'computed' => TRUE,
   );
 
   $group_type['weight'] = array(
@@ -519,7 +518,6 @@ function group_entity_property_info() {
     'type' => 'list<group_role>',
     'options list' => 'group_role_labels',
     'setter callback' => 'entity_property_verbatim_set',
-    'computed' => TRUE,
   );
 
   $group_membership['status'] = array(
@@ -614,7 +612,6 @@ function group_entity_property_info_alter(&$info) {
         'description' => t($message, array('@entity' => $type)),
         'type' => $is_single ? 'group' : 'list<group>',
         'setter callback' => 'entity_property_verbatim_set',
-        'computed' => TRUE,
       );
     }
   }
