@@ -34,6 +34,13 @@ function gnode_menu_local_tasks_alter(&$data, $router_item, $root_path) {
     foreach (node_type_get_types() as $node_type => $info) {
       $item = menu_get_item("group/$gid/node/add/$node_type");
 
+      // Add one general and one unique class for styling purposes.
+      $item['localized_options']['attributes']['class'][] = 'group-local-action';
+      $item['localized_options']['attributes']['class'][] = 'group-local-action-' . str_replace('_', '-', $node_type);
+
+      // Add another class to target just Group Node local actions.
+      $item['localized_options']['attributes']['class'][] = 'gnode-local-action';
+
       if ($item['access']) {
         $data['actions']['output'][] = array(
           '#theme' => 'menu_local_action',

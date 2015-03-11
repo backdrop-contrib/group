@@ -48,6 +48,13 @@ function ggroup_menu_local_tasks_alter(&$data, $router_item, $root_path) {
     foreach (group_types() as $group_type => $info) {
       $item = menu_get_item("group/$gid/subgroup/add/$group_type");
 
+      // Add one general and one unique class for styling purposes.
+      $item['localized_options']['attributes']['class'][] = 'group-local-action';
+      $item['localized_options']['attributes']['class'][] = 'group-local-action-' . str_replace('_', '-', $group_type);
+
+      // Add another class to target just Subgroup local actions.
+      $item['localized_options']['attributes']['class'][] = 'ggroup-local-action';
+
       if ($item['access']) {
         $data['actions']['output'][] = array(
           '#theme' => 'menu_local_action',
