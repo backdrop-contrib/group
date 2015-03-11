@@ -50,12 +50,11 @@ function ginvite_uninstall() {
   db_drop_field('group_membership', 'invited_on');
   db_drop_field('group_membership', 'invited_by');
 
-  // Load Entity API and Group to ensure we can call Group's functions.
-  drupal_load('module', 'entity');
-  drupal_load('module', 'group');
-
-  // Remove all memberships that are still set to invited.
-  group_membership_delete_multiple(array_keys(group_memberships(array('status' => 'invited'))));
+  // If Group is still enabled, we remove all memberships that are still set to
+  // invited. Otherwise, we can't run this code without causing a WSOD.
+  if (module_exists('group')) {
+    group_membership_delete_multiple(array_keys(group_memberships(array('status' => 'invited'))));
+  }
 }
 
 /**
