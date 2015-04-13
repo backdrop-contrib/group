@@ -146,6 +146,13 @@ function group_pathauto_update_alias(Group $group, $op, $language = NULL) {
   // Make sure the language is set.
   if (!isset($language)) {
     $language = entity_language('group', $group);
+
+    // To preserve some backwards compatibility, entity_language() returns NULL
+    // instead of LANGUAGE_NONE when no language is found. Pathauto expects
+    // LANGUAGE_NONE, though, so we convert it.
+    if (!isset($language)) {
+      $language = LANGUAGE_NONE;
+    }
   }
 
   // Skip processing if the entity has no pattern.
