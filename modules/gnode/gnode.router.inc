@@ -16,6 +16,7 @@ function gnode_menu() {
     'page arguments' => array(1, 4),
     'access callback' => 'gnode_add_node_access',
     'access arguments' => array(1, 4),
+    'type' => MENU_CALLBACK,
   );
 
   return $items;

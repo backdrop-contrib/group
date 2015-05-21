@@ -301,8 +301,7 @@ function gnode_node_access($node, $op, $account) {
 function gnode_node_add(Group $group, $node_type) {
   global $user;
 
-  module_load_include('inc', 'node', 'node.pages');
-
+  // Create an empty node to pass on to the node form.
   $types = node_type_get_types();
   $node = (object) array(
     'uid' => $user->uid,
@@ -311,17 +310,28 @@ function gnode_node_add(Group $group, $node_type) {
     'language' => LANGUAGE_NONE,
     'group' => $group->gid,
   );
-  drupal_set_title(t('Create @name', array('@name' => $types[$node_type]->name)), PASS_THROUGH);
 
-  // Build the arguments to pass to drupal_get_form().
-  $setup = array($node_type . '_node_form', $node);
+  // Set the page title to something different than the local action title.
+  $message = 'Create @name in @group';
+  $replace = array('@name' => $types[$node_type]->name, '@group' => $group->label());
+  drupal_set_title(t($message, $replace), PASS_THROUGH);
+
+  // Build the arguments to set in the form state. We ensure any extra URL
+  // parameters will be passed on to the form builder as well. For instance:
+  // group/1/node/add/page/specialvar will pass on the empty 'page' node as well
+  // as the string "specialvar".
+  $setup = array($node);
   $extra = array_slice(func_get_args(), 2);
   $args = array_merge($setup, $extra);
 
-  // We call call_user_func_array() so we can add any extra argument
-  // that was provided through the URL. This will ensure paths like
-  // group/1/node/add/page/specialvar will function properly.
-  return call_user_func_array('drupal_get_form', $args);
+  // Build the form state, paying extra attention to two things: setting the
+  // arguments as explained above and making sure the form will know to load
+  // node.pages.inc whenever it's rebuilt.
+  $form_state['build_info']['args'] = array_values($args);
+  form_load_include($form_state, 'inc', 'node', 'node.pages');
+
+  // Finally we build the form with our customized form state.
+  return drupal_build_form($node_type . '_node_form', $form_state);
 }
 
 /**
