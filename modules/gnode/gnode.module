@@ -57,6 +57,15 @@ function node_group_permission() {
 }
 
 /**
+ * Implements hook_admin_paths().
+ */
+function gnode_admin_paths() {
+  if (variable_get('node_admin_theme')) {
+    return array('group/*/node/add/*' => TRUE);
+  }
+}
+
+/**
  * Retrieve all group ids a user can create a node of a given type in.
  *
  * @param string $type
