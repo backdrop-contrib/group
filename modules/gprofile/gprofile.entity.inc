@@ -103,7 +103,7 @@ function gprofile_entity_property_info() {
   $info = array();
 
   // Properties for GProfile entities.
-  $profile = &$info['GProfile']['properties'];
+  $profile = &$info['gprofile']['properties'];
   $profile['pid'] = array(
     'label' => t('Group member profile ID'),
     'description' => t('The unique group member profile ID.'),
