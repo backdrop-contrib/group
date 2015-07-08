@@ -6,6 +6,8 @@
 
 /**
  * Implements hook_install().
+ *
+ * @see group_form()
  */
 function group_install() {
   $t = get_t();
@@ -14,6 +16,14 @@ function group_install() {
   variable_set('group_admin_theme', '1');
 
   // Add Pathauto module support.
+  //
+  // Setting a default pattern will trigger the Pathauto UI to show up on group
+  // forms even though we're not sure whether the soft dependency Entity tokens
+  // is enabled.
+  //
+  // Because we still want to indicate the possibility of using Pathauto with
+  // Group instead of not setting a default pattern at all when Entity tokens is
+  // disabled, we alter the Pathauto form in group_form().
   variable_set('pathauto_group_pattern', 'group/[group:title]');
 
   // Create a first global admin role and give it full permissions.

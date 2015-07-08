@@ -6,6 +6,10 @@
 
 /**
  * Generates the group editing form.
+ *
+ * Pathauto support is also added here, albeit with a twist.
+ *
+ * @see group_install()
  */
 function group_form($form, &$form_state, Group $group, $op = 'edit') {
   $group_type = group_type_load($group->type);
@@ -47,6 +51,26 @@ function group_form($form, &$form_state, Group $group, $op = 'edit') {
   // Load fields based on group type, this will also enable Pathauto support by
   // invoking the hook implementation pathauto_field_attach_form().
   field_attach_form('group', $group, $form, $form_state, entity_language('group', $group));
+
+  // Tweak the Pathauto additions so the user is notified the checkbox won't do
+  // anything unless they enable Entity tokens. See group_install() for info.
+  if (isset($form['path']['pathauto']) && !module_exists('entity_token')) {
+    $group->path['pathauto'] = FALSE;
+
+    // Only disable the whole '!enabled' state if there is one entry in it.
+    if (count($form['path']['alias']['#states']['!enabled']) == 1) {
+      unset($form['path']['alias']['#states']['!enabled']);
+    }
+    else {
+      unset($form['path']['alias']['#states']['!enabled']['input[name="path[pathauto]"]']);
+    }
+
+    // Disable the Pathauto checkbox and add a message.
+    $message = t('You need to enable the Entity tokens module for Pathauto to work with Group.');
+    $form['path']['pathauto']['#default_value'] = 0;
+    $form['path']['pathauto']['#disabled'] = TRUE;
+    $form['path']['pathauto']['#description'] .= '<br /><strong>' . t('Please note:') . '</strong> ' . $message;
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(

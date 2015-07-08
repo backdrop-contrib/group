@@ -110,7 +110,7 @@ function group_group_operations() {
   );
 
   // Add Pathauto module support.
-  if (module_exists('pathauto')) {
+  if (module_exists('pathauto') && module_exists('entity_tokens')) {
     module_load_include('inc', 'group', 'group.pathauto');
     $operations['pathauto_update_alias'] = array(
       'label' => t('Update URL alias'),
