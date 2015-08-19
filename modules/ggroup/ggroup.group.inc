@@ -14,7 +14,7 @@ function ggroup_group_permission() {
 
   // Set permissions for the enabled subgroup types.
   foreach (group_types() as $group_type) {
-    $permissions["create $group_type->name"] = array(
+    $permissions["create $group_type->name group"] = array(
       'title' => t('Create %group_type as a subgroup', array('%group_type' => $group_type->label())),
       'warning' => t("This only grants the permission to create subgroups of this type.<br />Which group types can actually become subgroups is configured under every group type's config link."),
     );

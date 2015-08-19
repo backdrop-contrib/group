@@ -33,22 +33,22 @@ function node_group_permission() {
   foreach (node_type_get_types() as $node_type) {
     $replace = array('%node_type' => $node_type->name);
 
-    $permissions["view $node_type->type"] = array(
+    $permissions["view $node_type->type node"] = array(
       'title' => t('%node_type: View content', $replace),
     );
-    $permissions["create $node_type->type"] = array(
+    $permissions["create $node_type->type node"] = array(
       'title' => t('%node_type: Create new content', $replace),
     );
-    $permissions["update own $node_type->type"] = array(
+    $permissions["update own $node_type->type node"] = array(
       'title' => t('%node_type: Edit own content', $replace),
     );
-    $permissions["update any $node_type->type"] = array(
+    $permissions["update any $node_type->type node"] = array(
       'title' => t('%node_type: Edit any content', $replace),
     );
-    $permissions["delete own $node_type->type"] = array(
+    $permissions["delete own $node_type->type node"] = array(
       'title' => t('%node_type: Delete own content', $replace),
     );
-    $permissions["delete any $node_type->type"] = array(
+    $permissions["delete any $node_type->type node"] = array(
       'title' => t('%node_type: Delete any content', $replace),
     );
   }
