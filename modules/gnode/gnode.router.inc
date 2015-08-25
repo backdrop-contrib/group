@@ -64,5 +64,5 @@ function gnode_add_node_title($node_type) {
  * Access callback for group/%group/node/add/%.
  */
 function gnode_add_node_access($group, $node_type) {
-  return group_access("create $node_type", $group);
+  return group_access("create $node_type node", $group);
 }

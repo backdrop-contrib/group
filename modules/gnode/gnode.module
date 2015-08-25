@@ -114,7 +114,7 @@ function gnode_group_node_create_gids($type, $account = NULL) {
   // Add all of the user's groups in which he has creation rights.
   foreach (group_load_by_member($account->uid) as $group) {
     $has_access = group_access('administer group', $group, $account);
-    $has_access = $has_access || group_access("create $type", $group, $account);
+    $has_access = $has_access || group_access("create $type node", $group, $account);
 
     if ($has_access) {
       $gids[] = $group->gid;
@@ -182,7 +182,7 @@ function gnode_group_node_create_access($type, $account = NULL) {
   // Check the user's groups for creation rights.
   foreach (group_load_by_member($account->uid) as $group) {
     $has_access = group_access('administer group', $group, $account);
-    $has_access = $has_access || group_access("create $type", $group, $account);
+    $has_access = $has_access || group_access("create $type node", $group, $account);
 
     if ($has_access) {
       return TRUE;
@@ -274,15 +274,15 @@ function gnode_node_access($node, $op, $account) {
 
     switch ($op) {
       case "view":
-        $has_access = $has_access || group_access("view $node->type", $group, $account);
+        $has_access = $has_access || group_access("view $node->type node", $group, $account);
         break;
 
       case "update":
       case "delete":
-        $has_access = $has_access || group_access("$op any $node->type", $group, $account);
+        $has_access = $has_access || group_access("$op any $node->type node", $group, $account);
 
         if ($account->uid == $node->uid) {
-          $has_access = $has_access || group_access("$op own $node->type", $group, $account);
+          $has_access = $has_access || group_access("$op own $node->type node", $group, $account);
         }
 
         break;
@@ -595,13 +595,13 @@ function _gnode_node_access_info($account, $op) {
 
       switch ($op) {
         case 'view':
-          $type_access = group_access("view $node_type", $group, $account);
+          $type_access = group_access("view $node_type node", $group, $account);
           break;
 
         case 'update':
         case 'delete':
-          $type_access = group_access("$op any $node_type", $group, $account);
-          $user_access = group_access("$op own $node_type", $group, $account);
+          $type_access = group_access("$op any $node_type node", $group, $account);
+          $user_access = group_access("$op own $node_type node", $group, $account);
           break;
       }
 

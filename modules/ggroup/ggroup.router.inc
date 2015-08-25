@@ -86,5 +86,5 @@ function ggroup_add_subgroup_access($group, $group_type) {
     return FALSE;
   }
 
-  return group_access("create $group_type->name", $group);
+  return group_access("create $group_type->name group", $group);
 }
