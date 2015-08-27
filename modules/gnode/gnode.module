@@ -546,13 +546,13 @@ function _gnode_node_access_info($account, $op) {
 
         switch ($op) {
           case 'view':
-            $type_access = in_array("view $node_type", $permissions);
+            $type_access = in_array("view $node_type node", $permissions);
             break;
 
           case 'update':
           case 'delete':
-            $type_access = in_array("$op any $node_type", $permissions);
-            $user_access = in_array("$op own $node_type", $permissions);
+            $type_access = in_array("$op any $node_type node", $permissions);
+            $user_access = in_array("$op own $node_type node", $permissions);
             break;
         }
 
