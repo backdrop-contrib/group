@@ -141,7 +141,7 @@ function group_entity_info() {
     'entity keys' => array(
       'id' => 'mid',
     ),
-    'access callback' => 'group_configure_access',
+    'access callback' => 'group_membership_access',
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
     'bundles' => array(
