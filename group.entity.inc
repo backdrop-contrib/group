@@ -116,7 +116,6 @@ function group_entity_info() {
       'name' => 'name',
       'label' => 'label',
     ),
-    // Roles are bound to group types.
     'access callback' => 'group_configure_access',
     'label callback' => 'entity_class_label',
     'module' => 'group',
