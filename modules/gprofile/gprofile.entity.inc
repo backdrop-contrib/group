@@ -83,7 +83,7 @@ function gprofile_entity_info_alter(&$entity_info) {
         'path' => 'admin/group/member/manage/%gprofile_type',
         'real path' => 'admin/group/member/manage/' . $name,
         'bundle argument' => 4,
-        'access arguments' => array('administer group member profile types'),
+        'access arguments' => array('configure group module'),
       ),
     );
   }
