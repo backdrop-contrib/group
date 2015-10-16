@@ -167,5 +167,5 @@ function group_group_view_enable($cache, $disabled) {
  */
 function group_group_view_access_check($task, $subtask_id, $contexts) {
   $context = reset($contexts);
-  return group_entity_access('view', $context->data);
+  return entity_access('view', 'group', $context->data);
 }

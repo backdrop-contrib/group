@@ -203,16 +203,13 @@ function group_entity_info_alter(&$entity_info) {
  * @param Group $group
  * @param object $account
  * @param string $entity_type
- * @param string $group_type
- *   (optional) The group type to create. Only needs to be specified
- *   when $op is 'create'.
  *
  * @return bool
  */
-function group_entity_access($op, Group $group = NULL, $account = NULL, $entity_type = NULL, $group_type = NULL) {
+function group_entity_access($op, Group $group = NULL, $account = NULL, $entity_type = NULL) {
   switch ($op) {
     case 'create':
-      return !empty($group_type) && user_access("create $group_type group", $account);
+      return !empty($group->type) && user_access("create $group->type group", $account);
 
     case 'view':
       return group_access('administer group', $group, $account)
