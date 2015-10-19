@@ -62,7 +62,7 @@ function group_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  */
 function _group_add_access() {
   foreach (group_types() as $group_type) {
-    $group = entity_create('group', array('type' => $group_type));
+    $group = entity_create('group', array('type' => $group_type->name));
     if (entity_access('create', 'group', $group)) {
       return TRUE;
     }
