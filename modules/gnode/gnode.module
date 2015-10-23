@@ -197,7 +197,7 @@ function gnode_group_node_create_access($type, $account = NULL) {
     $check_permissions = $account_exists ? $group_type->outsider_permissions : $group_type->anonymous_permissions;
 
     $has_access = in_array('administer group', $check_permissions);
-    $has_access = $has_access || in_array("create $type", $check_permissions);
+    $has_access = $has_access || in_array("create $type node", $check_permissions);
 
     // If the group type allows access to non-members and the provided user
     // has as at least one group of this type he is not a member of, we allow
