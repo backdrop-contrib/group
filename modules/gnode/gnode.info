@@ -3,5 +3,7 @@ description = Enables Group functionality for the Node module
 core = 7.x
 package = Group
 
+files[] = tests/gnode.test
+
 dependencies[] = group
 dependencies[] = node

@@ -1,0 +1,1476 @@
+<?php
+
+/**
+ * @file
+ * Tests for the gnode module.
+ */
+
+/**
+ * Base class provides a number of helper functions.
+ */
+abstract class GNodeWebTestBase extends DrupalWebTestCase {
+
+  /**
+   * Perform an operation on a node.
+   *
+   * This will check the response to access some operation via
+   * the URL of a node. Note that this just checks the ability to perform
+   * the operation and does not actually create or delete a node.
+   *
+   * @param int|string $node_identifier
+   *   The node nid or node type for create
+   * @param string $op
+   *   An operation such as 'view', 'edit', 'create'
+   * @param int $expected_response
+   *   The expected response code. If the user should not be able to
+   *   see the 'publish' or 'unpublish' tabs, set this to 403, otherwise
+   *   200.
+   * @param string $msg
+   *   (optional) An assertion log message.
+   * @throws Exception
+   *   If bad $op param is used
+   */
+  public function assertNodeOperationAccess($node_identifier, $op = 'view', $expected_response = 200, $msg = '') {
+    switch ($op) {
+      case 'view' :
+        $url = "node/{$node_identifier}";
+        break;
+      case 'edit' :
+        $url = "node/{$node_identifier}/edit";
+        break;
+      case 'delete' :
+        $url = "node/{$node_identifier}/delete";
+        break;
+      case 'create' :
+        $url = "node/add/{$node_identifier}";
+        break;
+      default:
+        throw new Exception('Invalid $op parameter passed to assertNodeOperationAccess: ' . $op);
+    }
+
+    $this->drupalGet($url);
+    $this->assertResponse($expected_response, $msg);
+  }
+
+  /**
+   * Check that only the specified nodes are listed at /node.
+   *
+   * @param int[] $expected_nids
+   *   A list of expected nids.
+   * @param string $message
+   *   Assertion message.
+   */
+  public function assertNodesOnListingPage(array $expected_nids = array(), $message = 'Nodes listed on the node listing page are expected.') {
+    $this->drupalGet('node');
+    $node_divs = $this->xpath("//div[contains(@class, 'node-promoted')]");
+    $actual_nids = array();
+
+    /** @var SimpleXMLElement $node_div */
+    foreach ($node_divs as $node_div) {
+      $id = (string) $node_div->attributes()->id;
+      $actual_nids[] = (int) substr($id, 5);
+    }
+
+    $this->assertEqual($expected_nids, $actual_nids, $message);
+  }
+
+  /**
+   * Create a GroupType entity.
+   *
+   * @param string $machine_name
+   * @param string $label
+   *   (optional) if omitted, the label is the same as the name.
+   *
+   * @return \GroupType
+   */
+  public function createGroupType($machine_name, $label = '') {
+    $label = empty($label) ? $machine_name : $label;
+
+    $group_type = new GroupType(array(
+      'name' => $machine_name,
+      'label' => $label,
+      'anonymous_permissions' => array(),
+      'outsider_permissions' => array(),
+      'member_permissions' => array(),
+      'config' => array(),
+      'weight' => 0,
+      'status' => 1,
+      'module' => NULL,
+    ), 'group_type');
+
+    $group_type->save();
+
+    return $group_type;
+  }
+
+  /**
+   * Create a group.
+   *
+   * @param string $machine_name
+   * @param string $bundle_name
+   * @param string $title
+   *   (optional) If omitted, this is the same as the machine_name.
+   *
+   * @return \Group
+   */
+  public function createGroup($machine_name, $bundle_name, $title = '') {
+    $title = empty($title) ? $machine_name : $title;
+
+    $group = new Group(array(
+      'name' => $machine_name,
+      'title' => $title,
+      'type' => $bundle_name,
+    ), 'group');
+
+    $group->save();
+
+    return $group;
+  }
+
+  /**
+   * Create a global group role
+   *
+   * @param string $machine_name
+   * @param string $group_type
+   *   (optional) Bundle name for the group to attach the role to.
+   *   Leave blank to make this a global role.
+   * @param string $label
+   *   (optional) Leave blank to have this the same as the machine_name.
+   *
+   * @return \GroupRole
+   */
+  public function createRole($machine_name, $group_type = '', $label = '') {
+    $label = empty($label) ? $machine_name : $label;
+
+    $role = new GroupRole(array(
+      'type' => empty($group_type) ? '' : $group_type,
+      'name' => $machine_name,
+      'label' => $label,
+      'global' => empty($group_type) ? 1 : 0,
+      'permissions' => array(),
+      'weight' => 1,
+      'status' => 1,
+      'module' => NULL,
+    ), 'group_role');
+
+    $role->save();
+
+    return $role;
+  }
+
+  /**
+   * Create a test node in a specified group.
+   *
+   * @param int $gid
+   * @param string $node_type
+   *   Defaults to 'page'
+   * @param int $status
+   *   Defaults to 1 (published)
+   * @param int $uid
+   *   Defaults to 1 (root user)
+   *
+   * @return object
+   *   The node.
+   */
+  public function createNodeInGroup($gid, $node_type = 'page', $status = 1, $uid = 1) {
+    return $this->drupalCreateNode(
+      array(
+        'type' => $node_type,
+        'uid' => $uid,
+        'status' => $status,
+        'promote' => 1,
+        'group' => $gid,
+      )
+    );
+  }
+
+  /**
+   * Remove a node from it's group.
+   *
+   * @param $node
+   * @throws \Exception
+   */
+  public function removeNodeFromGroup($node) {
+    $node->group = NULL;
+    node_save($node);
+  }
+
+}
+
+/**
+ * Test for view access control.
+ */
+abstract class GNodeViewAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Test anonymous user's view access to nodes in a group.
+   */
+  public function testAnonymousViewAccess() {
+    $role = user_role_load_by_name('anonymous user');
+    user_role_grant_permissions($role->rid, array('access content'));
+
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by anonymous without view permissions');
+    $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to anonymous without view permissions.');
+
+    $group_type->anonymous_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous with view permissions');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is visible on listing pages to anonymous with view permissions.');
+
+    $group_type->anonymous_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous with administer group permissions');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is visible on listing pages to anonymous with administer group permissions.');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by anonymous with standard access content permission');
+    $this->assertNodesOnListingPage(array($node->nid), 'Node not in group is visible on listing pages to anonymous with administer group permissions.');
+  }
+
+  /**
+   * Test outsider user's view access to nodes in a group.
+   */
+  public function testOutsiderViewAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by outsider without view permissions.');
+    $this->assertNodesOnListingPage(array(), 'Node in group is not visible on listing pages to outsider without view permissions.');
+
+    $group_type->outsider_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with view permissions.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Node in group is visible on listing pages to outsider with view permissions.');
+
+    $group_type->outsider_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with administer group permissions.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Node in group is visible on listing pages to outsider with administer group permissions.');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by outsider with standard access content permission.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Node not in group is visible on listing pages to outsider with standard access content permission.');
+  }
+
+  /**
+   * Test member user's view access to nodes in a group.
+   */
+  public function testMemberViewAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+    $group->addMember($web_user->uid);
+
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without view permissions.');
+    $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to member without view permissions.');
+
+    $group_type->member_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with view permissions.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is visible on listing pages to member with view permissions.');
+
+    $group_type->member_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with administer group permissions.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is visible on listing pages to member with administer group permissions.');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by member with standard access content permission.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Node not in group is visible on listing pages to member with standard access content permissions.');
+  }
+
+  /**
+   * Test member user's view access to nodes in a group when the permission
+   * is granted via a group level role.
+   */
+  public function testMemberWithGroupRoleViewAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $group_role = $this->createRole('example_role', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $role_details = array(
+      'roles' => array('example_role'),
+      'added_on' => REQUEST_TIME,
+      'added_by' => 1,
+    );
+
+    $group->addMember($web_user->uid, $role_details);
+
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without view permissions on group role.');
+    $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to member without view permissions on group role.');
+
+    $group_role->grantPermissions(array('view page node'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with view permissions on group role.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is visible on listing pages to member with view permissions on group role.');
+
+    $group_role->revokePermissions(array('view page node'));
+    $group_role->grantPermissions(array('administer group'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with administer group permissions on group role.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is visible on listing pages to member with administer group permissions on group role.');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by member with group role with standard access content permission.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Node not in group is visible on listing pages to member with standard access content permission.');
+  }
+
+  /**
+   * Test member user's view access to nodes in a group when the permission
+   * is granted via a global level role.
+   */
+  public function testMemberWithGlobalRoleViewAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $group_role = $this->createRole('example_role');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $role_details = array(
+      'roles' => array('example_role'),
+      'added_on' => REQUEST_TIME,
+      'added_by' => 1,
+    );
+
+    $group->addMember($web_user->uid, $role_details);
+
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without view permissions on a global role.');
+    $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to member without view permissions on a global role.');
+
+    $group_role->grantPermissions(array('view page node'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with view permissions.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is visible on listing pages to member with view permissions on a global role.');
+
+    $group_role->revokePermissions(array('view page node'));
+    $group_role->grantPermissions(array('administer group'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with administer group permissions.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is visible on listing pages to member with administer group permissions on a global role.');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by member with global role with standard access content permission.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Node not in group is visible on listing pages to member with global role with standard access content permission.');
+  }
+
+  /**
+   * Test the outside user does not receive access until their role has access
+   * even when higher roles do have access.
+   */
+  public function testOutsiderPermissionBuildUp() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $group_global_role = $this->createRole('example_global_role');
+    $group_local_role = $this->createRole('example_local_role', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by outsider without view permissions');
+    $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to outsider without view permissions.');
+
+    $group_global_role->grantPermissions(array('view page node'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is still not accessible by outsider though group global role has permission.');
+
+    $group_local_role->grantPermissions(array('view page node'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is still not accessible by outsider though group local role has permission.');
+    $this->assertNodesOnListingPage(array(), 'Group node is still not visible on listing pages to outsider though group local role has permission.');
+
+    $group_type->member_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is still not accessible by outsider though member role has permission.');
+    $this->assertNodesOnListingPage(array(), 'Group node is still not visible on listing pages to outsider though member role has permission.');
+
+    $group_type->outsider_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is now accessible by outsider with view permissions.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is now visible on listing pages to outsider with view permission.');
+
+    $group_type->anonymous_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is still accessible by outsider now anonymous has view permissions.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is still visible on listing pages to outsider now anonymous has view permissions.');
+  }
+
+  /**
+   * Test the anonymous user does not receive access until their role has access
+   * even when higher roles do have access.
+   */
+  public function testAnonymousPermissionBuildUp() {
+    $role = user_role_load_by_name('anonymous user');
+    user_role_grant_permissions($role->rid, array('access content'));
+
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $group_global_role = $this->createRole('example_global_role');
+    $group_local_role = $this->createRole('example_local_role', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by anonymous without view permissions.');
+    $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to anonymous without view permissions.');
+
+    $group_global_role->grantPermissions(array('view page node'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is still not accessible by anonymous though group global role has permission.');
+    $this->assertNodesOnListingPage(array(), 'Group node is still not visible on listing pages to anonymous though group global role has permission.');
+
+    $group_local_role->grantPermissions(array('view page node'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is still not accessible by anonymous though group local role has permission.');
+    $this->assertNodesOnListingPage(array(), 'Group node is still not visible on listing pages to anonymous though group local role has permission.');
+
+    $group_type->member_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is still not accessible by anonymous though member role has permission.');
+    $this->assertNodesOnListingPage(array(), 'Group node is still not visible on listing pages to anonymous though member role has permission.');
+
+    $group_type->outsider_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is still not accessible by anonymous though outsider role has permission.');
+    $this->assertNodesOnListingPage(array(), 'Group node is still not visible on listing pages by anonymous though outsider role has permission.');
+
+    $group_type->anonymous_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is finally accessible by anonymous with view permissions.');
+    $this->assertNodesOnListingPage(array($node->nid), 'Group node is finally visible on listing pages by anonymous with view permissions.');
+  }
+
+}
+
+/**
+ * Test for edit access control.
+ */
+abstract class GNodeEditAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Test anonymous user's edit access to nodes in a group.
+   */
+  public function testAnonymousEditAccess() {
+    $role = user_role_load_by_name('anonymous user');
+    user_role_grant_permissions($role->rid, array('access content'));
+
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node is not editable by anonymous without update any page node permissions');
+
+    $group_type->anonymous_permissions = array('update any page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by anonymous with update any page node permissions');
+
+    $group_type->anonymous_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by anonymous with administer group node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Node not in group is not editable by anonymous with standard access content permission');
+  }
+
+  /**
+   * Test outsider user's edit access to nodes in a group.
+   * This checks via several permissions: the update any node, update own node and administer group.
+   */
+  public function testOutsiderEditAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+    $this->drupalLogin($web_user);
+
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node is not editable by outsider without update any page node permissions');
+
+    $group_type->outsider_permissions = array('update any page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by outsider with update any page node permissions');
+
+    $group_type->outsider_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by outsider with administer group node permissions');
+
+    $group_type->outsider_permissions = array('update own page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node not owned by user is not editable by outsider with update own page node permissions');
+
+    $node->uid = $web_user->uid;
+    node_save($node);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node owned by user is editable by outsider with update own page node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Node not in group is not editable by outsider with standard access content permission');
+  }
+
+  /**
+   * Test member user's edit access to nodes in a group.
+   * This checks via several permissions: the update any node, update own node and administer group.
+   */
+  public function testMemberEditAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $group->addMember($web_user->uid);
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node is not editable by member without update any page node permissions');
+
+    $group_type->member_permissions = array('update any page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by member with update any page node permissions');
+
+    $group_type->member_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by member with administer group node permissions');
+
+    $group_type->member_permissions = array('update own page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node not owned by user is not editable by member with update own page node permissions');
+
+    $node->uid = $web_user->uid;
+    node_save($node);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node owned by user is editable by member with update own page node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Node not in group is not editable by mmeber with standard access content permission');
+  }
+
+  /**
+   * Test member with group role user's edit access to nodes in a group.
+   * This checks via several permissions: the update any node, update own node and administer group.
+   */
+  public function testMemberWithGroupRoleEditAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $group_role = $this->createRole('example_role', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $role_details = array(
+      'roles' => array('example_role'),
+      'added_on' => REQUEST_TIME,
+      'added_by' => 1,
+    );
+
+    $group->addMember($web_user->uid, $role_details);
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node is not editable by member granted a group role without update any page node permissions');
+
+    $group_role->grantPermissions(array('update any page node'));
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is now editable by member granted a group role with update any page node permissions');
+
+    $group_role->revokePermissions(array('update any page node'));
+    $group_role->grantPermissions(array('administer group'));
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is now editable by member granted a group role with administer group permissions');
+
+    $group_role->revokePermissions(array('administer group'));
+    $group_role->grantPermissions(array('update own page node'));
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node not owned by user is not editable by member granted a group role with update own page node permissions');
+
+    $node->uid = $web_user->uid;
+    node_save($node);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node owned by user is editable by member granted a group role with update own page node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Node not in group is not editable by member with standard access content permission');
+  }
+
+  /**
+   * Test member with global role user's edit access to nodes in a group.
+   * This checks via several permissions: the update any node, update own node and administer group.
+   */
+  public function testMemberWithGlobalRoleEditAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $global_role = $this->createRole('example_role');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $role_details = array(
+      'roles' => array('example_role'),
+      'added_on' => REQUEST_TIME,
+      'added_by' => 1,
+    );
+
+    $group->addMember($web_user->uid, $role_details);
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node is not editable by member granted a global role without update any page node permissions');
+
+    $global_role->grantPermissions(array('update any page node'));
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is now editable by member granted a global role with update any page node permissions');
+
+    $global_role->revokePermissions(array('update any page node'));
+    $global_role->grantPermissions(array('administer group'));
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is now editable by member granted a global role with administer group permissions');
+
+    $global_role->revokePermissions(array('administer group'));
+    $global_role->grantPermissions(array('update own page node'));
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node not owned by user is not editable by member granted a global role with update own page node permissions');
+
+    $node->uid = $web_user->uid;
+    node_save($node);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node owned by user is editable by member granted a global role with update own page node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Node not in group is not editable by member with standard access content permission');
+  }
+
+}
+
+/**
+ * Test for delete access control.
+ */
+abstract class GNodeDeleteAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Test anonymous user's delete access to nodes in a group.
+   * This checks via several permissions: the delete any node, delete own node and administer group.
+   */
+  public function testAnonymousDeleteAccess() {
+    $role = user_role_load_by_name('anonymous user');
+    user_role_grant_permissions($role->rid, array('access content'));
+
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node is not deletable by anonymous without update any page node permissions');
+
+    $group_type->anonymous_permissions = array('delete any page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is deletable by anonymous with update any page node permissions');
+
+    $group_type->anonymous_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is deletable by anonymous with administer group node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Node not in group is not deletable by anonymous with standard access content permission');
+  }
+
+  /**
+   * Test outsider user's delete access to nodes in a group.
+   * This checks via several permissions: the delete any node, delete own node and administer group.
+   */
+  public function testOutsiderDeleteAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+    $this->drupalLogin($web_user);
+
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node is not deletable by outsider without delete any page node permissions');
+
+    $group_type->outsider_permissions = array('delete any page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is deletable by outsider with delete any page node permissions');
+
+    $group_type->outsider_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is deletable by outsider with administer group node permissions');
+
+    $group_type->outsider_permissions = array('delete own page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node not owned by user is not deletable by outsider with delete own page node permissions');
+
+    $node->uid = $web_user->uid;
+    node_save($node);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node owned by user is deletable by outsider with delete own page node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Node not in group is not deletable by outsider with standard access content permission');
+  }
+
+  /**
+   * Test member user's delete access to nodes in a group.
+   * This checks via several permissions: the delete any node, delete own node and administer group.
+   */
+  public function testMemberDeleteAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $group->addMember($web_user->uid);
+
+    $this->drupalLogin($web_user);
+
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node is not deletable by member without delete any page node permissions');
+
+    $group_type->member_permissions = array('delete any page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is deletable by member with delete any page node permissions');
+
+    $group_type->member_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is deletable by member with administer group node permissions');
+
+    $group_type->member_permissions = array('delete own page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node not owned by user is not deletable by member with delete own page node permissions');
+
+    $node->uid = $web_user->uid;
+    node_save($node);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node owned by user is deletable by member with delete own page node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Node not in group is not deletable by member with standard access content permission');
+  }
+
+  /**
+   * Test member with group role user's delete access to nodes in a group.
+   * This checks via several permissions: the delete any node, delete own node and administer group.
+   */
+  public function testMemberWithGroupRoleDeleteAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $group_role = $this->createRole('example_role', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $role_details = array(
+      'roles' => array('example_role'),
+      'added_on' => REQUEST_TIME,
+      'added_by' => 1,
+    );
+
+    $group->addMember($web_user->uid, $role_details);
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node is not deletable by member granted a group role without delete any page node permissions');
+
+    $group_role->grantPermissions(array('delete any page node'));
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is now deletable by member granted a group role with delete any page node permissions');
+
+    $group_role->revokePermissions(array('delete any page node'));
+    $group_role->grantPermissions(array('administer group'));
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is now deletable by member granted a group role with administer group permissions');
+
+    $group_role->revokePermissions(array('administer group'));
+    $group_role->grantPermissions(array('delete own page node'));
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node not owned by user is not deletable by member granted a group role with delete own page node permissions');
+
+    $node->uid = $web_user->uid;
+    node_save($node);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node owned by user is deletable by member granted a group role with delete own page node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Node not in group is not deletable by member with standard access content permission');
+  }
+
+  /**
+   * Test member with global role user's delete access to nodes in a group.
+   * This checks via several permissions: the delete any node, delete own node and administer group.
+   */
+  public function testMemberWithGlobalRoleDeleteAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $global_role = $this->createRole('example_role');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $role_details = array(
+      'roles' => array('example_role'),
+      'added_on' => REQUEST_TIME,
+      'added_by' => 1,
+    );
+
+    $group->addMember($web_user->uid, $role_details);
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node is not deletable by member granted a global role without delete any page node permissions');
+
+    $global_role->grantPermissions(array('delete any page node'));
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is now deletable by member granted a global role with delete any page node permissions');
+
+    $global_role->revokePermissions(array('delete any page node'));
+    $global_role->grantPermissions(array('administer group'));
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is now deletable by member granted a global role with administer group permissions');
+
+    $global_role->revokePermissions(array('administer group'));
+    $global_role->grantPermissions(array('delete own page node'));
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node not owned by user is not deletable by member granted a global role with delete own page node permissions');
+
+    $node->uid = $web_user->uid;
+    node_save($node);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node owned by user is deletable by member granted a global role with delete own page node permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Node not in group is not deletable by member with standard access content permission');
+  }
+
+}
+
+/**
+ * Test for create access control.
+ */
+abstract class GNodeCreateAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Test anonymous user's create access to nodes in a group.
+   * This checks via several permissions: create node and administer group.
+   */
+  public function testAnonymousCreateAccess() {
+    $role = user_role_load_by_name('anonymous user');
+    user_role_grant_permissions($role->rid, array('access content'));
+
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+
+    $this->assertNodeOperationAccess('page', 'create', 403, 'Page nodes cannot be created by anonymous without create page node permissions');
+
+    $group_type->anonymous_permissions = array('create page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess('page', 'create', 200, 'Page nodes can be created by anonymous with create page node permission');
+
+    $group_type->anonymous_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess('page', 'create', 200, 'Page nodes can be created by anonymous with administer group permission');
+  }
+
+  /**
+   * Test outsider user's create access.
+   * This checks via several permissions: create node and administer group.
+   */
+  public function testOutsiderCreateAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess('page', 'create', 403, 'Page nodes cannot be created by outsider without create page node permission');
+
+    $group_type->outsider_permissions = array('create page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess('page', 'create', 200, 'Page nodes can be created by outsider with create page node permission');
+
+    $group_type->outsider_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess('page', 'create', 200, 'Page nodes can be created by outsider with administer group permission');
+  }
+
+  /**
+   * Test member user's create access to nodes in a group.
+   * This checks via several permissions: create node and administer group.
+   */
+  public function testMemberCreateAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    $group->addMember($web_user->uid);
+    $this->drupalLogin($web_user);
+    $this->assertNodeOperationAccess('page', 'create', 403, 'Page nodes cannot be created by member without create page node permission');
+
+    $group_type->member_permissions = array('create page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess('page', 'create', 200, 'Page nodes can be created by member with create page node permission');
+
+    $group_type->member_permissions = array('administer group');
+    $group_type->save();
+    $this->assertNodeOperationAccess('page', 'create', 200, 'Page nodes can be created by member with administer group permission');
+  }
+
+}
+
+/**
+ * Test for bypass access control.
+ */
+abstract class GNodeBypassAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Test anonymous user's access to nodes in a group when granted bypass group access.
+   */
+  public function testAnonymousBypassGroupAccess() {
+    $role = user_role_load_by_name('anonymous user');
+    user_role_grant_permissions($role->rid, array('access content', 'bypass group access'));
+
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $group_type->anonymous_permissions = array();
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous with bypass group access user permissions');
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by anonymous with bypass group access user permissions');
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is deletable by anonymous with bypass group access user permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by anonymous with bypass group access permission');
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Node not in group is not editable by anonymous with bypass group access permission');
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Node not in group is not deletable by anonymous with bypass group access permission');
+  }
+
+  /**
+   * Test outsider user's access to nodes in a group when granted bypass group access.
+   */
+  public function testOutsiderBypassGroupAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content', 'bypass group access'));
+    $this->drupalLogin($web_user);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with bypass group access user permissions');
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by outsider with bypass group access user permissions');
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is deletable by outsider with bypass group access user permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by outsider with bypass group access permission');
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Node not in group is not editable by outsider with bypass group access permission');
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Node not in group is not deletable by outsider with bypass group access permission');
+  }
+
+  /**
+   * Test member user's access to nodes in a group when granted bypass group access.
+   */
+  public function testMemberBypassGroupAccess() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content', 'bypass group access'));
+    $group->addMember($web_user->uid);
+    $this->drupalLogin($web_user);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with bypass group access user permissions');
+    $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by member with bypass group access user permissions');
+    $this->assertNodeOperationAccess($node->nid, 'delete', 200, 'Group node is deletable by member with bypass group access user permissions');
+    $this->assertNodeOperationAccess('page', 'create', 200, 'Group node is creatable by member with bypass group access user permissions');
+
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by member with bypass group access permission');
+    $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Node not in group is not editable by member with bypass group access permission');
+    $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Node not in group is not deletable by member with bypass group access permission');
+  }
+
+}
+
+/**
+ * This class runs all the tests in Safe mode.
+ */
+class GNodeSafeModeViewTests extends GNodeViewAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode safe mode view tests'),
+      'description' => t('Executes node view test suite for gnode module in safe mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
+    node_access_rebuild();
+  }
+
+}
+
+/**
+ * This class runs all the tests in Safe mode.
+ */
+class GNodeSafeModeEditTests extends GNodeEditAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode safe mode edit tests'),
+      'description' => t('Executes node edit test suite for gnode module in safe mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
+    node_access_rebuild();
+  }
+
+}
+
+/**
+ * This class runs all the tests in Safe mode.
+ */
+class GNodeSafeModeDeleteTests extends GNodeDeleteAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode safe mode delete tests'),
+      'description' => t('Executes node delete test suite for gnode module in safe mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
+    node_access_rebuild();
+  }
+
+}
+
+/**
+ * This class runs all the tests in Safe mode.
+ */
+class GNodeSafeModeCreateTests extends GNodeCreateAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode safe mode create tests'),
+      'description' => t('Executes node create test suite for gnode module in safe mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
+    node_access_rebuild();
+  }
+
+}
+
+/**
+ * This class runs all the tests in Safe mode.
+ */
+class GNodeSafeModeBypassTests extends GNodeBypassAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode safe mode node bypass tests'),
+      'description' => t('Executes node access test suite when using bypass group access permissions for gnode module in safe mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
+    node_access_rebuild();
+  }
+
+}
+
+/**
+ * This class runs all the tests in Compliance mode.
+ */
+class GNodeComplianceModeViewTests extends GNodeViewAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode compliance mode node view tests'),
+      'description' => t('Executes node view test suite for gnode module in compliance mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
+    node_access_rebuild();
+    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
+  }
+}
+
+/**
+ * This class runs all the tests in Compliance mode.
+ */
+class GNodeComplianceModeEditTests extends GNodeEditAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode compliance mode node edit tests'),
+      'description' => t('Executes node edit test suite for gnode module in compliance mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
+    node_access_rebuild();
+    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
+  }
+}
+
+/**
+ * This class runs all the tests in Compliance mode.
+ */
+class GNodeComplianceModeDeleteTests extends GNodeDeleteAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode compliance mode node delete tests'),
+      'description' => t('Executes node delete test suite for gnode module in compliance mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
+    node_access_rebuild();
+    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
+  }
+}
+
+/**
+ * This class runs all the tests in Compliance mode.
+ */
+class GNodeComplianceModeCreateTests extends GNodeCreateAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode compliance mode node create tests'),
+      'description' => t('Executes node create test suite for gnode module in compliance mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
+    node_access_rebuild();
+    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
+  }
+}
+
+/**
+ * This class runs all the tests in Compliance mode.
+ */
+class GNodeComplianceModeBypassTests extends GNodeBypassAccessTests {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode compliance mode node access bypass tests'),
+      'description' => t('Executes node access test suite for gnode module in compliance mode with bypass group access permission set.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
+    node_access_rebuild();
+    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
+  }
+}
+
+/**
+ * Test Group behaviour when another module is providing node grants.
+ *
+ * Node is in the group, user is not in the group.
+ * Group permissions say this user should not be able to access any content in the group.
+ * However, with the user permission, node test view, the node_access_test module
+ * gives the user a grant for the domain this node is in and will allow them access.
+ *
+ * In compliance mode, the user should be able to access the node.
+ */
+class GNodeComplianceModeViewWithAnotherModuleTests extends GNodeWebTestBase {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode compliance mode node view tests with another module'),
+      'description' => t('Executes node view test suite for gnode module in compliance mode with another module providing additional node grants.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'node_access_test', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
+    node_access_rebuild();
+    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
+  }
+
+  /**
+   * Test Group behaviour for anonymous when another module is providing node grants.
+   */
+  public function testAnonymousViewAccessWhenAnotherModuleSaysAccessIsOK() {
+    $role = user_role_load_by_name('anonymous user');
+    user_role_grant_permissions($role->rid, array('access content'));
+
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by anonymous without group view permissions nor other module grant');
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous without group view permissions but with other module grant');
+
+    $group_type->anonymous_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous with view permissions and other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous with view permissions without other module grant');
+
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by anonymous without group view permissions but with other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Node not in group is not accessible by anonymous without group view permissions and without other module grant');
+  }
+
+  /**
+   * Test Group behaviour for outsider when another module is providing node grants.
+   */
+  public function testOutsiderViewAccessWhenAnotherModuleSaysAccessIsOK() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+    $role = user_role_load(reset($web_user->roles));
+    $this->drupalLogin($web_user);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by outsider without group view permissions nor other module grant');
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider without group view permissions but with other module grant');
+
+    $group_type->outsider_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with view permissions and other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with view permissions without other module grant');
+
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by outsider without group view permissions but with other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Node not in group is not accessible by outsider without group view permissions and without other module grant');
+  }
+
+  /**
+   * Test Group behaviour for member when another module is providing node grants.
+   */
+  public function testMemberViewAccessWhenAnotherModuleSaysAccessIsOK() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+    $role = user_role_load(reset($web_user->roles));
+    $group->addMember($web_user->uid);
+    $this->drupalLogin($web_user);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without group view permissions nor other module grant');
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member without group view permissions but with other module grant');
+
+    $group_type->member_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with view permissions and other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with view permissions without other module grant');
+
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by member without group view permissions but with other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Node not in group is not accessible by member without group view permissions and without other module grant');
+  }
+}
+
+/**
+ * Test Group behaviour when another module is providing node grants.
+ *
+ * Node is in the group, user is not in the group.
+ * Group permissions say this user should not be able to access any content in the group.
+ * However, with the user permission, node test view, the node_access_test module
+ * gives the user a grant for the domain this node is in and will allow them access.
+ *
+ * In safe mode, the user should not be able to access the node.
+ */
+class GNodeSafeModeViewWithAnotherModuleTests extends GNodeWebTestBase {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode safe mode node view tests with another module'),
+      'description' => t('Executes node access test suite when using bypass group access permissions for gnode module in safe mode.'),
+      'group' => t('Group'),
+    );
+  }
+
+  /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    parent::setUp('node', 'node_access_test', 'entity', 'group', 'gnode');
+    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
+    node_access_rebuild();
+  }
+
+  /**
+   * Test Group behaviour for anonymous when another module is providing node grants.
+   */
+  public function testAnonymousViewAccessWhenAnotherModuleSaysAccessIsOK() {
+    $role = user_role_load_by_name('anonymous user');
+    user_role_grant_permissions($role->rid, array('access content'));
+
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by anonymous without group view permissions nor other module grant');
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by anonymous without group view permissions but with other module grant');
+
+    $group_type->anonymous_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous with view permissions and other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous with view permissions without other module grant');
+
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by anonymous without group view permissions but with other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Node not in group is not accessible by anonymous without group view permissions and without other module grant');
+  }
+
+  /**
+   * Test Group behaviour for outsider when another module is providing node grants.
+   */
+  public function testOutsiderViewAccessWhenAnotherModuleSaysAccessIsOK() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+    $role = user_role_load(reset($web_user->roles));
+    $this->drupalLogin($web_user);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by outsider without group view permissions nor other module grant');
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by outsider without group view permissions but with other module grant');
+
+    $group_type->outsider_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with view permissions and other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with view permissions without other module grant');
+
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by outsider without group view permissions but with other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Node not in group is not accessible by outsider without group view permissions and without other module grant');
+  }
+
+  /**
+   * Test Group behaviour for member when another module is providing node grants.
+   */
+  public function testMemberViewAccessWhenAnotherModuleSaysAccessIsOK() {
+    $group_type = $this->createGroupType('example');
+    $group = $this->createGroup('example', 'example');
+    $node = $this->createNodeInGroup($group->gid);
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+    $role = user_role_load(reset($web_user->roles));
+    $group->addMember($web_user->uid);
+    $this->drupalLogin($web_user);
+
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without group view permissions nor other module grant');
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without group view permissions but with other module grant');
+
+    $group_type->member_permissions = array('view page node');
+    $group_type->save();
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with view permissions and other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with view permissions without other module grant');
+
+    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
+    $this->removeNodeFromGroup($node);
+    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by member without group view permissions but with other module grant');
+    user_role_revoke_permissions($role->rid, array('node test view'));
+    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Node not in group is not accessible by member without group view permissions and without other module grant');
+  }
+}

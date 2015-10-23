@@ -33,6 +33,27 @@ function group_access($permission, Group $group, $account = NULL) {
 }
 
 /**
+ * Get a list of all the gids of a specified group type.
+ *
+ * @param string $group_type
+ *   (optional) Filter the query to groups of this type. Leave blank to return
+ *   all group gids.
+ *
+ * @return int[]
+ *   A list of all group gids.
+ */
+function group_get_all_group_ids($group_type = '') {
+  $query = db_select('groups', 'g')
+    ->fields('g', array('gid'));
+
+  if (!empty($group_type)) {
+    $query->condition('g.type', $group_type);
+  }
+
+  return $query->execute()->fetchCol(0);
+}
+
+/**
  * Retrieve group ids for a list of group entities.
  *
  * @param string $entity_type

@@ -19,6 +19,16 @@ function gnode_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['admin/group/settings/gnode'] = array(
+    'title' => 'Group node settings',
+    'access arguments' => array('configure group module'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gnode_settings'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'gnode.admin.inc',
+    'weight' => 10,
+  );
+
   return $items;
 }
 
