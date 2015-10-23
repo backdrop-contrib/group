@@ -2,4 +2,4 @@
 *.swp
 
 #Ignore PHPStorm config
-.idea/*
+/.idea
