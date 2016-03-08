@@ -496,11 +496,12 @@ function gnode_form_node_form_alter(&$form, $form_state) {
  * @see gnode_form_node_form_alter()
  */
 function gnode_node_validate($node, $form, &$form_state) {
-  $values = $form_state['values']['group_settings'];
-
-  if (!empty($values['group'])) {
+  // If the user was presented with an autocomplete, we need to map the selected
+  // group name to a group id in the form state so the submit handler can rely
+  // on it being set.
+  if (!empty($form_state['values']['group_settings']['group'])) {
     // Retrieve the group id from the name suffix.
-    if ($gid = group_autocomplete_result_gid($values['group'])) {
+    if ($gid = group_autocomplete_result_gid($form_state['values']['group_settings']['group'])) {
       $form_state['values']['group_settings']['gid'] = $gid;
     }
     // Throw an error if the gid could not be retrieved.
