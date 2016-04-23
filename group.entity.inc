@@ -207,22 +207,32 @@ function group_entity_info_alter(&$entity_info) {
  * @return bool
  */
 function group_entity_access($op, Group $group = NULL, $account = NULL, $entity_type = NULL) {
-  switch ($op) {
-    case 'create':
-      return !empty($group->type) && user_access("create $group->type group", $account);
+  // First deal with the case where a group is provided.
+  if (isset($group)) {
+    switch ($op) {
+      case 'create':
+        return !empty($group->type) && user_access("create $group->type group", $account);
 
-    case 'view':
-      return group_access('administer group', $group, $account)
+      case 'view':
+        return group_access('administer group', $group, $account)
         || group_access('view group', $group, $account);
 
-    case 'update':
-      return group_access('administer group', $group, $account)
+      case 'update':
+        return group_access('administer group', $group, $account)
         || group_access('edit group', $group, $account);
 
-    case 'delete':
-      return group_access('administer group', $group, $account)
+      case 'delete':
+        return group_access('administer group', $group, $account)
         || group_access('delete group', $group, $account);
+    }
   }
+
+  // No group is provided. Check for access to all groups.
+  if (user_access('bypass group access', $account)) {
+    return TRUE;
+  }
+
+  return FALSE;
 }
 
 /**
