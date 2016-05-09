@@ -15,10 +15,10 @@ function group_form($form, &$form_state, Group $group, $op = 'edit') {
   $group_type = group_type_load($group->type);
 
   if ($op == 'add') {
-    drupal_set_title(t('Create @name', array('@name' => $group_type->label())));
+    drupal_set_title(t('Create @name', array('@name' => $group_type->label())), PASS_THROUGH);
   }
   elseif ($op == 'edit') {
-    drupal_set_title(t('Edit @title', array('@title' => $group->label())));
+    drupal_set_title(t('Edit @title', array('@title' => $group->label())), PASS_THROUGH);
   }
 
   // A bundle property is needed for entity_form_field_validate().

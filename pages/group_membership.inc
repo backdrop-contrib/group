@@ -17,7 +17,7 @@ function group_membership_page(GroupMembership $group_membership) {
   // If there is a menu link to this member, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the member page title.
-  drupal_set_title($group_membership->label(), PASS_THROUGH);
+  drupal_set_title($group_membership->label());
 
   // Retrieve the URI for the member page.
   $uri = entity_uri('group_membership', $group_membership);
