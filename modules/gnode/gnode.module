@@ -293,8 +293,8 @@ function gnode_node_access($node, $op, $account) {
     }
   }
 
-  // Make sure we are dealing with a group node.
-  elseif (!empty($node->group)) {
+  // Make sure we are dealing with a published group node.
+  elseif (!empty($node->group) && $node->status) {
     $group = group_load($node->group);
 
     // If the user can bypass group access, he is allowed access.
@@ -302,27 +302,30 @@ function gnode_node_access($node, $op, $account) {
       return NODE_ACCESS_ALLOW;
     }
 
-    $has_access = group_access('administer group', $group, $account);
+    // If the user can administer the group, he is allowed access.
+    if (group_access('administer group', $group, $account)) {
+      return NODE_ACCESS_ALLOW;
+    }
 
+    $has_access = FALSE;
     switch ($op) {
       case "view":
-        $has_access = $has_access || group_access("view $node->type node", $group, $account);
+        $has_access = group_access("view $node->type node", $group, $account);
         break;
 
       case "update":
       case "delete":
-        $has_access = $has_access || group_access("$op any $node->type node", $group, $account);
-
+        $has_access = group_access("$op any $node->type node", $group, $account);
         if ($account->uid == $node->uid) {
           $has_access = $has_access || group_access("$op own $node->type node", $group, $account);
         }
-
         break;
     }
 
     return $has_access ? NODE_ACCESS_ALLOW : NODE_ACCESS_DENY;
   }
 
+  // Ignore access for non-group nodes or unpublished nodes.
   return NODE_ACCESS_IGNORE;
 }
 

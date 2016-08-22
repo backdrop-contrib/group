@@ -174,46 +174,50 @@ function gnode_node_grants($account, $op) {
  *
  * In compliance mode defines the following realms:
  * - 'gnode:NODE_TYPE': Grants access for this node type.
- * - 'gnode_author:GID:NODE_TYPE': Grants access to node
- *    author for this node type.
+ * - 'gnode_author:GID:NODE_TYPE': Grants access to node author for this node
+ *   type.
  *
  * In safe mode there is a single realm:
- *  - 'gnode:safemode': Grants view access, however this is never given to any
- *     user as we hand access control over to gnode_query_node_access_alter().
+ * - 'gnode:safemode': Grants view access, however this is never given to any
+ *   user as we hand access control over to gnode_query_node_access_alter().
  *
  * @see gnode_node_grants().
  */
 function gnode_node_access_records($node) {
   $grants = array();
 
-  if (_gnode_get_mode() !== GROUP_NODE_COMPLIANCE_MODE) {
-    if (!empty($node->group) && $node->status) {
-      $grants[] = array(
-        'gid' => '9000',
-        'grant_view' => 1,
-        'grant_update' => 0,
-        'grant_delete' => 0,
-        'priority' => 0,
-        'realm' => "gnode:safemode",
-      );
-    }
-
+  // If the node isn't part of a group or is unpublished, we do not set any
+  // access records for it. This leads to the node module taking over the
+  // responsibility for both cases.
+  if (empty($node->group) || !$node->status) {
     return $grants;
   }
+  
+  if (_gnode_get_mode() !== GROUP_NODE_COMPLIANCE_MODE) {
+    // Add a bogus grant to make sure the node module doesn't add a default
+    // access record that will allow anyone to view the node as long as it's
+    // published.
+    $grants[] = array(
+      'gid' => '9000',
+      'grant_view' => 1,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+      'realm' => "gnode:safemode",
+    );
+  }
+  else {
+    // Add a grant for the view/update/delete any permissions.
+    $grants[] = array(
+      'gid' => $node->group,
+      'grant_view' => 1,
+      'grant_update' => 1,
+      'grant_delete' => 1,
+      'priority' => 0,
+      'realm' => "gnode:{$node->type}",
+    );
 
-  if (!empty($node->group)) {
-    if ($node->status) {
-      $grants[] = array(
-        'gid' => $node->group,
-        'grant_view' => 1,
-        'grant_update' => 1,
-        'grant_delete' => 1,
-        'priority' => 0,
-        'realm' => "gnode:{$node->type}",
-      );
-    }
-
-    // Add a grant for the node author.
+    // Add a grant for the update/delete own permissions.
     $grants[] = array(
       'gid' => $node->uid,
       'grant_view' => 1,
