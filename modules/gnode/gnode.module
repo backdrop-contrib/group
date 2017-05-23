@@ -249,59 +249,6 @@ function gnode_global_node_create_access($type, $account = NULL) {
 }
 
 /**
- * Implements hook_node_access().
- */
-function gnode_node_access($node, $op, $account) {
-  if (is_string($node) && $op == 'create') {
-    if (gnode_group_node_create_access($node, $account)) {
-      return NODE_ACCESS_ALLOW;
-    }
-  }
-
-  // Make sure we are dealing with a group node.
-  elseif (!empty($node->group)) {
-    // If the user can bypass group access, he is allowed access.
-    if (user_access('bypass group access', $account)) {
-      return NODE_ACCESS_ALLOW;
-    }
-
-    $group = group_load($node->group);
-
-    // If the user has admin rights for the given group, he is allowed access.
-    if (group_access('administer group', $group, $account)) {
-      return NODE_ACCESS_ALLOW;
-    }
-
-    switch ($op) {
-      case "view":
-        if ($node->status && group_access("view $node->type node", $group, $account)) {
-          return NODE_ACCESS_ALLOW;
-        }
-        elseif (!$node->status && group_access("view unpublished $node->type node", $account)) {
-          return NODE_ACCESS_ALLOW;
-        }
-        break;
-
-      case "update":
-      case "delete":
-        if (group_access("$op any $node->type node", $group, $account)) {
-          return NODE_ACCESS_ALLOW;
-        }
-        elseif ($account->uid == $node->uid && group_access("$op own $node->type node", $group, $account)) {
-          return NODE_ACCESS_ALLOW;
-        }
-        break;
-    }
-
-    // If none of the above allowed access, we deny access.
-    return NODE_ACCESS_DENY;
-  }
-
-  // Ignore access for ungrouped nodes.
-  return NODE_ACCESS_IGNORE;
-}
-
-/**
  * Adds group data to the node add form.
  *
  * @param Group $group
