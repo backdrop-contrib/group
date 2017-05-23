@@ -214,7 +214,7 @@ function gnode_node_access($node, $op, $account) {
         if ($node->status && group_access("view $node->type node", $group, $account)) {
           return NODE_ACCESS_ALLOW;
         }
-        elseif (!$node->status && group_access("view unpublished $node->type node", $account)) {
+        elseif (!$node->status && group_access("view unpublished $node->type node", $group, $account)) {
           return NODE_ACCESS_ALLOW;
         }
         break;
