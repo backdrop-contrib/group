@@ -70,9 +70,6 @@ function group_group_permission() {
     'view group' => array(
       'title' => t('View group'),
     ),
-    'view members' => array(
-      'title' => t('View group members'),
-    ),
   );
 
   return $permissions;
