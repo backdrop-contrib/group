@@ -16,7 +16,7 @@ require_once 'gnode.router.inc';
 /**
  * Load our mode functions without polluting the .module file.
  */
-require_once 'modes/gnode.compliance.inc';
+require_once 'gnode.node_access.inc';
 
 /**
  * Implements hook_entity_info_alter().
