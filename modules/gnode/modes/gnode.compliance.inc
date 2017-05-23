@@ -5,177 +5,138 @@
  * Hooks and functions used in compliance mode.
  */
 
+// We need a grant ID for match-all access records.
+define('GNODE_MASTER_GRANT_ID', 1986);
+
 /**
  * Implements hook_node_grants().
  *
  * @see gnode_node_access_records().
  */
 function gnode_node_grants($account, $op) {
-  if (_gnode_get_mode() !== GROUP_NODE_COMPLIANCE_MODE) {
-    return array();
+  // Provide the master grant for users who can bypass group access.
+  if (user_access('bypass group access')) {
+    return array('gnode_bypass' => array(GNODE_MASTER_GRANT_ID));
   }
 
-  $grants = array();
+  // Initialize a grant array for members and one for anonymous/outsider users.
+  $grants_m = $grants_ao = array();
 
   // Gather the machine names of all node types.
   $node_types = array_keys(node_type_get_types());
 
-  // Provider grants for users with bypass group access.
-  if (user_access('bypass group access', $account)) {
-    if ($all_gids = group_get_all_group_ids()) {
-      foreach ($node_types as $node_type) {
-        foreach ($all_gids as $gid) {
-          $grants["gnode:{$node_type}"][] = $gid;
-        }
-      }
-    }
-    return $grants;
-  }
+  // If the user could not bypass group access, we need to check their access
+  // for every single group. Because loading every group would incur a massive
+  // performance hit, we only load those groups the user is a member of.
+  foreach (GroupMembership::getByActiveStatus($account->uid) as $group_membership) {
+    // Add the groups the user is a member of to use later on.
+    $member_gids[] = $gid = $group_membership->gid;
 
-  // Provide grants for anonymous user.
-  if (empty($account->uid)) {
-    foreach (group_types() as $type => $group_type) {
-      if ($all_gids = group_get_all_group_ids($type)) {
-        foreach ($node_types as $node_type) {
-          // Shorten variable name for readability's sake.
-          $permissions = $group_type->anonymous_permissions;
-          $group_administrator = in_array("administer group", $permissions);
-
-          // Allow the user to view content of this type.
-          if ($op === 'view' && ($group_administrator || in_array("view $node_type node", $permissions))) {
-            foreach ($all_gids as $gid) {
-              $grants["gnode:$node_type"][] = $gid;
-            }
-          }
-
-          // Allow the user to update content of this type.
-          elseif ($op === 'update' && ($group_administrator || in_array("update any $node_type node", $permissions))) {
-            foreach ($all_gids as $gid) {
-              $grants["gnode:$node_type"][] = $gid;
-            }
-          }
-
-          // Allow the user to delete content of this type.
-          elseif ($op === 'delete' && ($group_administrator || in_array("delete any $node_type node", $permissions))) {
-            foreach ($all_gids as $gid) {
-              $grants["gnode:$node_type"][] = $gid;
-            }
-          }
-
-          if (!$group_administrator) {
-            // Allow the user to update their own content of this type.
-            if ($op === 'update' && in_array("update own $node_type node", $permissions)) {
-              foreach ($all_gids as $gid) {
-                $grants["gnode_author:$gid:$node_type"][] = $account->uid;
-              }
-            }
-
-            // Allow the user to delete their own content of this type.
-            elseif ($op === 'delete' && in_array("delete own $node_type node", $permissions)) {
-              foreach ($all_gids as $gid) {
-                $grants["gnode_author:$gid:$node_type"][] = $account->uid;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return $grants;
-  }
-
-  // Provide grants for groups the user is an outsider to.
-  foreach (group_types() as $type => $group_type) {
-     if ($outsider_gids = group_non_member_gids($account->uid, $type)) {
-      foreach ($node_types as $node_type) {
-        // Shorten variable name for readability's sake.
-        $permissions = $group_type->outsider_permissions;
-        $group_administrator = in_array("administer group", $permissions);
-
-        // Allow the user to view content of this type.
-        if ($op === 'view' && ($group_administrator || in_array("view $node_type node", $permissions))) {
-          foreach ($outsider_gids as $gid) {
-            $grants["gnode:$node_type"][] = $gid;
-          }
-        }
-
-        // Allow the user to update content of this type.
-        elseif ($op === 'update' && ($group_administrator || in_array("update any $node_type node", $permissions))) {
-          foreach ($outsider_gids as $gid) {
-            $grants["gnode:$node_type"][] = $gid;
-          }
-        }
-
-        // Allow the user to delete content of this type.
-        elseif ($op === 'delete' && ($group_administrator || in_array("delete any $node_type node", $permissions))) {
-          foreach ($outsider_gids as $gid) {
-            $grants["gnode:$node_type"][] = $gid;
-          }
-        }
-
-        if (!$group_administrator) {
-          // Allow the user to update their own content of this type.
-          if ($op === 'update' && in_array("update own $node_type node", $permissions)) {
-            foreach ($outsider_gids as $gid) {
-              $grants["gnode_author:$gid:$node_type"][] = $account->uid;
-            }
-          }
-
-          // Allow the user to delete their own content of this type.
-          elseif ($op === 'delete' && in_array("delete own $node_type node", $permissions)) {
-            foreach ($outsider_gids as $gid) {
-              $grants["gnode_author:$gid:$node_type"][] = $account->uid;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Provide grants for groups the user is a member of.
-  foreach (group_load_by_member($account->uid) as $group) {
-    $group_administrator = group_access("administer group", $group, $account);
+    // See whether the user has all permissions for this group.
+    $group_administrator = $group_membership->hasPermission('administer group');
 
     foreach ($node_types as $node_type) {
-      // Allow the user to view content of this type.
-      if ($op === 'view' && ($group_administrator || group_access("view $node_type node", $group, $account))) {
-        $grants["gnode:$node_type"][] = $group->gid;
-      }
+      switch ($op) {
+        case 'view':
+          // Allow the user to view published content of this type.
+          if ($group_administrator || $group_membership->hasPermission("view $node_type node")) {
+            $grants_m["gnode:$node_type"][] = $gid;
+          }
+          // Allow the user to view unpublished content of this type.
+          if ($group_administrator || $group_membership->hasPermission("view unpublished $node_type node")) {
+            $grants_m["gnode_unpublished:$node_type"][] = $gid;
+          }
+          break;
 
-      // Allow the user to update content of this type.
-      elseif ($op === 'update' && ($group_administrator || group_access("update any $node_type node", $group, $account))) {
-        $grants["gnode:$node_type"][] = $group->gid;
-      }
-
-      // Allow the user to delete content of this type.
-      elseif ($op === 'delete' && ($group_administrator || group_access("delete any $node_type node", $group, $account))) {
-        $grants["gnode:$node_type"][] = $group->gid;
-      }
-
-      if (!$group_administrator) {
-        // Allow the user to update their own content of this type.
-        if ($op === 'update' && group_access("update own $node_type node", $group, $account)) {
-          $grants["gnode_author:{$group->gid}:{$node_type}"][] = $account->uid;
-        }
-
-        // Allow the user to delete their own content of this type.
-        elseif ($op === 'delete' && group_access("delete own $node_type node", $group, $account)) {
-          $grants["gnode_author:{$group->gid}:{$node_type}"][] = $account->uid;
-        }
+        case 'update':
+        case 'delete':
+          // If you can act on any node, there's no need for the author grant.
+          if ($group_administrator || $group_membership->hasPermission("$op any $node_type node")) {
+            $grants_m["gnode:$node_type"][] = $gid;
+          }
+          elseif ($group_membership->hasPermission("$op own $node_type node")) {
+            $grants_m["gnode_author:{$account->uid}:$node_type"][] = $gid;
+          }
+          break;
       }
     }
   }
 
-  return $grants;
+  // All other groups have the benefit of sharing the same permission set among
+  // all anonymous or authenticated users per group type. We can therefore know
+  // the user's permissions for all groups of the same type they aren't part of.
+  $query = db_select('groups', 'g')->fields('g', array('gid', 'type'));
+  if (!empty($member_gids)) {
+    $query->condition('gid', $member_gids, 'NOT IN');
+  }
+  foreach ($query->execute() as $record) {
+    $gids_per_group_type[$record->type][] = $record->gid;
+  }
+
+  foreach (group_types() as $name => $group_type) {
+    // If we could not retrieve any group IDs, skip to the next group type.
+    if (empty($gids_per_group_type[$name])) {
+      continue;
+    }
+
+    // Get the IDs of all the groups the user is not part of for the group type.
+    $gids = $gids_per_group_type[$name];
+
+    // Grab the anonymous or outsider permissions for the group type depending
+    // on the user's account status (anonymous or authenticated).
+    $permissions = $account->uid == 0
+      ? $group_type->anonymous_permissions
+      : $group_type->outsider_permissions;
+
+    // See whether the user has all permissions for this group type.
+    $group_administrator = in_array('administer group', $permissions, TRUE);
+
+    foreach ($node_types as $node_type) {
+      switch ($op) {
+        case 'view':
+          // Allow the user to view published content of this type.
+          if ($group_administrator || in_array("view $node_type node", $permissions, TRUE)) {
+            $grants_ao["gnode:$node_type"][] = $gids;
+          }
+          // Allow the user to view unpublished content of this type.
+          if ($group_administrator || in_array("view unpublished $node_type node", $permissions, TRUE)) {
+            $grants_ao["gnode_unpublished:$node_type"][] = $gids;
+          }
+          break;
+
+        case 'update':
+        case 'delete':
+          // If you can act on any node, there's no need for the author grant.
+          if ($group_administrator || in_array("$op any $node_type node", $permissions, TRUE)) {
+            $grants_ao["gnode:$node_type"][] = $gids;
+          }
+          elseif (in_array("$op own $node_type node", $permissions, TRUE)) {
+            $grants_ao["gnode_author:{$account->uid}:$node_type"][] = $gids;
+          }
+          break;
+      }
+    }
+  }
+
+  // The code above populated the anonymous/outsider grants by adding the group
+  // IDs per group type. We need to combine this into one big list of group IDs
+  // per entry in the $grants_ao array.
+  foreach ($grants_ao as $key => $grants_per_group_type) {
+    $grants_ao[$key] = array_reduce($grants_per_group_type, 'array_merge', array());
+  }
+
+  // Recursively merge the member grants with the anonymous/outsider grants.
+  return array_merge_recursive($grants_m, $grants_ao);
 }
 
 /**
  * Implements hook_node_access_records().
  *
  * In compliance mode defines the following realms:
- * - 'gnode:NODE_TYPE': Grants access for this node type.
- * - 'gnode_author:GID:NODE_TYPE': Grants access to node author for this node
- *   type.
+ * - 'gnode:NODE_TYPE': Grants view and update or delete any access to nodes.
+ * - 'gnode_unpublished:NODE_TYPE': Grants view access to unpublished nodes.
+ * - 'gnode_author:UID:NODE_TYPE': Grants update or delete access to authors.
+ * - 'gnode_bypass': Given to anyone with the 'bypass group access' permission.
  *
  * In safe mode there is a single realm:
  * - 'gnode:safemode': Grants view access, however this is never given to any
@@ -186,47 +147,40 @@ function gnode_node_grants($account, $op) {
 function gnode_node_access_records($node) {
   $grants = array();
 
-  // If the node isn't part of a group or is unpublished, we do not set any
-  // access records for it. This leads to the node module taking over the
-  // responsibility for both cases.
-  if (empty($node->group) || !$node->status) {
+  // If the node isn't part of a group, we do not set any access records for it.
+  // This allows the node module to take over the responsibility for access by
+  // setting the all access record in node_access_acquire_grants().
+  if (empty($node->group)) {
     return $grants;
   }
-  
-  if (_gnode_get_mode() !== GROUP_NODE_COMPLIANCE_MODE) {
-    // Add a bogus grant to make sure the node module doesn't add a default
-    // access record that will allow anyone to view the node as long as it's
-    // published.
-    $grants[] = array(
-      'gid' => '9000',
-      'grant_view' => 1,
-      'grant_update' => 0,
-      'grant_delete' => 0,
-      'priority' => 0,
-      'realm' => "gnode:safemode",
-    );
-  }
-  else {
-    // Add a grant for the view/update/delete any permissions.
-    $grants[] = array(
-      'gid' => $node->group,
-      'grant_view' => 1,
-      'grant_update' => 1,
-      'grant_delete' => 1,
-      'priority' => 0,
-      'realm' => "gnode:{$node->type}",
-    );
 
-    // Add a grant for the update/delete own permissions.
-    $grants[] = array(
-      'gid' => $node->uid,
-      'grant_view' => 1,
-      'grant_update' => 1,
-      'grant_delete' => 1,
-      'priority' => 0,
-      'realm' => "gnode_author:{$node->group}:{$node->type}",
-    );
-  }
+  // We can use the same grant-all base because we will only hand out the grants
+  // based on the $op parameter in hook_node_grants().
+  $base = [
+    'grant_view' => 1,
+    'grant_update' => 1,
+    'grant_delete' => 1,
+    'priority' => 0,
+  ];
+
+  // Add the non-author record for viewing nodes.
+  $prefix = $node->status ? 'gnode' : 'gnode_unpublished';
+  $grants[] = [
+    'gid' => $node->group,
+    'realm' => "$prefix:{$node->type}",
+  ] + $base;
+
+  // Add the author record for updating or deleting nodes.
+  $grants[] = array(
+    'gid' => $node->group,
+    'realm' => "gnode_author:{$node->uid}:{$node->type}",
+  ) + $base;
+
+  // Add the general access bypass record.
+  $records[] = array(
+    'gid' => GNODE_MASTER_GRANT_ID,
+    'realm' => 'gnode_bypass',
+  ) + $base;
 
   return $grants;
 }

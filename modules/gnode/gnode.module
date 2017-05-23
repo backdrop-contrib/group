@@ -9,18 +9,6 @@
  */
 
 /**
- * In safe mode we prevent other modules overriding group permission control.
- */
-define('GROUP_NODE_SAFE_MODE', 'GROUP_NODE_SAFE_MODE');
-
-/**
- * In compliance mode we allow other modules to provide node access records
- * which might conflict with Group Node's access records. This is better Drupal
- * behaviour but might confuse some users.
- */
-define('GROUP_NODE_COMPLIANCE_MODE', 'GROUP_NODE_COMPLIANCE_MODE');
-
-/**
  * Load our router functions without polluting the .module file.
  */
 require_once 'gnode.router.inc';
@@ -28,18 +16,7 @@ require_once 'gnode.router.inc';
 /**
  * Load our mode functions without polluting the .module file.
  */
-require_once 'modes/gnode.safe.inc';
 require_once 'modes/gnode.compliance.inc';
-
-/**
- * Get the currently set mode of the gnode module.
- *
- * @return
- *   Either GROUP_NODE_SAFE_MODE or GROUP_NODE_COMPLIANCE_MODE
- */
-function _gnode_get_mode() {
-  return variable_get('group_node_mode', GROUP_NODE_SAFE_MODE);
-}
 
 /**
  * Implements hook_entity_info_alter().
@@ -58,25 +35,28 @@ function gnode_entity_info_alter(&$entity_info) {
 function node_group_permission() {
   $permissions = array();
 
-  foreach (node_type_get_types() as $node_type) {
+  foreach (node_type_get_types() as $name => $node_type) {
     $replace = array('%node_type' => $node_type->name);
 
-    $permissions["view $node_type->type node"] = array(
+    $permissions["view $name node"] = array(
       'title' => t('%node_type: View content', $replace),
     );
-    $permissions["create $node_type->type node"] = array(
+    $permissions["view unpublished $name node"] = array(
+      'title' => t('%node_type: View unpublished content', $replace),
+    );
+    $permissions["create $name node"] = array(
       'title' => t('%node_type: Create new content', $replace),
     );
-    $permissions["update own $node_type->type node"] = array(
+    $permissions["update own $name node"] = array(
       'title' => t('%node_type: Edit own content', $replace),
     );
-    $permissions["update any $node_type->type node"] = array(
+    $permissions["update any $name node"] = array(
       'title' => t('%node_type: Edit any content', $replace),
     );
-    $permissions["delete own $node_type->type node"] = array(
+    $permissions["delete own $name node"] = array(
       'title' => t('%node_type: Delete own content', $replace),
     );
-    $permissions["delete any $node_type->type node"] = array(
+    $permissions["delete any $name node"] = array(
       'title' => t('%node_type: Delete any content', $replace),
     );
   }
@@ -270,62 +250,54 @@ function gnode_global_node_create_access($type, $account = NULL) {
 
 /**
  * Implements hook_node_access().
- *
- * Because the grant system for node access can quickly become very taxing on
- * the site's performance, we chose to implement hook_node_access() instead.
- *
- * All list query related alterations that would otherwise be taken care of by
- * the grant system still take place, albeit in Group Node's implementation of
- * hook_query_TAG_alter() for 'node_access'.
- *
- * @see gnode_query_node_access_alter()
  */
 function gnode_node_access($node, $op, $account) {
-  if (_gnode_get_mode() === GROUP_NODE_COMPLIANCE_MODE && $op !== 'create') {
-    return NODE_ACCESS_IGNORE;
-  }
-
-  if (is_string($node)) {
-    if ($op == 'create') {
-      if (gnode_group_node_create_access($node, $account)) {
-        return NODE_ACCESS_ALLOW;
-      }
+  if (is_string($node) && $op == 'create') {
+    if (gnode_group_node_create_access($node, $account)) {
+      return NODE_ACCESS_ALLOW;
     }
   }
 
-  // Make sure we are dealing with a published group node.
-  elseif (!empty($node->group) && $node->status) {
-    $group = group_load($node->group);
-
+  // Make sure we are dealing with a group node.
+  elseif (!empty($node->group)) {
     // If the user can bypass group access, he is allowed access.
     if (user_access('bypass group access', $account)) {
       return NODE_ACCESS_ALLOW;
     }
 
-    // If the user can administer the group, he is allowed access.
+    $group = group_load($node->group);
+
+    // If the user has admin rights for the given group, he is allowed access.
     if (group_access('administer group', $group, $account)) {
       return NODE_ACCESS_ALLOW;
     }
 
-    $has_access = FALSE;
     switch ($op) {
       case "view":
-        $has_access = group_access("view $node->type node", $group, $account);
+        if ($node->status && group_access("view $node->type node", $group, $account)) {
+          return NODE_ACCESS_ALLOW;
+        }
+        elseif (!$node->status && group_access("view unpublished $node->type node", $account)) {
+          return NODE_ACCESS_ALLOW;
+        }
         break;
 
       case "update":
       case "delete":
-        $has_access = group_access("$op any $node->type node", $group, $account);
-        if ($account->uid == $node->uid) {
-          $has_access = $has_access || group_access("$op own $node->type node", $group, $account);
+        if (group_access("$op any $node->type node", $group, $account)) {
+          return NODE_ACCESS_ALLOW;
+        }
+        elseif ($account->uid == $node->uid && group_access("$op own $node->type node", $group, $account)) {
+          return NODE_ACCESS_ALLOW;
         }
         break;
     }
 
-    return $has_access ? NODE_ACCESS_ALLOW : NODE_ACCESS_DENY;
+    // If none of the above allowed access, we deny access.
+    return NODE_ACCESS_DENY;
   }
 
-  // Ignore access for non-group nodes or unpublished nodes.
+  // Ignore access for ungrouped nodes.
   return NODE_ACCESS_IGNORE;
 }
 

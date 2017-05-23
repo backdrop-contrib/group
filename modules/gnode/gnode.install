@@ -13,3 +13,11 @@ function gnode_install() {
     ->condition('name', 'gnode')
     ->execute();
 }
+
+/**
+ * Backport the Drupal 8 node access code for consistency.
+ */
+function gnode_update_7001() {
+  variable_del('group_node_mode');
+  node_access_needs_rebuild(TRUE);
+}

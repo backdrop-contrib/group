@@ -11,6 +11,15 @@
 abstract class GNodeWebTestBase extends DrupalWebTestCase {
 
   /**
+   * Test setup instructions.
+   */
+  public function setUp() {
+    $modules = array_merge(func_get_args(), array('node', 'entity', 'group', 'gnode'));
+    parent::setUp(array_unique($modules));
+    node_access_rebuild();
+  }
+
+  /**
    * Perform an operation on a node.
    *
    * This will check the response to access some operation via
@@ -200,7 +209,18 @@ abstract class GNodeWebTestBase extends DrupalWebTestCase {
 /**
  * Test for view access control.
  */
-abstract class GNodeViewAccessTests extends GNodeWebTestBase {
+class GNodeViewAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode view tests'),
+      'description' => t('Executes node view test suite for gnode module.'),
+      'group' => t('Group'),
+    );
+  }
 
   /**
    * Test anonymous user's view access to nodes in a group.
@@ -451,7 +471,18 @@ abstract class GNodeViewAccessTests extends GNodeWebTestBase {
 /**
  * Test for edit access control.
  */
-abstract class GNodeEditAccessTests extends GNodeWebTestBase {
+class GNodeEditAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode edit tests'),
+      'description' => t('Executes node edit test suite for gnode module.'),
+      'group' => t('Group'),
+    );
+  }
 
   /**
    * Test anonymous user's edit access to nodes in a group.
@@ -634,7 +665,18 @@ abstract class GNodeEditAccessTests extends GNodeWebTestBase {
 /**
  * Test for delete access control.
  */
-abstract class GNodeDeleteAccessTests extends GNodeWebTestBase {
+class GNodeDeleteAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode delete tests'),
+      'description' => t('Executes node delete test suite for gnode module.'),
+      'group' => t('Group'),
+    );
+  }
 
   /**
    * Test anonymous user's delete access to nodes in a group.
@@ -820,7 +862,18 @@ abstract class GNodeDeleteAccessTests extends GNodeWebTestBase {
 /**
  * Test for create access control.
  */
-abstract class GNodeCreateAccessTests extends GNodeWebTestBase {
+class GNodeCreateAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode create tests'),
+      'description' => t('Executes node create test suite for gnode module.'),
+      'group' => t('Group'),
+    );
+  }
 
   /**
    * Test anonymous user's create access to nodes in a group.
@@ -893,7 +946,18 @@ abstract class GNodeCreateAccessTests extends GNodeWebTestBase {
 /**
  * Test for bypass access control.
  */
-abstract class GNodeBypassAccessTests extends GNodeWebTestBase {
+class GNodeBypassAccessTests extends GNodeWebTestBase {
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Group gnode node bypass tests'),
+      'description' => t('Executes node access test suite when using bypass group access permissions for gnode module.'),
+      'group' => t('Group'),
+    );
+  }
 
   /**
    * Test anonymous user's access to nodes in a group when granted bypass group access.
@@ -965,397 +1029,6 @@ abstract class GNodeBypassAccessTests extends GNodeWebTestBase {
 }
 
 /**
- * This class runs all the tests in Safe mode.
- */
-class GNodeSafeModeViewTests extends GNodeViewAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode safe mode view tests'),
-      'description' => t('Executes node view test suite for gnode module in safe mode.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
-    node_access_rebuild();
-  }
-
-}
-
-/**
- * This class runs all the tests in Safe mode.
- */
-class GNodeSafeModeEditTests extends GNodeEditAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode safe mode edit tests'),
-      'description' => t('Executes node edit test suite for gnode module in safe mode.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
-    node_access_rebuild();
-  }
-
-}
-
-/**
- * This class runs all the tests in Safe mode.
- */
-class GNodeSafeModeDeleteTests extends GNodeDeleteAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode safe mode delete tests'),
-      'description' => t('Executes node delete test suite for gnode module in safe mode.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
-    node_access_rebuild();
-  }
-
-}
-
-/**
- * This class runs all the tests in Safe mode.
- */
-class GNodeSafeModeCreateTests extends GNodeCreateAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode safe mode create tests'),
-      'description' => t('Executes node create test suite for gnode module in safe mode.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
-    node_access_rebuild();
-  }
-
-}
-
-/**
- * This class runs all the tests in Safe mode.
- */
-class GNodeSafeModeBypassTests extends GNodeBypassAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode safe mode node bypass tests'),
-      'description' => t('Executes node access test suite when using bypass group access permissions for gnode module in safe mode.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
-    node_access_rebuild();
-  }
-
-}
-
-/**
- * This class runs all the tests in Compliance mode.
- */
-class GNodeComplianceModeViewTests extends GNodeViewAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode compliance mode node view tests'),
-      'description' => t('Executes node view test suite for gnode module in compliance mode.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
-    node_access_rebuild();
-    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
-  }
-}
-
-/**
- * This class runs all the tests in Compliance mode.
- */
-class GNodeComplianceModeEditTests extends GNodeEditAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode compliance mode node edit tests'),
-      'description' => t('Executes node edit test suite for gnode module in compliance mode.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
-    node_access_rebuild();
-    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
-  }
-}
-
-/**
- * This class runs all the tests in Compliance mode.
- */
-class GNodeComplianceModeDeleteTests extends GNodeDeleteAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode compliance mode node delete tests'),
-      'description' => t('Executes node delete test suite for gnode module in compliance mode.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
-    node_access_rebuild();
-    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
-  }
-}
-
-/**
- * This class runs all the tests in Compliance mode.
- */
-class GNodeComplianceModeCreateTests extends GNodeCreateAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode compliance mode node create tests'),
-      'description' => t('Executes node create test suite for gnode module in compliance mode.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
-    node_access_rebuild();
-    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
-  }
-}
-
-/**
- * This class runs all the tests in Compliance mode.
- */
-class GNodeComplianceModeBypassTests extends GNodeBypassAccessTests {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode compliance mode node access bypass tests'),
-      'description' => t('Executes node access test suite for gnode module in compliance mode with bypass group access permission set.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
-    node_access_rebuild();
-    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
-  }
-}
-
-/**
- * Test Group behaviour when another module is providing node grants.
- *
- * Node is in the group, user is not in the group.
- * Group permissions say this user should not be able to access any content in the group.
- * However, with the user permission, node test view, the node_access_test module
- * gives the user a grant for the domain this node is in and will allow them access.
- *
- * In compliance mode, the user should be able to access the node.
- */
-class GNodeComplianceModeViewWithAnotherModuleTests extends GNodeWebTestBase {
-
-  /**
-   * Drupal SimpleTest method: return metadata about the test.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Group gnode compliance mode node view tests with another module'),
-      'description' => t('Executes node view test suite for gnode module in compliance mode with another module providing additional node grants.'),
-      'group' => t('Group'),
-    );
-  }
-
-  /**
-   * Test setup instructions.
-   */
-  public function setUp() {
-    parent::setUp('node', 'node_access_test', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_COMPLIANCE_MODE');
-    node_access_rebuild();
-    $this->assert(count(module_implements('node_grants')) > 0, 'The number of modules which implement hook_node_grants is greater than 0.');
-  }
-
-  /**
-   * Test Group behaviour for anonymous when another module is providing node grants.
-   */
-  public function testAnonymousViewAccessWhenAnotherModuleSaysAccessIsOK() {
-    $role = user_role_load_by_name('anonymous user');
-    user_role_grant_permissions($role->rid, array('access content'));
-
-    $group_type = $this->createGroupType('example');
-    $group = $this->createGroup('example', 'example');
-    $node = $this->createNodeInGroup($group->gid);
-
-    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by anonymous without group view permissions nor other module grant');
-    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous without group view permissions but with other module grant');
-
-    $group_type->anonymous_permissions = array('view page node');
-    $group_type->save();
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous with view permissions and other module grant');
-    user_role_revoke_permissions($role->rid, array('node test view'));
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by anonymous with view permissions without other module grant');
-
-    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
-    $this->removeNodeFromGroup($node);
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by anonymous without group view permissions but with other module grant');
-    user_role_revoke_permissions($role->rid, array('node test view'));
-    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Node not in group is not accessible by anonymous without group view permissions and without other module grant');
-  }
-
-  /**
-   * Test Group behaviour for outsider when another module is providing node grants.
-   */
-  public function testOutsiderViewAccessWhenAnotherModuleSaysAccessIsOK() {
-    $group_type = $this->createGroupType('example');
-    $group = $this->createGroup('example', 'example');
-    $node = $this->createNodeInGroup($group->gid);
-
-    $web_user = $this->drupalCreateUser(array('access content'));
-    $role = user_role_load(reset($web_user->roles));
-    $this->drupalLogin($web_user);
-
-    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by outsider without group view permissions nor other module grant');
-    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider without group view permissions but with other module grant');
-
-    $group_type->outsider_permissions = array('view page node');
-    $group_type->save();
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with view permissions and other module grant');
-    user_role_revoke_permissions($role->rid, array('node test view'));
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with view permissions without other module grant');
-
-    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
-    $this->removeNodeFromGroup($node);
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by outsider without group view permissions but with other module grant');
-    user_role_revoke_permissions($role->rid, array('node test view'));
-    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Node not in group is not accessible by outsider without group view permissions and without other module grant');
-  }
-
-  /**
-   * Test Group behaviour for member when another module is providing node grants.
-   */
-  public function testMemberViewAccessWhenAnotherModuleSaysAccessIsOK() {
-    $group_type = $this->createGroupType('example');
-    $group = $this->createGroup('example', 'example');
-    $node = $this->createNodeInGroup($group->gid);
-
-    $web_user = $this->drupalCreateUser(array('access content'));
-    $role = user_role_load(reset($web_user->roles));
-    $group->addMember($web_user->uid);
-    $this->drupalLogin($web_user);
-
-    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without group view permissions nor other module grant');
-    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member without group view permissions but with other module grant');
-
-    $group_type->member_permissions = array('view page node');
-    $group_type->save();
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with view permissions and other module grant');
-    user_role_revoke_permissions($role->rid, array('node test view'));
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with view permissions without other module grant');
-
-    user_role_grant_permissions($role->rid, array('access content', 'node test view'));
-    $this->removeNodeFromGroup($node);
-    $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Node not in group is accessible by member without group view permissions but with other module grant');
-    user_role_revoke_permissions($role->rid, array('node test view'));
-    $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Node not in group is not accessible by member without group view permissions and without other module grant');
-  }
-}
-
-/**
  * Test Group behaviour when another module is providing node grants.
  *
  * Node is in the group, user is not in the group.
@@ -1372,8 +1045,8 @@ class GNodeSafeModeViewWithAnotherModuleTests extends GNodeWebTestBase {
    */
   public static function getInfo() {
     return array(
-      'name' => t('Group gnode safe mode node view tests with another module'),
-      'description' => t('Executes node access test suite when using bypass group access permissions for gnode module in safe mode.'),
+      'name' => t('Group gnode node view tests with another module'),
+      'description' => t('Executes node access test suite when using bypass group access permissions for gnode module.'),
       'group' => t('Group'),
     );
   }
@@ -1382,9 +1055,7 @@ class GNodeSafeModeViewWithAnotherModuleTests extends GNodeWebTestBase {
    * Test setup instructions.
    */
   public function setUp() {
-    parent::setUp('node', 'node_access_test', 'entity', 'group', 'gnode');
-    variable_set('group_node_mode', 'GROUP_NODE_SAFE_MODE');
-    node_access_rebuild();
+    parent::setUp('node_access_test');
   }
 
   /**
