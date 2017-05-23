@@ -156,19 +156,19 @@ function gnode_node_access_records($node) {
 
   // We can use the same grant-all base because we will only hand out the grants
   // based on the $op parameter in hook_node_grants().
-  $base = [
+  $base = array(
     'grant_view' => 1,
     'grant_update' => 1,
     'grant_delete' => 1,
     'priority' => 0,
-  ];
+  );
 
   // Add the non-author record for viewing nodes.
   $prefix = $node->status ? 'gnode' : 'gnode_unpublished';
-  $grants[] = [
+  $grants[] = array(
     'gid' => $node->group,
     'realm' => "$prefix:{$node->type}",
-  ] + $base;
+  ) + $base;
 
   // Add the author record for updating or deleting nodes.
   $grants[] = array(
