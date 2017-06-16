@@ -177,7 +177,7 @@ function gnode_node_access_records($node) {
   ) + $base;
 
   // Add the general access bypass record.
-  $records[] = array(
+  $grants[] = array(
     'gid' => GNODE_MASTER_GRANT_ID,
     'realm' => 'gnode_bypass',
   ) + $base;
