@@ -79,7 +79,7 @@ function hook_entity_info() {
  *     permission to trusted users. This should be used for permissions that
  *     have inherent security risks across a variety of potential use cases
  *     (for example, the "administer filters" and "bypass node access"
- *     permissions provided by Drupal core). When set to TRUE, a standard
+ *     permissions provided by Backdrop core). When set to TRUE, a standard
  *     warning message defined in user_admin_permissions() and output via
  *     theme_user_permission_description() will be associated with the
  *     permission and displayed with it on the permission administration page.

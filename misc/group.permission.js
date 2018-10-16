@@ -3,7 +3,7 @@
     /**
      * Shows checked and disabled checkboxes for inherited permissions.
      */
-    Drupal.behaviors.permissions = {
+    Backdrop.behaviors.permissions = {
         attach: function (context) {
             var self = this;
             $('table#group-permissions').once('permissions', function () {
@@ -27,7 +27,7 @@
                 // permission table would be polluted with redundant entries. This
                 // is deliberate, but desirable when we automatically check them.
                 var $dummy = $('<input type="checkbox" class="dummy-checkbox" disabled="disabled" checked="checked" />')
-                    .attr('title', Drupal.t("This permission is inherited from the member role."))
+                    .attr('title', Backdrop.t("This permission is inherited from the member role."))
                     .hide();
 
                 $('input[type=checkbox]', this).not('.rid-anonymous, .rid-outsider, .rid-member').addClass('real-checkbox').each(function () {

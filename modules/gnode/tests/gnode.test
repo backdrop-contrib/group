@@ -8,7 +8,7 @@
 /**
  * Base class provides a number of helper functions.
  */
-abstract class GNodeWebTestBase extends DrupalWebTestCase {
+abstract class GNodeWebTestBase extends BackdropWebTestCase {
 
   /**
    * Test setup instructions.
@@ -57,7 +57,7 @@ abstract class GNodeWebTestBase extends DrupalWebTestCase {
         throw new Exception('Invalid $op parameter passed to assertNodeOperationAccess: ' . $op);
     }
 
-    $this->drupalGet($url);
+    $this->backdropGet($url);
     $this->assertResponse($expected_response, $msg);
   }
 
@@ -70,7 +70,7 @@ abstract class GNodeWebTestBase extends DrupalWebTestCase {
    *   Assertion message.
    */
   public function assertNodesOnListingPage(array $expected_nids = array(), $message = 'Nodes listed on the node listing page are expected.') {
-    $this->drupalGet('node');
+    $this->backdropGet('node');
     $node_divs = $this->xpath("//div[contains(@class, 'node-promoted')]");
     $actual_nids = array();
 
@@ -182,7 +182,7 @@ abstract class GNodeWebTestBase extends DrupalWebTestCase {
    *   The node.
    */
   public function createNodeInGroup($gid, $node_type = 'page', $status = 1, $uid = 1) {
-    return $this->drupalCreateNode(
+    return $this->backdropCreateNode(
       array(
         'type' => $node_type,
         'uid' => $uid,
@@ -212,7 +212,7 @@ abstract class GNodeWebTestBase extends DrupalWebTestCase {
 class GNodeViewAccessTests extends GNodeWebTestBase {
 
   /**
-   * Drupal SimpleTest method: return metadata about the test.
+   * Backdrop SimpleTest method: return metadata about the test.
    */
   public static function getInfo() {
     return array(
@@ -259,8 +259,8 @@ class GNodeViewAccessTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by outsider without view permissions.');
     $this->assertNodesOnListingPage(array(), 'Node in group is not visible on listing pages to outsider without view permissions.');
 
@@ -287,10 +287,10 @@ class GNodeViewAccessTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
     $group->addMember($web_user->uid);
 
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without view permissions.');
     $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to member without view permissions.');
 
@@ -319,7 +319,7 @@ class GNodeViewAccessTests extends GNodeWebTestBase {
     $group_role = $this->createRole('example_role', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
     $role_details = array(
       'roles' => array('example_role'),
@@ -329,7 +329,7 @@ class GNodeViewAccessTests extends GNodeWebTestBase {
 
     $group->addMember($web_user->uid, $role_details);
 
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without view permissions on group role.');
     $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to member without view permissions on group role.');
 
@@ -357,7 +357,7 @@ class GNodeViewAccessTests extends GNodeWebTestBase {
     $group_role = $this->createRole('example_role');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
     $role_details = array(
       'roles' => array('example_role'),
@@ -367,7 +367,7 @@ class GNodeViewAccessTests extends GNodeWebTestBase {
 
     $group->addMember($web_user->uid, $role_details);
 
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without view permissions on a global role.');
     $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to member without view permissions on a global role.');
 
@@ -396,9 +396,9 @@ class GNodeViewAccessTests extends GNodeWebTestBase {
     $group_local_role = $this->createRole('example_local_role', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by outsider without view permissions');
     $this->assertNodesOnListingPage(array(), 'Group node is not visible on listing pages to outsider without view permissions.');
 
@@ -474,7 +474,7 @@ class GNodeViewAccessTests extends GNodeWebTestBase {
 class GNodeEditAccessTests extends GNodeWebTestBase {
 
   /**
-   * Drupal SimpleTest method: return metadata about the test.
+   * Backdrop SimpleTest method: return metadata about the test.
    */
   public static function getInfo() {
     return array(
@@ -518,8 +518,8 @@ class GNodeEditAccessTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($web_user);
 
     $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node is not editable by outsider without update any page node permissions');
 
@@ -552,10 +552,10 @@ class GNodeEditAccessTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
     $group->addMember($web_user->uid);
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node is not editable by member without update any page node permissions');
 
     $group_type->member_permissions = array('update any page node');
@@ -588,7 +588,7 @@ class GNodeEditAccessTests extends GNodeWebTestBase {
     $group_role = $this->createRole('example_role', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
     $role_details = array(
       'roles' => array('example_role'),
@@ -597,7 +597,7 @@ class GNodeEditAccessTests extends GNodeWebTestBase {
     );
 
     $group->addMember($web_user->uid, $role_details);
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node is not editable by member granted a group role without update any page node permissions');
 
     $group_role->grantPermissions(array('update any page node'));
@@ -629,7 +629,7 @@ class GNodeEditAccessTests extends GNodeWebTestBase {
     $global_role = $this->createRole('example_role');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
     $role_details = array(
       'roles' => array('example_role'),
@@ -638,7 +638,7 @@ class GNodeEditAccessTests extends GNodeWebTestBase {
     );
 
     $group->addMember($web_user->uid, $role_details);
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'edit', 403, 'Group node is not editable by member granted a global role without update any page node permissions');
 
     $global_role->grantPermissions(array('update any page node'));
@@ -668,7 +668,7 @@ class GNodeEditAccessTests extends GNodeWebTestBase {
 class GNodeDeleteAccessTests extends GNodeWebTestBase {
 
   /**
-   * Drupal SimpleTest method: return metadata about the test.
+   * Backdrop SimpleTest method: return metadata about the test.
    */
   public static function getInfo() {
     return array(
@@ -713,8 +713,8 @@ class GNodeDeleteAccessTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($web_user);
 
     $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node is not deletable by outsider without delete any page node permissions');
 
@@ -747,11 +747,11 @@ class GNodeDeleteAccessTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
     $group->addMember($web_user->uid);
 
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
 
     $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node is not deletable by member without delete any page node permissions');
 
@@ -785,7 +785,7 @@ class GNodeDeleteAccessTests extends GNodeWebTestBase {
     $group_role = $this->createRole('example_role', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
     $role_details = array(
       'roles' => array('example_role'),
@@ -794,7 +794,7 @@ class GNodeDeleteAccessTests extends GNodeWebTestBase {
     );
 
     $group->addMember($web_user->uid, $role_details);
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node is not deletable by member granted a group role without delete any page node permissions');
 
     $group_role->grantPermissions(array('delete any page node'));
@@ -826,7 +826,7 @@ class GNodeDeleteAccessTests extends GNodeWebTestBase {
     $global_role = $this->createRole('example_role');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
     $role_details = array(
       'roles' => array('example_role'),
@@ -835,7 +835,7 @@ class GNodeDeleteAccessTests extends GNodeWebTestBase {
     );
 
     $group->addMember($web_user->uid, $role_details);
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess($node->nid, 'delete', 403, 'Group node is not deletable by member granted a global role without delete any page node permissions');
 
     $global_role->grantPermissions(array('delete any page node'));
@@ -865,7 +865,7 @@ class GNodeDeleteAccessTests extends GNodeWebTestBase {
 class GNodeCreateAccessTests extends GNodeWebTestBase {
 
   /**
-   * Drupal SimpleTest method: return metadata about the test.
+   * Backdrop SimpleTest method: return metadata about the test.
    */
   public static function getInfo() {
     return array(
@@ -905,8 +905,8 @@ class GNodeCreateAccessTests extends GNodeWebTestBase {
     $group_type = $this->createGroupType('example');
     $group = $this->createGroup('example', 'example');
 
-    $web_user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess('page', 'create', 403, 'Page nodes cannot be created by outsider without create page node permission');
 
     $group_type->outsider_permissions = array('create page node');
@@ -926,10 +926,10 @@ class GNodeCreateAccessTests extends GNodeWebTestBase {
     $group_type = $this->createGroupType('example');
     $group = $this->createGroup('example', 'example');
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
 
     $group->addMember($web_user->uid);
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
     $this->assertNodeOperationAccess('page', 'create', 403, 'Page nodes cannot be created by member without create page node permission');
 
     $group_type->member_permissions = array('create page node');
@@ -949,7 +949,7 @@ class GNodeCreateAccessTests extends GNodeWebTestBase {
 class GNodeBypassAccessTests extends GNodeWebTestBase {
 
   /**
-   * Drupal SimpleTest method: return metadata about the test.
+   * Backdrop SimpleTest method: return metadata about the test.
    */
   public static function getInfo() {
     return array(
@@ -990,8 +990,8 @@ class GNodeBypassAccessTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content', 'bypass group access'));
-    $this->drupalLogin($web_user);
+    $web_user = $this->backdropCreateUser(array('access content', 'bypass group access'));
+    $this->backdropLogin($web_user);
 
     $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by outsider with bypass group access user permissions');
     $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by outsider with bypass group access user permissions');
@@ -1011,9 +1011,9 @@ class GNodeBypassAccessTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content', 'bypass group access'));
+    $web_user = $this->backdropCreateUser(array('access content', 'bypass group access'));
     $group->addMember($web_user->uid);
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
 
     $this->assertNodeOperationAccess($node->nid, 'view', 200, 'Group node is accessible by member with bypass group access user permissions');
     $this->assertNodeOperationAccess($node->nid, 'edit', 200, 'Group node is editable by member with bypass group access user permissions');
@@ -1041,7 +1041,7 @@ class GNodeBypassAccessTests extends GNodeWebTestBase {
 class GNodeSafeModeViewWithAnotherModuleTests extends GNodeWebTestBase {
 
   /**
-   * Drupal SimpleTest method: return metadata about the test.
+   * Backdrop SimpleTest method: return metadata about the test.
    */
   public static function getInfo() {
     return array(
@@ -1094,9 +1094,9 @@ class GNodeSafeModeViewWithAnotherModuleTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
     $role = user_role_load(reset($web_user->roles));
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
 
     $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by outsider without group view permissions nor other module grant');
     user_role_grant_permissions($role->rid, array('access content', 'node test view'));
@@ -1123,10 +1123,10 @@ class GNodeSafeModeViewWithAnotherModuleTests extends GNodeWebTestBase {
     $group = $this->createGroup('example', 'example');
     $node = $this->createNodeInGroup($group->gid);
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->backdropCreateUser(array('access content'));
     $role = user_role_load(reset($web_user->roles));
     $group->addMember($web_user->uid);
-    $this->drupalLogin($web_user);
+    $this->backdropLogin($web_user);
 
     $this->assertNodeOperationAccess($node->nid, 'view', 403, 'Group node is not accessible by member without group view permissions nor other module grant');
     user_role_grant_permissions($role->rid, array('access content', 'node test view'));
