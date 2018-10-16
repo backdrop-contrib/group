@@ -480,8 +480,6 @@ function group_update_last_removed() {
  */
 function group_update_1000() {
   $config = config('group.settings');
-  $config->set('group_default_roles', update_variable_get('group_default_roles', 'novalue'));
   $config->set('group_admin_theme', update_variable_get('group_admin_theme', 'novalue'));
-  update_variable_del('group_default_roles');
   update_variable_del('group_admin_theme');
 }

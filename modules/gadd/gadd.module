@@ -59,7 +59,7 @@ function gadd_entity_property_info_alter(&$info) {
  */
 function gadd_admin_paths() {
   // TODO This variable was probably removed in Backdrop without replacement.
-  if (variable_get('group_admin_theme')) {
+  if (config_get('group.settings', 'group_admin_theme')) {
     $paths = array(
       'group/*/add' => TRUE,
     );

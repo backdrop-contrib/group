@@ -1,5 +1,4 @@
 {
     "_config_name": "group.settings",
-    "group_default_roles": "novalue",
-    "group_admin_theme": "novalue"
+    "group_admin_theme": "0"
 }

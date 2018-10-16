@@ -8,7 +8,6 @@
  * Implements hook_PLUGIN_page_manager_tasks().
  */
 function group_group_view_page_manager_tasks() {
-  // TODO This variable was probably removed in Backdrop without replacement.
   return array(
     'task type' => 'page',
     'title' => t('Group template'),
@@ -18,7 +17,7 @@ function group_group_view_page_manager_tasks() {
     'hook menu alter' => 'group_group_view_menu_alter',
     'handler type' => 'context',
     'get arguments' => 'group_group_view_get_arguments',
-    'disabled' => variable_get('group_pm_group_view_disabled', TRUE),
+    'disabled' => config_get('group.settings', 'group_pm_group_view_disabled'),
     'enable callback' => 'group_group_view_enable',
     'access callback' => 'group_group_view_access_check',
   );
@@ -31,15 +30,14 @@ function group_group_view_page_manager_tasks() {
  * @see hook_menu_alter()
  */
 function group_group_view_menu_alter(&$items, $task) {
-  // TODO This variable was probably removed in Backdrop without replacement.
-  if (variable_get('group_pm_group_view_disabled', TRUE)) {
+  $config = config('group.settings');
+  if ($config->get('group_pm_group_view_disabled')) {
     return;
   }
 
   // Override the group view handler for our purpose.
   $callback = $items['group/%group']['page callback'];
-  // TODO This variable was probably removed in Backdrop without replacement.
-  if ($callback == 'group_page' || variable_get('page_manager_override_anyway', FALSE)) {
+  if ($callback == 'group_page' || $config->get('page_manager_override_anyway')) {
     $items['group/%group']['page callback'] = 'group_group_view_page';
     $items['group/%group']['file path'] = $task['path'];
     $items['group/%group']['file'] = $task['file'];
@@ -47,7 +45,7 @@ function group_group_view_menu_alter(&$items, $task) {
   else {
     // automatically disable this task if it cannot be enabled.
     // TODO This variable was probably removed in Backdrop without replacement.
-    variable_set('group_pm_group_view_disabled', TRUE);
+    $config->set('group_pm_group_view_disabled', TRUE);
     if (!empty($GLOBALS['group_pm_enabling_group_view'])) {
       backdrop_set_message(t('Page manager module is unable to enable group/%group because some other module already has overridden with %callback.', array('%callback' => $callback)), 'error');
     }
@@ -145,8 +143,7 @@ function group_group_view_get_arguments($task, $subtask_id) {
  * @see group_group_view_page_manager_tasks()
  */
 function group_group_view_enable($cache, $disabled) {
-  // TODO This variable was probably removed in Backdrop without replacement.
-  variable_set('group_pm_group_view_disabled', $disabled);
+  config_set('group.settings', 'group_pm_group_view_disabled', $disabled);
 
   // Track the status so group_group_view_menu_alter() can throw an error when
   // it cannot swap out the group view page with this task plugin.
