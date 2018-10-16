@@ -115,7 +115,7 @@ function ginvite_user_is_invited(Group $group, $account, $group_membership) {
 function ginvite_user_accept(Group $group, $account, $group_membership) {
   $group_membership->status = 'active';
   $group_membership->save();
-  drupal_set_message(t('You have accepted the group invitation.'));
+  backdrop_set_message(t('You have accepted the group invitation.'));
 }
 
 /**
@@ -130,5 +130,5 @@ function ginvite_user_accept(Group $group, $account, $group_membership) {
  */
 function ginvite_user_decline(Group $group, $account, $group_membership) {
   $group_membership->delete();
-  drupal_set_message(t('You have declined the group invitation.'));
+  backdrop_set_message(t('You have declined the group invitation.'));
 }

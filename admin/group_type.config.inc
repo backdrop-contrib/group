@@ -12,7 +12,7 @@
 function group_type_config_form($form, &$form_state, GroupType $group_type) {
   // Load the saved configuration.
   $defaults = isset($group_type->config['creator_roles'])
-    ? drupal_map_assoc($group_type->config['creator_roles'])
+    ? backdrop_map_assoc($group_type->config['creator_roles'])
     : array();
 
   // Get the available group roles for this group type.

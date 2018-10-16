@@ -12,7 +12,7 @@ require_once 'ginvite.router.inc';
 /**
  * Implements hook_schema_alter().
  *
- * Informs Drupal of the changes we made to {group_membership}.
+ * Informs Backdrop of the changes we made to {group_membership}.
  */
 function ginvite_schema_alter(&$schema) {
   // Include the install file for its helper functions.
@@ -32,7 +32,7 @@ function ginvite_schema_alter(&$schema) {
 /**
  * Implements hook_entity_property_info_alter().
  *
- * Informs Drupal of the changes we made to {group_membership}.
+ * Informs Backdrop of the changes we made to {group_membership}.
  */
 function ginvite_entity_property_info_alter(&$info) {
   $properties = &$info['group_membership']['properties'];
@@ -81,7 +81,7 @@ function ginvite_init() {
     if (GroupMembership::getByStatus($user->uid, 'invited')) {
       $message = 'You have pending group invitations. <a href="@url">Visit your profile</a> to see them.';
       $replace = array('@url' => url("user/$user->uid/group/invite"));
-      drupal_set_message(t($message, $replace), 'warning', FALSE);
+      backdrop_set_message(t($message, $replace), 'warning', FALSE);
     }
   }
 }
@@ -186,9 +186,9 @@ function ginvite_mail($key, &$message, $params) {
     $body_message .= 'Kind regards,' . "\n";
     $body_message .= 'The @site team';
     $body_replace = array(
-      '@user' => format_username($params['user']),
+      '@user' => user_format_name($params['user']),
       '@group' => $params['group']->title,
-      '@site' => variable_get('site_name', 'Drupal'),
+      '@site' => config_get('system.performance', 'site_name'),
       '@url' => url('user/register', array('absolute' => TRUE)),
     );
 
@@ -201,6 +201,7 @@ function ginvite_mail($key, &$message, $params) {
  * Implements hook_admin_paths().
  */
 function ginvite_admin_paths() {
+  // TODO This variable was probably removed in Backdrop without replacement.
   if (variable_get('group_admin_theme')) {
     $paths = array(
       'group/*/invite' => TRUE,

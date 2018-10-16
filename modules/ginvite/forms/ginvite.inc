@@ -93,7 +93,7 @@ function ginvite_by_user_form_submit($form, &$form_state) {
   );
 
   $form_state['build_info']['args'][0]->addMember($form_state['values']['uid'], $values);
-  drupal_set_message(t('Invite sent to %user', array('%user' => $form_state['values']['user'])));
+  backdrop_set_message(t('Invite sent to %user', array('%user' => $form_state['values']['user'])));
 }
 
 /**
@@ -144,7 +144,7 @@ function ginvite_by_mail_form_validate($form, &$form_state) {
     // If nothing fails, set the required values for an invite by user.
     else {
       $form_state['values']['uid'] = $account->uid;
-      $form_state['values']['user'] = format_username($account);
+      $form_state['values']['user'] = user_format_name($account);
     }
   }
 
@@ -172,7 +172,7 @@ function ginvite_by_mail_form_submit($form, &$form_state) {
   // If the e-mail was already registered, send a user invite instead.
   if (!empty($form_state['values']['uid'])) {
     $message = 'There already is a user account for %email. Sending a regular invite instead.';
-    drupal_set_message(t($message, array('%email' => $mail)), 'warning');
+    backdrop_set_message(t($message, array('%email' => $mail)), 'warning');
 
     ginvite_by_user_form_submit($form, $form_state);
   }
@@ -185,19 +185,22 @@ function ginvite_by_mail_form_submit($form, &$form_state) {
     // Insert the invite record into the database.
     db_insert('group_invite')
       ->fields(array(
-        'gid' => $form_state['build_info']['args'][0]->gid,
-        'roles' => serialize(array_values(array_filter($form_state['values']['roles']))),
-        'mail' => $mail,
-        'invited_on' => REQUEST_TIME,
-        'invited_by' => $user->uid,
-      ))
+      'gid' => $form_state['build_info']['args'][0]->gid,
+      'roles' => serialize(array_values(array_filter($form_state['values']['roles']))),
+      'mail' => $mail,
+      'invited_on' => REQUEST_TIME,
+      'invited_by' => $user->uid,
+    ))
       ->execute();
 
     // Actually e-mail the invite to the person.
-    $params = array('user' => $user, 'group' => $group);
-    drupal_mail('ginvite', 'invite', $mail, $language, $params);
+    $params = array(
+      'user' => $user,
+      'group' => $group,
+    );
+    backdrop_mail('ginvite', 'invite', $mail, $language, $params);
 
     // Show a confirmation message.
-    drupal_set_message(t('Invite sent to %mail', array('%mail' => $mail)));
+    backdrop_set_message(t('Invite sent to %mail', array('%mail' => $mail)));
   }
 }

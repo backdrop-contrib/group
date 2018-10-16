@@ -8,11 +8,12 @@
  * Implements hook_PLUGIN_page_manager_tasks().
  */
 function group_group_view_page_manager_tasks() {
+  // TODO This variable was probably removed in Backdrop without replacement.
   return array(
     'task type' => 'page',
     'title' => t('Group template'),
     'admin title' => t('Group template'),
-    'admin description' => t('When enabled, this overrides the default Drupal behavior for displaying groups at <em>group/%group</em>. If you add variants, you may use selection criteria such as group type or language or user access to provide different views of groups. If no variant is selected, the default Group view will be used. This page only affects groups viewed as pages, it will not affect groups viewed in lists or at other locations. Also please note that if you are using pathauto, aliases may make a group to be somewhere else, but as far as Drupal is concerned, they are still at group/%group.'),
+    'admin description' => t('When enabled, this overrides the default Backdrop behavior for displaying groups at <em>group/%group</em>. If you add variants, you may use selection criteria such as group type or language or user access to provide different views of groups. If no variant is selected, the default Group view will be used. This page only affects groups viewed as pages, it will not affect groups viewed in lists or at other locations. Also please note that if you are using pathauto, aliases may make a group to be somewhere else, but as far as Backdrop is concerned, they are still at group/%group.'),
     'admin path' => 'group/%group',
     'hook menu alter' => 'group_group_view_menu_alter',
     'handler type' => 'context',
@@ -30,12 +31,14 @@ function group_group_view_page_manager_tasks() {
  * @see hook_menu_alter()
  */
 function group_group_view_menu_alter(&$items, $task) {
+  // TODO This variable was probably removed in Backdrop without replacement.
   if (variable_get('group_pm_group_view_disabled', TRUE)) {
     return;
   }
 
   // Override the group view handler for our purpose.
   $callback = $items['group/%group']['page callback'];
+  // TODO This variable was probably removed in Backdrop without replacement.
   if ($callback == 'group_page' || variable_get('page_manager_override_anyway', FALSE)) {
     $items['group/%group']['page callback'] = 'group_group_view_page';
     $items['group/%group']['file path'] = $task['path'];
@@ -43,9 +46,10 @@ function group_group_view_menu_alter(&$items, $task) {
   }
   else {
     // automatically disable this task if it cannot be enabled.
+    // TODO This variable was probably removed in Backdrop without replacement.
     variable_set('group_pm_group_view_disabled', TRUE);
     if (!empty($GLOBALS['group_pm_enabling_group_view'])) {
-      drupal_set_message(t('Page manager module is unable to enable group/%group because some other module already has overridden with %callback.', array('%callback' => $callback)), 'error');
+      backdrop_set_message(t('Page manager module is unable to enable group/%group because some other module already has overridden with %callback.', array('%callback' => $callback)), 'error');
     }
   }
 }
@@ -61,7 +65,7 @@ function group_group_view_menu_alter(&$items, $task) {
  *   The group object.
  *
  * @return array
- *   A render array suitable for use by drupal_render().
+ *   A render array suitable for use by backdrop_render().
  *
  * @see group_group_view_menu_alter()
  */
@@ -109,10 +113,10 @@ function group_group_view_page($group) {
   // Set the page title and canonical and shortlink head links. Copied verbatim
   // from group_page(). See that function for a more documented version.
   if ($set_head) {
-    drupal_set_title($group->label());
+    backdrop_set_title($group->label());
     $uri = entity_uri('group', $group);
-    drupal_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
-    drupal_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
+    backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
+    backdrop_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
   }
 
   return $output;
@@ -141,6 +145,7 @@ function group_group_view_get_arguments($task, $subtask_id) {
  * @see group_group_view_page_manager_tasks()
  */
 function group_group_view_enable($cache, $disabled) {
+  // TODO This variable was probably removed in Backdrop without replacement.
   variable_set('group_pm_group_view_disabled', $disabled);
 
   // Track the status so group_group_view_menu_alter() can throw an error when

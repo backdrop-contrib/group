@@ -175,7 +175,7 @@ function group_permissions() {
  * @see hook_group_membership_status_info()
  */
 function group_membership_status_info() {
-  $info = &drupal_static(__FUNCTION__);
+  $info = &backdrop_static(__FUNCTION__);
 
   if (!isset($info)) {
     $info = module_invoke_all('group_membership_status_info');
@@ -211,7 +211,7 @@ function group_membership_status_types() {
  * @see hook_group_membership_action_info()
  */
 function group_membership_action_info() {
-  $info = &drupal_static(__FUNCTION__);
+  $info = &backdrop_static(__FUNCTION__);
 
   if (!isset($info)) {
     $info = module_invoke_all('group_membership_action_info');
@@ -230,7 +230,7 @@ function group_membership_action_info() {
  * @see hook_group_membership_profile_info()
  */
 function group_membership_profile_info() {
-  $profiles = &drupal_static(__FUNCTION__);
+  $profiles = &backdrop_static(__FUNCTION__);
 
   if (!isset($profiles)) {
     $info = entity_get_info('group_membership');

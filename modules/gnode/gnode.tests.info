@@ -1,0 +1,42 @@
+[GNodeWebTestBase]
+name = GNodeWebTestBase
+description = GNodeWebTestBase
+group = gnode
+file = tests/gnode.test
+
+[GNodeViewAccessTests]
+name = Group gnode view tests
+description = Executes node view test suite for gnode module.
+group = Group
+file = tests/gnode.test
+
+[GNodeEditAccessTests]
+name = Group gnode edit tests
+description = Executes node edit test suite for gnode module.
+group = Group
+file = tests/gnode.test
+
+[GNodeDeleteAccessTests]
+name = Group gnode delete tests
+description = Executes node delete test suite for gnode module.
+group = Group
+file = tests/gnode.test
+
+[GNodeCreateAccessTests]
+name = Group gnode create tests
+description = Executes node create test suite for gnode module.
+group = Group
+file = tests/gnode.test
+
+[GNodeBypassAccessTests]
+name = Group gnode node bypass tests
+description = Executes node access test suite when using bypass group access permissions for gnode module.
+group = Group
+file = tests/gnode.test
+
+[GNodeSafeModeViewWithAnotherModuleTests]
+name = Group gnode node view tests with another module
+description = Executes node access test suite when using bypass group access permissions for gnode module.
+group = Group
+file = tests/gnode.test
+

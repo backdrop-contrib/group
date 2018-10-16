@@ -68,7 +68,7 @@ function node_group_permission() {
  * Implements hook_admin_paths().
  */
 function gnode_admin_paths() {
-  if (variable_get('node_admin_theme')) {
+  if (config_get('system.performance', 'node_admin_theme')) {
     return array('group/*/node/add/*' => TRUE);
   }
 }
@@ -151,7 +151,7 @@ function gnode_group_node_create_access($type, $account = NULL) {
   // results of hook_node_access(). This can be useful if you need to figure
   // out whether a user had node creation rights before Group Node decided
   // to allow such action.
-  $skip = &drupal_static(__FUNCTION__, FALSE);
+  $skip = &backdrop_static(__FUNCTION__, FALSE);
 
   if ($skip) {
     return FALSE;
@@ -229,12 +229,12 @@ function gnode_global_node_create_access($type, $account = NULL) {
   // In order to figure out whether the user can create nodes outside of a
   // group, we first have to delete the cached node_access entry for this node
   // type.
-  $rights = &drupal_static('node_access', array());
+  $rights = &backdrop_static('node_access', array());
   unset($rights[$account->uid][$type]['create']);
 
   // Then we flag gnode_group_node_create_access() to not interfere with the
   // results of node_access() and run the latter to get the result we want.
-  $skip = &drupal_static('gnode_group_node_create_access');
+  $skip = &backdrop_static('gnode_group_node_create_access');
   $skip = TRUE;
   $return = node_access('create', $type);
 
@@ -276,8 +276,11 @@ function gnode_node_add(Group $group, $node_type) {
 
   // Set the page title to something different than the local action title.
   $message = 'Create @name in @group';
-  $replace = array('@name' => $types[$node_type]->name, '@group' => $group->label());
-  drupal_set_title(t($message, $replace), PASS_THROUGH);
+  $replace = array(
+    '@name' => $types[$node_type]->name,
+    '@group' => $group->label(),
+  );
+  backdrop_set_title(t($message, $replace), PASS_THROUGH);
 
   // Build the arguments to set in the form state. We ensure any extra URL
   // parameters will be passed on to the form builder as well. For instance:
@@ -294,7 +297,7 @@ function gnode_node_add(Group $group, $node_type) {
   form_load_include($form_state, 'inc', 'node', 'node.pages');
 
   // Finally we build the form with our customized form state.
-  return drupal_build_form($node_type . '_node_form', $form_state);
+  return backdrop_build_form($node_type . '_node_form', $form_state);
 }
 
 /**
@@ -349,7 +352,7 @@ function gnode_form_node_form_alter(&$form, $form_state) {
       'class' => array('node-form-group-information'),
     ),
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'gnode') . '/misc/gnode.js'),
+      'js' => array(backdrop_get_path('module', 'gnode') . '/misc/gnode.js'),
     ),
     '#tree' => TRUE,
     '#weight' => -50,
@@ -445,4 +448,12 @@ function gnode_node_submit($node, $form, &$form_state) {
   elseif (isset($node->group)) {
     unset($node->group);
   }
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function gnode_autoload_info() {
+  return array(
+  );
 }

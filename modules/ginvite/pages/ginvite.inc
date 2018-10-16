@@ -91,8 +91,8 @@ function ginvite_accept_callback($account, Group $group) {
   $group_membership->status = 'active';
   $group_membership->save();
 
-  drupal_set_message(t('You have accepted the group invitation.'));
-  drupal_goto("user/$account->uid/group/invite");
+  backdrop_set_message(t('You have accepted the group invitation.'));
+  backdrop_goto("user/$account->uid/group/invite");
 }
 
 /**
@@ -104,6 +104,6 @@ function ginvite_decline_callback($account, Group $group) {
   $group_membership = $group->getMember($account->uid);
   $group_membership->delete();
 
-  drupal_set_message(t('You have declined the group invitation.'));
-  drupal_goto("user/$account->uid/group/invite");
+  backdrop_set_message(t('You have declined the group invitation.'));
+  backdrop_goto("user/$account->uid/group/invite");
 }

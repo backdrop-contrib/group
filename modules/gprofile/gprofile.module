@@ -101,3 +101,16 @@ function gprofile_group_membership_submit(&$form, &$form_state) {
     $gprofile->save();
   }
 }
+
+/**
+ * Implements hook_autoload_info().
+ */
+function gprofile_autoload_info() {
+  return array(
+    'GProfileExtraFieldsController' => 'classes/gprofile.extra_fields_controller.inc',
+    'GProfile' => 'classes/gprofile.inc',
+    'GProfileTypeController' => 'classes/gprofile_type.controller.inc',
+    'GProfileType' => 'classes/gprofile_type.inc',
+    'GProfileTypeUIController' => 'classes/gprofile_type.ui_controller.inc',
+  );
+}

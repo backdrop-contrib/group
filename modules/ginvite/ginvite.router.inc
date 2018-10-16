@@ -10,7 +10,7 @@
 function ginvite_menu() {
   $items['group/%group/invite'] = array(
     'title' => 'Invite member',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('ginvite_by_user_form', 1),
     'access callback' => 'group_access',
     'access arguments' => array('invite members by user', 1),
@@ -27,7 +27,7 @@ function ginvite_menu() {
 
   $items['group/%group/invite/mail'] = array(
     'title' => 'By e-mail',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('ginvite_by_mail_form', 1),
     'access callback' => 'group_access',
     'access arguments' => array('invite members by mail', 1),
@@ -38,7 +38,7 @@ function ginvite_menu() {
 
   $items['group/%group/invite/mail/%/edit'] = array(
     'title' => 'Edit invitation',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('ginvite_by_mail_edit_form', 1, 4),
     'access callback' => 'group_access',
     'access arguments' => array('manage mail invitations', 1),
@@ -48,7 +48,7 @@ function ginvite_menu() {
 
   $items['group/%group/invite/mail/%/delete'] = array(
     'title' => 'Delete invitation',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('ginvite_by_mail_delete_form', 1, 4),
     'access callback' => 'group_access',
     'access arguments' => array('manage mail invitations', 1),
@@ -112,5 +112,5 @@ function ginvite_user_page_title($account) {
     return t('My invites');
   }
 
-  return t("@user's invites", array('@user' => format_username($account)));
+  return t("@user's invites", array('@user' => user_format_name($account)));
 }

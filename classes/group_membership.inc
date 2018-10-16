@@ -15,7 +15,7 @@ class GroupMembership extends Entity {
   protected function defaultLabel() {
     $message = 'Member %account in %group';
     $replace = array(
-      '%account' => format_username(user_load($this->uid)),
+      '%account' => user_format_name(user_load($this->uid)),
       '%group' => group_load($this->gid)->label(),
     );
 
@@ -26,7 +26,7 @@ class GroupMembership extends Entity {
    * Specifies the default uri, which is picked up by uri() by default.
    */
   protected function defaultURI() {
-    return array('path' => "group/$this->gid/member/$this->uid" );
+    return array('path' => "group/$this->gid/member/$this->uid");
   }
 
   /**

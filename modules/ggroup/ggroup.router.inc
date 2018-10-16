@@ -22,7 +22,7 @@ function ggroup_menu() {
   $items['admin/group/type/manage/%group_type/config/subgroup'] = array(
     'title' => 'Subgroups',
     'description' => 'Configuration regarding subgroups.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('ggroup_config_form', 4),
     'access callback' => 'user_access',
     'access arguments' => array('configure group module'),

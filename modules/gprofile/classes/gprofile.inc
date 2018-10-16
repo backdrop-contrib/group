@@ -18,7 +18,7 @@ class GProfile extends Entity {
     $message = '%profile profile for %member in %group';
     $replace = array(
       '%profile' => gprofile_type_load($this->type)->label(),
-      '%member' => format_username(user_load($group_membership->uid)),
+      '%member' => user_format_name(user_load($group_membership->uid)),
       '%group' => group_load($group_membership->gid)->label(),
     );
 

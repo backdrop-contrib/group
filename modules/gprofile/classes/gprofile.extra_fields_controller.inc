@@ -17,7 +17,7 @@ class GProfileExtraFieldsController extends EntityDefaultExtraFieldsController {
 
     foreach (gprofile_types() as $name => $gprofile_type) {
       // Get the redirect link for the edit and delete action.
-      $options = array('query' => drupal_get_destination());
+      $options = array('query' => backdrop_get_destination());
 
       // Add an extra field and display for every member profile.
       foreach (array('form', 'display') as $context) {

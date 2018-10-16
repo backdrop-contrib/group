@@ -53,7 +53,7 @@ function group_autocomplete_by_type(GroupType $group_type = NULL, $search = '') 
     }
   }
 
-  drupal_json_output($matches);
+  backdrop_json_output($matches);
 }
 
 /**
@@ -67,7 +67,7 @@ function group_add_page() {
 
   if (count($content) == 1) {
     $item = array_shift($content);
-    drupal_goto($item['href']);
+    backdrop_goto($item['href']);
   }
 
   if ($content) {
@@ -93,13 +93,13 @@ function group_add_page() {
  *   The group object.
  *
  * @return array
- *   A render array suitable for use by drupal_render().
+ *   A render array suitable for use by backdrop_render().
  */
 function group_page(Group $group) {
   // If there is a menu link to this group, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the group title.
-  drupal_set_title($group->label());
+  backdrop_set_title($group->label());
 
   // Retrieve the URI for the group.
   $uri = entity_uri('group', $group);
@@ -109,14 +109,14 @@ function group_page(Group $group) {
     'rel' => 'canonical',
     'href' => url($uri['path'], $uri['options']),
   );
-  drupal_add_html_head_link($attributes, TRUE);
+  backdrop_add_html_head_link($attributes, TRUE);
 
   // Set the non-aliased path as a default shortlink.
   $attributes = array(
     'rel' => 'shortlink',
     'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE))),
   );
-  drupal_add_html_head_link($attributes, TRUE);
+  backdrop_add_html_head_link($attributes, TRUE);
 
   return $group->view('full', NULL, TRUE);
 }

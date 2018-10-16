@@ -17,7 +17,7 @@ class GroupUIController extends EntityDefaultUIController {
     $items[$this->path] = array(
       'title' => 'Groups',
       'description' => 'Find and manage groups.',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_overview_form', 'group'),
       'access arguments' => array('access group overview'),
       'file' => 'includes/entity.ui.inc',
@@ -37,7 +37,7 @@ class GroupUIController extends EntityDefaultUIController {
       // TRUE because of individual 'view' access checks on every group.
       'access callback' => TRUE,
       'file' => 'pages/group.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_CALLBACK,
     );
 
@@ -48,7 +48,7 @@ class GroupUIController extends EntityDefaultUIController {
       // TRUE because of individual 'view' access checks on every group.
       'access callback' => TRUE,
       'file' => 'pages/group.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_CALLBACK,
     );
 
@@ -57,7 +57,7 @@ class GroupUIController extends EntityDefaultUIController {
       'page callback' => 'group_add_page',
       'access callback' => '_group_add_access',
       'file' => 'pages/group.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
     );
 
     foreach (group_types() as $name => $group_type) {
@@ -71,7 +71,7 @@ class GroupUIController extends EntityDefaultUIController {
         'access callback' => 'entity_access',
         'access arguments' => array('create', 'group', $group),
         'file' => 'forms/group.inc',
-        'file path' => drupal_get_path('module', 'group'),
+        'file path' => backdrop_get_path('module', 'group'),
       );
     }
 
@@ -83,7 +83,7 @@ class GroupUIController extends EntityDefaultUIController {
       'access callback' => 'entity_access',
       'access arguments' => array('view', 'group', 1),
       'file' => 'pages/group.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
     );
 
     $items['group/%group/view'] = array(
@@ -99,7 +99,7 @@ class GroupUIController extends EntityDefaultUIController {
       'access callback' => 'entity_access',
       'access arguments' => array('update', 'group', 1),
       'file' => 'forms/group.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
       'weight' => -5,
       // @todo Properly implement contextual links.
@@ -108,12 +108,12 @@ class GroupUIController extends EntityDefaultUIController {
 
     $items['group/%group/delete'] = array(
       'title' => 'Delete',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_operation_form', 'group', 1, 'delete'),
       'access callback' => 'entity_access',
       'access arguments' => array('delete', 'group', 1),
       'file' => 'forms/group.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_CALLBACK,
     );
 
@@ -167,7 +167,7 @@ class GroupUIController extends EntityDefaultUIController {
       return confirm_form($form, t($message, $replace), "group/$group->gid", NULL, t('Delete'));
     }
 
-    drupal_not_found();
+    backdrop_not_found();
     exit;
   }
 

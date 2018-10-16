@@ -41,6 +41,7 @@ function gadd_install() {
 
   db_add_field('group_membership', 'added_on', _gadd_added_on());
   db_add_field('group_membership', 'added_by', _gadd_added_by());
+  // Dynamically generated variable data was detected on the following lines.
 }
 
 /**
@@ -51,10 +52,19 @@ function gadd_uninstall() {
   db_drop_field('group_membership', 'added_by');
 }
 
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function gadd_update_7001() { }
+
 /**
- * Remove default values from 'added_on' and 'added_by'.
+ * Implements hook_update_last_removed().
  */
-function gadd_update_7001() {
-  db_change_field('group_membership', 'added_on', 'added_on', _gadd_added_on());
-  db_change_field('group_membership', 'added_by', 'added_by', _gadd_added_by());
+function gadd_update_last_removed() {
+  return 7001;
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function gadd_update_1000() {
+  $config = config('gadd.settings');
 }

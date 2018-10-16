@@ -34,7 +34,7 @@ function group_pathauto($op) {
     'patterndescr' => t('Default path pattern (applies to all group types with blank patterns below)'),
     'patterndefault' => 'group/[group:title]',
     'batch_update_callback' => 'group_pathauto_bulk_update_batch_process',
-    'batch_file' => drupal_get_path('module', 'group') . '/group.pathauto.inc',
+    'batch_file' => backdrop_get_path('module', 'group') . '/group.pathauto.inc',
   );
 
   $languages = array();
@@ -120,7 +120,7 @@ function group_pathauto_update_alias_multiple(array $gids, $op, array $options =
   }
 
   if (!empty($options['message'])) {
-    drupal_set_message(format_plural(count($gids), 'Updated URL alias for 1 group.', 'Updated URL aliases for @count groups.'));
+    backdrop_set_message(format_plural(count($gids), 'Updated URL alias for 1 group.', 'Updated URL aliases for @count groups.'));
   }
 }
 

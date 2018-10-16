@@ -175,7 +175,7 @@ function group_entity_info() {
  * Implements hook_entity_info_alter().
  */
 function group_entity_info_alter(&$entity_info) {
-  // Informs Drupal that group types are bundles for groups.
+  // Informs Backdrop that group types are bundles for groups.
   foreach (group_types() as $name => $group_type) {
     $entity_info['group']['bundles'][$name] = array(
       'label' => $group_type->label,
@@ -677,7 +677,7 @@ function group_entity_update($entity, $type) {
     if ($gids = array_diff($original_gids, $updated_gids)) {
       foreach (group_load_multiple($gids) as $group) {
         $group->removeEntity($entity_id, $type);
-      };
+      }
     }
 
     // Saving takes care of creating new links.
@@ -742,6 +742,6 @@ function group_entity_view($entity, $type, $view_mode, $langcode) {
 
   if ($type == 'group') {
     module_load_include('inc', 'group', 'forms/group.membership_actions');
-    $entity->content['membership_actions'] = drupal_get_form('group_membership_actions_form', $entity, $user);
+    $entity->content['membership_actions'] = backdrop_get_form('group_membership_actions_form', $entity, $user);
   }
 }

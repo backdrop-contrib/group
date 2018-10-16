@@ -98,3 +98,24 @@ function gprofile_schema() {
 
   return $schema;
 }
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function gprofile_update_last_removed() {
+  return;
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function gprofile_update_1000() {
+  $config = config('gprofile.settings');
+}
+
+/**
+ * Implements hook_install().
+ */
+function gprofile_install() {
+  // Dynamically generated variable data was detected.
+}

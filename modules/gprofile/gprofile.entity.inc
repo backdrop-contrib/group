@@ -75,7 +75,7 @@ function gprofile_entity_info() {
  * Implements hook_entity_info_alter().
  */
 function gprofile_entity_info_alter(&$entity_info) {
-  // Informs Drupal that profile types are bundles for member profiles.
+  // Informs Backdrop that profile types are bundles for member profiles.
   foreach (gprofile_types() as $name => $gprofile_type) {
     $entity_info['gprofile']['bundles'][$name] = array(
       'label' => $gprofile_type->label,

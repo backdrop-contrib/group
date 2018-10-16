@@ -359,8 +359,8 @@ function group_membership_multiple_delete_confirm($form, &$form_state, $mids) {
     );
   }
 
-  $question = format_plural(count($mids),
-    'Are you sure you want to remove this member?',
+  $question = format_plural(count($mids), 
+    'Are you sure you want to remove this member?', 
     'Are you sure you want to remove these members?'
   );
 
@@ -377,7 +377,7 @@ function group_membership_multiple_delete_confirm_submit($form, &$form_state) {
 
     group_membership_delete_multiple($mids);
     watchdog('group', 'Removed @count members.', array('@count' => $count));
-    drupal_set_message(format_plural($count, 'Removed 1 member.', 'Removed @count members.'));
+    backdrop_set_message(format_plural($count, 'Removed 1 member.', 'Removed @count members.'));
   }
 }
 
@@ -400,7 +400,7 @@ function group_membership_approve($mids) {
   }
 
   $message = format_plural($count, 'Approved 1 membership request.', 'Approved @count membership requests.');
-  drupal_set_message($message);
+  backdrop_set_message($message);
 }
 
 /**
@@ -417,7 +417,7 @@ function group_membership_decline($mids) {
   }
 
   $message = format_plural($count, 'Declined 1 membership request.', 'Declined @count membership requests.');
-  drupal_set_message($message);
+  backdrop_set_message($message);
 }
 
 /**
@@ -440,7 +440,7 @@ function group_membership_block($mids) {
   }
 
   $message = format_plural($count, 'Blocked 1 member.', 'Blocked @count members.');
-  drupal_set_message($message);
+  backdrop_set_message($message);
 }
 
 /**
@@ -462,7 +462,7 @@ function group_membership_unblock($mids) {
   }
 
   $message = format_plural($count, 'Unblocked 1 member.', 'Unblocked @count members.');
-  drupal_set_message($message);
+  backdrop_set_message($message);
 }
 
 /**
@@ -507,7 +507,7 @@ function group_membership_cancel_form($form, &$form_state, GroupMembership $grou
     : 'Yes, cancel the membership';
 
   $replace = array(
-    '%user' => format_username($account),
+    '%user' => user_format_name($account),
     '%group' => $group->label(),
   );
 
@@ -525,5 +525,5 @@ function group_membership_cancel_form_submit($form, &$form_state) {
   $group_membership = $form_state['build_info']['args'][0];
   $group_membership->delete();
 
-  drupal_set_message(t('The membership was cancelled.'));
+  backdrop_set_message(t('The membership was cancelled.'));
 }

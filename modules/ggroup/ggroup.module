@@ -22,7 +22,7 @@ require_once 'ggroup.router.inc';
 /**
  * Implements hook_schema_alter().
  *
- * Informs Drupal of the changes we made to {group_membership}.
+ * Informs Backdrop of the changes we made to {group_membership}.
  */
 function ggroup_schema_alter(&$schema) {
   // Include the install file for its helper functions.
@@ -232,7 +232,7 @@ function ggroup_run_group_type_inheritance(GroupType $group_type, $form_submit =
       array('ggroup_group_type_batch', array($mids)),
     ),
     'finished' => 'ggroup_group_type_batch_finished',
-    'title' => t('Running inheritance for group type: @type', array('@type'=> $group_type->label())),
+    'title' => t('Running inheritance for group type: @type', array('@type' => $group_type->label())),
     'init_message' => t('Initializing group inheritance.'),
     'progress_message' => t('@percentage% done.'),
     'error_message' => t('The operation encountered an error.'),
@@ -271,7 +271,7 @@ function ggroup_group_type_batch($mids, &$context) {
   $message = 'Processed @current out of @total memberships.';
   $replace = array(
     '@current' => $context['sandbox']['progress'],
-    '@total' => $context['sandbox']['max']
+    '@total' => $context['sandbox']['max'],
   );
   $context['message'] = t($message, $replace);
 
@@ -289,10 +289,10 @@ function ggroup_group_type_batch($mids, &$context) {
  */
 function ggroup_group_type_batch_finished($success, $results, $operations) {
   if ($success) {
-    drupal_set_message(format_plural(count($results), 'One membership processed.', '@count memberships processed.'));
+    backdrop_set_message(format_plural(count($results), 'One membership processed.', '@count memberships processed.'));
   }
   else {
-    drupal_set_message(t('Finished with an error.'), 'error');
+    backdrop_set_message(t('Finished with an error.'), 'error');
   }
 }
 
@@ -317,7 +317,7 @@ function ggroup_inheritance_revert($mids) {
   }
 
   $message = format_plural($count, 'Reverted 1 membership.', 'Reverted @count memberships.');
-  drupal_set_message($message);
+  backdrop_set_message($message);
 }
 
 /**
@@ -340,5 +340,5 @@ function ggroup_inheritance_break($mids) {
   }
 
   $message = format_plural($count, 'Broke heritage of 1 membership.', 'Broke heritage of @count memberships.');
-  drupal_set_message($message);
+  backdrop_set_message($message);
 }

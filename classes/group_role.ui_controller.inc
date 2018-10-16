@@ -57,12 +57,12 @@ class GroupRoleUIController extends EntityDefaultUIController {
     $items["$this->path/manage/%group_role/permissions"] = array(
       'title' => 'Permissions',
       'description' => 'Edit permissions for this role',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_permission_form', NULL, 4),
       'access callback' => 'user_access',
       'access arguments' => array('configure group module'),
       'file' => 'admin/group.permission.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
       'weight' => 0,
     );
@@ -197,7 +197,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
       $table['elements'] = $weights;
       $table['#attributes'] = array('id' => 'group-role-table');
 
-      drupal_add_tabledrag('group-role-table', 'order', 'sibling', 'group-role-weight');
+      backdrop_add_tabledrag('group-role-table', 'order', 'sibling', 'group-role-weight');
     }
 
     return $table;
@@ -363,7 +363,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
             $path = "$this->path/manage/$name/delete";
           }
 
-          $row['data']['delete'] = l($what, $path, array('query' => drupal_get_destination()));
+          $row['data']['delete'] = l($what, $path, array('query' => backdrop_get_destination()));
         }
       }
 

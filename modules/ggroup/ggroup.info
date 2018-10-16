@@ -1,6 +1,7 @@
 name = Subgroup
 description = Allows a group to belong to another group
-core = 7.x
+backdrop = 1.x
+type = module
 package = Group
 configure = admin/group/config/subgroup
 

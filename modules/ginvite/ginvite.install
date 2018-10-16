@@ -41,6 +41,7 @@ function ginvite_install() {
 
   db_add_field('group_membership', 'invited_on', _ginvite_invited_on());
   db_add_field('group_membership', 'invited_by', _ginvite_invited_by());
+  // Dynamically generated variable data was detected on the following lines.
 }
 
 /**
@@ -115,24 +116,22 @@ function ginvite_schema() {
   return $schema;
 }
 
-/**
- * Add the invited_on and invited_by columns to {group_invite} and
- * {group_membership}.
- */
-function ginvite_update_7001() {
-  $invited_on = _ginvite_invited_on();
-  $invited_by = _ginvite_invited_by();
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function ginvite_update_7001() { }
 
-  db_add_field('group_invite', 'invited_on', $invited_on);
-  db_add_field('group_invite', 'invited_by', $invited_by);
-  db_add_field('group_membership', 'invited_on', $invited_on);
-  db_add_field('group_membership', 'invited_by', $invited_by);
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function ginvite_update_7002() { }
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function ginvite_update_last_removed() {
+  return 7002;
 }
 
 /**
- * Remove default values from 'invited_on' and 'invited_by'.
+ * Implements hook_update_N().
  */
-function ginvite_update_7002() {
-  db_change_field('group_membership', 'invited_on', 'invited_on', _ginvite_invited_on());
-  db_change_field('group_membership', 'invited_by', 'invited_by', _ginvite_invited_by());
+function ginvite_update_1000() {
+  $config = config('ginvite.settings');
 }

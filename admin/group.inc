@@ -325,8 +325,8 @@ function group_multiple_delete_confirm($form, &$form_state, $gids) {
     '#suffix' => '<br />',
   );
 
-  $question = format_plural(count($gids),
-    'Are you sure you want to delete this group?',
+  $question = format_plural(count($gids), 
+    'Are you sure you want to delete this group?', 
     'Are you sure you want to delete these groups?'
   );
 
@@ -343,6 +343,6 @@ function group_multiple_delete_confirm_submit($form, &$form_state) {
 
     group_delete_multiple($gids);
     watchdog('groups', 'Deleted @count groups.', array('@count' => $count));
-    drupal_set_message(format_plural($count, 'Deleted 1 group.', 'Deleted @count groups.'));
+    backdrop_set_message(format_plural($count, 'Deleted 1 group.', 'Deleted @count groups.'));
   }
 }

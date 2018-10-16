@@ -65,7 +65,11 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
   // We keep track of checkbox options for all three membership types. This
   // allows us to have certain checkboxes missing in case they are prohibited
   // for a membership type.
-  $options = array('anonymous' => array(), 'outsider' => array(), 'member' => array());
+  $options = array(
+    'anonymous' => array(),
+    'outsider' => array(),
+    'member' => array(),
+  );
 
   // Populate the checkbox options and rows for every possible permission.
   foreach ($modules as $module => $module_name) {
@@ -167,7 +171,7 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
     );
   }
 
-  $form['#attached']['js'][] = drupal_get_path('module', 'group') . '/misc/group.permission.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'group') . '/misc/group.permission.js';
 
   return $form;
 }
@@ -182,5 +186,5 @@ function group_permission_form_submit($form, &$form_state) {
     $group_role->changePermissions($form_state['values'][$rname]);
   }
 
-  drupal_set_message(t('The changes have been saved.'));
+  backdrop_set_message(t('The changes have been saved.'));
 }

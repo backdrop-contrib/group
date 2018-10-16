@@ -35,7 +35,7 @@ function ginvite_by_mail_list(Group $group) {
       $roles = array_intersect_key($group_roles, array_flip(unserialize($data->roles)));
 
       // Build the operation links.
-      $destination = drupal_get_destination();
+      $destination = backdrop_get_destination();
 
       $operations['edit'] = array(
         'title' => t('edit'),
@@ -58,7 +58,7 @@ function ginvite_by_mail_list(Group $group) {
             '#items' => $roles,
           ),
         ),
-        l(format_username(user_load($data->invited_by)), "user/$data->invited_by"),
+        l(user_format_name(user_load($data->invited_by)), "user/$data->invited_by"),
         format_date($data->invited_on),
         array(
           'data' => array(
@@ -101,7 +101,7 @@ function ginvite_by_mail_edit_form($form, &$form_state, Group $group, $iid) {
     '%mail' => $data->mail,
     '%group' => $group->label(),
   );
-  drupal_set_title(t($message, $replace), PASS_THROUGH);
+  backdrop_set_title(t($message, $replace), PASS_THROUGH);
 
   $roles = array();
   foreach ($group->getRoles(FALSE) as $group_role) {
@@ -135,7 +135,7 @@ function ginvite_by_mail_edit_form_submit($form, &$form_state) {
     ->condition('iid', $iid)
     ->execute();
 
-  drupal_set_message(t('The invitation was successfully edited.'));
+  backdrop_set_message(t('The invitation was successfully edited.'));
   $form_state['redirect'] = "group/$group->gid/invite/mail-list";
 }
 
@@ -168,5 +168,5 @@ function ginvite_by_mail_delete_form_submit($form, &$form_state) {
     ->condition('iid', $form_state['build_info']['args'][1])
     ->execute();
 
-  drupal_set_message(t('The invitation has been removed.'));
+  backdrop_set_message(t('The invitation has been removed.'));
 }

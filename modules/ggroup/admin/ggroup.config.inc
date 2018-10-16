@@ -63,8 +63,14 @@ function ggroup_config_form($form, &$form_state, GroupType $group_type) {
     $form['subgroup'][$type]['inheritance'] = array(
       '#theme' => 'ggroup_inheritance_table',
       // Sources and targets are used in the theme function.
-      'sources' => array('#type' => 'value', '#value' => $sources),
-      'targets' => array('#type' => 'value', '#value' => $targets),
+      'sources' => array(
+        '#type' => 'value',
+        '#value' => $sources,
+      ),
+      'targets' => array(
+        '#type' => 'value',
+        '#value' => $targets,
+      ),
       // We use a form item wrapper so the #states property will work.
       '#type' => 'item',
       '#states' => array(

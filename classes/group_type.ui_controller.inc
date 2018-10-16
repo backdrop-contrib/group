@@ -23,12 +23,12 @@ class GroupTypeUIController extends EntityDefaultUIController {
     $items["$this->path/manage/%group_type/permissions"] = array(
       'title' => 'Permissions',
       'description' => 'Edit permissions for groups of this type',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_permission_form', 4),
       'access callback' => 'user_access',
       'access arguments' => array('configure group module'),
       'file' => 'admin/group.permission.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
       'weight' => 0,
     );
@@ -43,7 +43,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
     $items["$this->path/manage/%group_type/permissions/roles"] = array(
       'title' => 'Roles',
       'description' => 'Manage group roles for this group type.',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_role_overview_form', 'group_role', 4),
       'access callback' => 'user_access',
       'access arguments' => array('configure group module'),
@@ -59,7 +59,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
       'access callback' => 'group_type_add_role_access',
       'access arguments' => array(4),
       'file' => 'admin/group_role.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_LOCAL_ACTION,
       'weight' => 0,
     );
@@ -67,12 +67,12 @@ class GroupTypeUIController extends EntityDefaultUIController {
     $items["$this->path/manage/%group_type/config"] = array(
       'title' => 'Config',
       'description' => 'Configure the group type.',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_type_config_form', 4),
       'access callback' => 'user_access',
       'access arguments' => array('configure group module'),
       'file' => 'admin/group_type.config.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
       'weight' => -5,
     );
@@ -192,7 +192,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
       'elements' => $weights,
     );
 
-    drupal_add_tabledrag('group-type-table', 'order', 'sibling', 'group-type-weight');
+    backdrop_add_tabledrag('group-type-table', 'order', 'sibling', 'group-type-weight');
 
     return $table;
   }
@@ -327,7 +327,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
         $path = "$this->path/manage/$name/delete";
       }
 
-      $row['data']['delete'] = l($what, $path, array('query' => drupal_get_destination()));
+      $row['data']['delete'] = l($what, $path, array('query' => backdrop_get_destination()));
     }
 
     // Add the export action.

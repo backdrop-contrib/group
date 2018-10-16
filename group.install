@@ -13,7 +13,7 @@ function group_install() {
   $t = get_t();
 
   // Enable the editing of Group entities in the admin theme.
-  variable_set('group_admin_theme', '1');
+  config_set('group.settings', 'group_admin_theme', '1');
 
   // Add Pathauto module support.
   //
@@ -24,7 +24,7 @@ function group_install() {
   // Because we still want to indicate the possibility of using Pathauto with
   // Group instead of not setting a default pattern at all when Entity tokens is
   // disabled, we alter the Pathauto form in group_form().
-  variable_set('pathauto_group_pattern', 'group/[group:title]');
+  config_set('group.settings', 'pathauto_group_pattern', 'group/[group:title]');
 
   // Create a first global admin role and give it full permissions.
   $group_admin = entity_create('group_role', array(
@@ -34,6 +34,7 @@ function group_install() {
     'permissions' => array_keys(module_invoke_all('group_permission')),
   ));
   $group_admin->save();
+  // Dynamically generated variable data was detected on the following lines.
 }
 
 /**
@@ -42,8 +43,8 @@ function group_install() {
  * @see hook_group_uninstall()
  */
 function group_uninstall() {
-  variable_del('group_admin_theme');
-  variable_del('group_pm_group_view_disabled');
+  config_clear('group.settings', 'group_admin_theme');
+  config_clear('group.settings', 'group_pm_group_view_disabled');
 
   // Bypass entity_load() as we cannot use it here.
   $types = db_select('group_type', 'gt')
@@ -434,242 +435,53 @@ function group_schema() {
   return $schema;
 }
 
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7001() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7002() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7003() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7004() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7005() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7006() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7007() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7008() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7009() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7010() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function group_update_7011() { }
+
 /**
- * Add the subscription_type column to {group_type}.
+ * Implements hook_update_last_removed().
  */
-function group_update_7001() {
-  db_add_field('group_type', 'subscription_type', array(
-    'description' => 'The way users can become members of groups of this group type.',
-    'type' => 'varchar',
-    'length' => 32,
-    'not null' => TRUE,
-  ));
+function group_update_last_removed() {
+  return 7011;
 }
 
 /**
- * Add the status column to {group_membership}.
+ * Implements hook_update_N().
  */
-function group_update_7002() {
-  db_add_field('group_membership', 'status', array(
-    'description' => 'The membership status.',
-    'type' => 'int',
-    'size' => 'tiny',
-    'unsigned' => TRUE,
-    'not null' => TRUE,
-     // GROUP_MEMBERSHIP_ACTIVE
-    'default' => 1,
-  ));
-}
-
-/**
- * Convert the status column for {group_membership} to a token (varchar).
- */
-function group_update_7003() {
-  $spec = array(
-    'description' => 'The membership status.',
-    'type' => 'varchar',
-    'length' => 32,
-    'not null' => TRUE,
-    'default' => 'active',
-  );
-
-  $keys_new = array(
-    'indexes' => array(
-      'status' => array('status'),
-    ),
-  );
-
-  db_drop_index('group_membership', 'status');
-  db_change_field('group_membership', 'status', 'status', $spec, $keys_new);
-
-  // Convert the old values into new ones.
-  $updates['blocked'] = db_update('group_membership')->condition('status', '0');
-  $updates['active']  = db_update('group_membership')->condition('status', '1');
-  $updates['invited'] = db_update('group_membership')->condition('status', '2');
-
-  foreach ($updates as $status => $query) {
-    $query->fields(array(
-      'status' => $status,
-    ));
-
-    $query->execute();
-  }
-}
-
-/**
- * Change the way roles are saved on memberships.
- */
-function group_update_7004() {
-  // Create the {group_membership_role} table.
-  $table = array(
-    'description' => 'Links group memberships to their roles.',
-    'fields' => array(
-      'mid' => array(
-        'description' => 'The {group_membership}.mid for the membership.',
-        'type' => 'int',
-        'default' => 0,
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'role' => array(
-        'description' => 'The {group_role}.name for the group role.',
-        'type' => 'varchar',
-        'length' => 32,
-        'default' => '',
-        'not null' => TRUE,
-      ),
-    ),
-    'indexes' => array(
-      'group_membership' => array('mid'),
-    ),
-    'foreign keys' => array(
-      'group_membership' => array(
-        'table' => 'group_membership',
-        'columns' => array('mid' => 'mid'),
-      ),
-      'group_role' => array(
-        'table' => 'group_role',
-        'columns' => array('role' => 'name'),
-      ),
-    ),
-    'primary key' => array('mid', 'role'),
-  );
-  db_create_table('group_membership_role', $table);
-
-  // Prepare the insert for the new table.
-  $query = db_insert('group_membership_role')->fields(array('mid', 'role'));
-
-  // Gather the existing membership data for insert.
-  foreach (db_select('group_membership', 'gm')->fields('gm')->execute() as $record) {
-    foreach (unserialize($record->roles) as $role) {
-      $query->values(array(
-        'mid' => $record->mid,
-        'role' => $role,
-      ));
-    }
-  }
-
-  // Migrate the existing data.
-  $query->execute();
-
-  // Drop the old data from {group_membership}.
-  db_drop_field('group_membership', 'roles');
-}
-
-/**
- * Change the group_admin role to be deletable.
- */
-function group_update_7005() {
-  if ($group_admin = group_role_load('group_admin')) {
-    $group_admin->status = ENTITY_CUSTOM;
-    $group_admin->save();
-  }
-}
-
-/**
- * Drop the subscription_type column from {group_type}.
- */
-function group_update_7006() {
-  db_drop_field('group_type', 'subscription_type');
-}
-
-/**
- * Add group type configuration to {group_type}.
- */
-function group_update_7007() {
-  db_add_field('group_type', 'config', array(
-    'description' => 'The specific configuration for this group type.',
-    'type' => 'text',
-    'not null' => TRUE,
-    'serialize' => TRUE,
-    'initial' => serialize(array()),
-  ));
-}
-
-/**
- * Drop the group_default_roles variable.
- */
-function group_update_7008() {
-  $old_config = variable_get('group_default_roles');
-
-  // The content of group_default_roles has moved to the group types.
-  foreach (group_types() as $type => $group_type) {
-    if (!empty($old_config[$type])) {
-      $group_type->config['creator_roles'] = $old_config[$type];
-      $group_type->save();
-    }
-  }
-
-  variable_del('group_default_roles');
-}
-
-/**
- * Add a lot of metadata to group memberships.
- */
-function group_update_7009() {
-  $blocked_status = array(
-    'description' => 'The membership status before the member was blocked.',
-    'type' => 'varchar',
-    'length' => 32,
-    'not null' => TRUE,
-    'default' => '',
-  );
-
-  // Add 'blocked_status'.
-  db_add_field('group_membership', 'blocked_status', $blocked_status);
-
-  $base = array(
-    'type' => 'int',
-    'unsigned' => TRUE,
-  );
-
-  // Add 'blocked_on'.
-  $field = array('description' => 'The Unix timestamp when the membership was blocked.') + $base;
-  db_add_field('group_membership', 'blocked_on', $field);
-
-  // Add 'blocked_by'.
-  $field = array('description' => 'The {users}.uid of the blocking user.') + $base;
-  db_add_field('group_membership', 'blocked_by', $field);
-
-  // Add 'joined_on'.
-  $field = array('description' => 'The Unix timestamp when the user joined.') + $base;
-  db_add_field('group_membership', 'joined_on', $field);
-
-  // Add 'requested_on'.
-  $field = array('description' => 'The Unix timestamp when the user requested to join.') + $base;
-  db_add_field('group_membership', 'requested_on', $field);
-
-  // Add 'approved_on'.
-  $field = array('description' => 'The Unix timestamp when the membership was approved.') + $base;
-  db_add_field('group_membership', 'approved_on', $field);
-
-  // Add 'approved_by'.
-  $field = array('description' => 'The {users}.uid of the approving user.') + $base;
-  db_add_field('group_membership', 'approved_by', $field);
-}
-
-/**
- * Add anonymous permissions to {group_type}.
- */
-function group_update_7010() {
-  db_add_field('group_type', 'anonymous_permissions', array(
-    'description' => 'The anonymous permissions for this group type.',
-    'type' => 'text',
-    'not null' => TRUE,
-    'serialize' => TRUE,
-    'initial' => serialize(array()),
-  ));
-}
-
-/**
- * Make sure the creator_roles data in {group_type}.config is consistent.
- */
-function group_update_7011() {
-  // Turn all creator_roles data into a numerical array.
-  foreach (group_types() as $group_type) {
-    if (!empty($group_type->config['creator_roles'])) {
-      $group_type->config['creator_roles'] = array_values(array_filter($group_type->config['creator_roles']));
-      $group_type->save();
-    }
-  }
+function group_update_1000() {
+  $config = config('group.settings');
+  $config->set('group_default_roles', update_variable_get('group_default_roles', 'novalue'));
+  $config->set('group_admin_theme', update_variable_get('group_admin_theme', 'novalue'));
+  update_variable_del('group_default_roles');
+  update_variable_del('group_admin_theme');
 }

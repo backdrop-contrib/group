@@ -12,12 +12,22 @@ function gnode_install() {
     ->fields(array('weight' => 1))
     ->condition('name', 'gnode')
     ->execute();
+  // Dynamically generated variable data was detected on the following lines.
+}
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function gnode_update_7001() { }
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function gnode_update_last_removed() {
+  return 7001;
 }
 
 /**
- * Backport the Drupal 8 node access code for consistency.
+ * Implements hook_update_N().
  */
-function gnode_update_7001() {
-  variable_del('group_node_mode');
-  node_access_needs_rebuild(TRUE);
+function gnode_update_1000() {
+  $config = config('gnode.settings');
 }

@@ -1,6 +1,7 @@
 name = Group add
 description = Allows you to add members to a group without their consent
-core = 7.x
+backdrop = 1.x
+type = module
 package = Group
 
 dependencies[] = group

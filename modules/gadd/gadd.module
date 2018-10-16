@@ -12,7 +12,7 @@ require_once 'gadd.router.inc';
 /**
  * Implements hook_schema_alter().
  *
- * Informs Drupal of the changes we made to {group_membership}.
+ * Informs Backdrop of the changes we made to {group_membership}.
  */
 function gadd_schema_alter(&$schema) {
   // Include the install file for its helper functions.
@@ -32,7 +32,7 @@ function gadd_schema_alter(&$schema) {
 /**
  * Implements hook_entity_property_info_alter().
  *
- * Informs Drupal of the changes we made to {group_membership}.
+ * Informs Backdrop of the changes we made to {group_membership}.
  */
 function gadd_entity_property_info_alter(&$info) {
   $properties = &$info['group_membership']['properties'];
@@ -58,6 +58,7 @@ function gadd_entity_property_info_alter(&$info) {
  * Implements hook_admin_paths().
  */
 function gadd_admin_paths() {
+  // TODO This variable was probably removed in Backdrop without replacement.
   if (variable_get('group_admin_theme')) {
     $paths = array(
       'group/*/add' => TRUE,

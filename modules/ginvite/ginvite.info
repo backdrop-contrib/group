@@ -1,6 +1,7 @@
 name = Group invite
 description = Allows group members to invite people into their group
-core = 7.x
+backdrop = 1.x
+type = module
 package = Group
 
 dependencies[] = group

@@ -15,10 +15,10 @@ function group_form($form, &$form_state, Group $group, $op = 'edit') {
   $group_type = group_type_load($group->type);
 
   if ($op == 'add') {
-    drupal_set_title(t('Create @name', array('@name' => $group_type->label())), PASS_THROUGH);
+    backdrop_set_title(t('Create @name', array('@name' => $group_type->label())), PASS_THROUGH);
   }
   elseif ($op == 'edit') {
-    drupal_set_title(t('Edit @title', array('@title' => $group->label())), PASS_THROUGH);
+    backdrop_set_title(t('Edit @title', array('@title' => $group->label())), PASS_THROUGH);
   }
 
   // A bundle property is needed for entity_form_field_validate().
@@ -112,7 +112,7 @@ function group_form_submit($form, &$form_state) {
     '%group' => $group->label(),
   );
 
-  drupal_set_message(t($message, $replace));
+  backdrop_set_message(t($message, $replace));
   $form_state['redirect'] = "group/$group->gid";
 }
 
@@ -160,7 +160,7 @@ function group_attach_path_form(Group $group, &$form, &$form_state) {
       'class' => array('path-form'),
     ),
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'path') . '/path.js'),
+      'js' => array(backdrop_get_path('module', 'path') . '/path.js'),
     ),
     '#access' => user_access('create url aliases') || user_access('administer url aliases'),
     '#weight' => 30,

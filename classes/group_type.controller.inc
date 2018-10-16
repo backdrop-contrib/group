@@ -144,7 +144,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
           continue;
         }
 
-        $group_type->roles[] = drupal_json_decode($controller->export($group_role, $prefix));
+        $group_type->roles[] = backdrop_json_decode($controller->export($group_role, $prefix));
       }
     }
 

@@ -15,7 +15,7 @@ function ggroup_entity_info_alter(&$entity_info) {
 /**
  * Implements hook_entity_property_info_alter().
  *
- * Informs Drupal of the changes we made to {group_membership}.
+ * Informs Backdrop of the changes we made to {group_membership}.
  */
 function ggroup_entity_property_info_alter(&$info) {
   $group_membership = &$info['group_membership']['properties'];
@@ -54,7 +54,7 @@ function ggroup_entity_property_info_alter(&$info) {
 
   $group_membership['heritage']['property info']['revoked'] = array(
     'label' => t('Inherited roles'),
-      'description' => t('The group roles that were revoked from the inherited ones.'),
+    'description' => t('The group roles that were revoked from the inherited ones.'),
   ) + $group_role_list;
 }
 

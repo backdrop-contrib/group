@@ -45,7 +45,7 @@ function theme_group_permission_form($variables) {
     // Theme a module name row.
     if (is_numeric($pname)) {
       $row[] = array(
-        'data' => drupal_render($form['permissions'][$pname]),
+        'data' => backdrop_render($form['permissions'][$pname]),
         'class' => array('module'),
         'id' => 'module-' . $form['permissions'][$pname]['#id'],
         'colspan' => count($form['roles']['#value']) + 1,
@@ -55,7 +55,7 @@ function theme_group_permission_form($variables) {
     // Theme a permission row.
     else {
       $row[] = array(
-        'data' => drupal_render($form['permissions'][$pname]),
+        'data' => backdrop_render($form['permissions'][$pname]),
         'class' => array('permissions'),
       );
 
@@ -69,7 +69,7 @@ function theme_group_permission_form($variables) {
           $form['checkboxes'][$rname][$pname]['#attributes']['title'] = $title;
 
           $row[] = array(
-            'data' => drupal_render($form['checkboxes'][$rname][$pname]),
+            'data' => backdrop_render($form['checkboxes'][$rname][$pname]),
             'class' => array('checkbox'),
           );
         }
@@ -90,13 +90,13 @@ function theme_group_permission_form($variables) {
   }
 
   // Add css for incompatible permissions.
-  drupal_add_css('.group-permission-incompatible {color: #8c2e0b;text-align:center;}', array('type' => 'inline'));
+  backdrop_add_css('.group-permission-incompatible {color: #8c2e0b;text-align:center;}', array('type' => 'inline'));
 
   // Compose the table header.
   $header = array(t('Permission'));
   foreach (element_children($form['roles']) as $rname) {
     $header[] = array(
-      'data' => drupal_render($form['roles'][$rname]),
+      'data' => backdrop_render($form['roles'][$rname]),
       'class' => array('checkbox'),
     );
   }
@@ -108,7 +108,7 @@ function theme_group_permission_form($variables) {
     'rows' => $rows,
     'attributes' => array('id' => 'group-permissions'),
   ));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
   return $output;
 }

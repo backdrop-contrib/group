@@ -16,10 +16,10 @@ function group_membership_form($form, &$form_state, GroupMembership $group_membe
   if ($op == 'edit') {
     $message = 'Edit membership for %user in %group';
     $replace = array(
-      '%user' => format_username($account),
+      '%user' => user_format_name($account),
       '%group' => $group->label(),
     );
-    drupal_set_title(t($message, $replace), PASS_THROUGH);
+    backdrop_set_title(t($message, $replace), PASS_THROUGH);
   }
 
   // Only show the role selector if the current user can administer members.
@@ -72,7 +72,7 @@ function group_membership_form_submit($form, &$form_state) {
     $group_membership->save();
   }
 
-  drupal_set_message(t('The membership was successfully edited.'));
+  backdrop_set_message(t('The membership was successfully edited.'));
 }
 
 /**
@@ -99,7 +99,10 @@ function group_membership_restore_roles_eb($entity_type, $entity, $form, $form_s
  */
 function group_membership_join_form_builder(Group $group, $account, $form_id) {
   // Build an empty GroupMembership.
-  $values = array('gid' => $group->gid, 'uid' => $account->uid);
+  $values = array(
+    'gid' => $group->gid,
+    'uid' => $account->uid,
+  );
   $group_membership = entity_create('group_membership', $values);
 
   // Create our own form state and build the form.
@@ -108,7 +111,7 @@ function group_membership_join_form_builder(Group $group, $account, $form_id) {
   $form_state['redirect'] = "group/$group->gid";
   $form_state['build_info']['args'] = array($group_membership, 'add', 'group_membership');
 
-  return drupal_build_form($form_id, $form_state);
+  return backdrop_build_form($form_id, $form_state);
 }
 
 /**
@@ -139,7 +142,7 @@ function group_form_group_membership_request_form_alter(&$form, &$form_state) {
  * base form's submit handler. Otherwise, any module altering the base form
  * would get first say in altering #submit.
  *
- * @see drupal_prepare_form()
+ * @see backdrop_prepare_form()
  */
 function group_membership_request_form_submit_b($form, &$form_state) {
   $form_state['group_membership']->status = 'requested';

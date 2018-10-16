@@ -40,7 +40,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
     $items[$this->path] = array(
       'title' => 'Group members',
       'description' => 'Manage group membership fields and display',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_membership_overview_form', 'group_membership'),
       'access arguments' => array('configure group module'),
       'type' => MENU_LOCAL_TASK,
@@ -51,7 +51,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
     $items["$this->path/manage/group_membership"] = array(
       'title' => 'Manage defaults',
       'description' => 'Manage default group membership fields and display',
-      'page callback' => 'drupal_goto',
+      'page callback' => 'backdrop_goto',
       'page arguments' => array($this->path),
       'access arguments' => array('configure group module'),
     );
@@ -59,12 +59,12 @@ class GroupMembershipUIController extends EntityDefaultUIController {
     // Below are router definitions for individual group memberships.
     $items['group/%group/member'] = array(
       'title' => 'Members',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_member_overview_form', 1),
       'access callback' => 'group_access',
       'access arguments' => array('access member overview', 1),
       'file' => 'admin/group_membership.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_LOCAL_TASK,
       'weight' => 0,
     );
@@ -77,7 +77,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
       'access callback' => 'group_membership_access',
       'access arguments' => array('view', 1),
       'file' => 'pages/group_membership.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'load arguments' => array(3),
     );
 
@@ -94,7 +94,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
       'access callback' => 'group_membership_access',
       'access arguments' => array('metadata', 1),
       'file' => 'pages/group_membership.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'load arguments' => array(3),
       'type' => MENU_LOCAL_TASK,
       'weight' => 5,
@@ -107,7 +107,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
       'access callback' => 'group_membership_access',
       'access arguments' => array('update', 1),
       'file' => 'forms/group_membership.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'load arguments' => array(3),
       'type' => MENU_LOCAL_TASK,
       'weight' => 10,
@@ -115,12 +115,12 @@ class GroupMembershipUIController extends EntityDefaultUIController {
 
     $items['group/%group_membership/member/%/cancel'] = array(
       'title' => 'Cancel membership',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_membership_cancel_form', 1),
       'access callback' => 'group_membership_access',
       'access arguments' => array('delete', 1),
       'file' => 'admin/group_membership.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'load arguments' => array(3),
       'type' => MENU_CALLBACK,
     );
@@ -135,7 +135,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
       'access callback' => 'group_membership_join_form_access',
       'access arguments' => array(1, 3),
       'file' => 'forms/group_membership.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_CALLBACK,
     );
 
@@ -148,7 +148,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
       'access callback' => 'group_membership_request_form_access',
       'access arguments' => array(1, 3),
       'file' => 'forms/group_membership.inc',
-      'file path' => drupal_get_path('module', 'group'),
+      'file path' => backdrop_get_path('module', 'group'),
       'type' => MENU_CALLBACK,
     );
 
@@ -279,7 +279,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
 
     // Add the Field UI actions.
     if (module_exists('field_ui')) {
-      $row['manage fields'] = l(t('manage fields'), $profile['path'] .'/fields');
+      $row['manage fields'] = l(t('manage fields'), $profile['path'] . '/fields');
       $row['manage display'] = l(t('manage display'), $profile['path'] . '/display');
     }
 
@@ -311,7 +311,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
           $path = $profile['path'] . '/delete';
         }
 
-        $row['delete'] = $profile_default ? '' : l($what, $path, array('query' => drupal_get_destination()));
+        $row['delete'] = $profile_default ? '' : l($what, $path, array('query' => backdrop_get_destination()));
       }
 
       // Add the export action.

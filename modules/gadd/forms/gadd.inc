@@ -72,5 +72,5 @@ function gadd_add_member_form_submit($form, &$form_state) {
   );
 
   $form_state['build_info']['args'][0]->addMember($form_state['values']['uid'], $values);
-  drupal_set_message(t('Added %user', array('%user' => $form_state['values']['user'])));
+  backdrop_set_message(t('Added %user', array('%user' => $form_state['values']['user'])));
 }

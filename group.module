@@ -136,13 +136,23 @@ function group_permission() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function group_config_info() {
+  $prefixes['group.settings'] = array(
+    'label' => t('Module name settings'),
+    'group' => t('Configuration'),
+  );
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function group_form_system_themes_admin_form_alter(&$form, &$form_state) {
   $form['admin_theme']['group_admin_theme'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use the administration theme when editing or creating groups'),
-    '#default_value' => variable_get('group_admin_theme', '0'),
+    '#default_value' => config_get('group.settings', 'group_admin_theme'),
   );
 
   $form['#submit'][] = 'group_system_themes_admin_form_submit';
@@ -152,14 +162,14 @@ function group_form_system_themes_admin_form_alter(&$form, &$form_state) {
  * Extra submit handler for admin theme form.
  */
 function group_system_themes_admin_form_submit($form, &$form_state) {
-  variable_set('group_admin_theme', $form_state['values']['group_admin_theme']);
+  config_set('group.settings', 'group_admin_theme', $form_state['values']['group_admin_theme']);
 }
 
 /**
  * Implements hook_admin_paths().
  */
 function group_admin_paths() {
-  if (variable_get('group_admin_theme')) {
+  if (config_get('group.settings', 'group_admin_theme')) {
     $paths = array(
       'group/*/edit' => TRUE,
       'group/*/delete' => TRUE,
@@ -209,4 +219,36 @@ function group_query_group_member_overview_alter(QueryAlterableInterface $query)
   if (isset($filters['status'])) {
     $query->condition('gm.status', $filters['status']);
   }
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function group_autoload_info() {
+  return array(
+    'GroupController' => 'classes/group.controller.inc',
+    'GroupExtraFieldsController' => 'classes/group.extra_fields_controller.inc',
+    'Group' => 'classes/group.inc',
+    'GroupUIController' => 'classes/group.ui_controller.inc',
+    'GroupViewsController' => 'classes/group.views_controller.inc',
+    'GroupMembershipController' => 'classes/group_membership.controller.inc',
+    'GroupMembershipExtraFieldsController' => 'classes/group_membership.extra_fields_controller.inc',
+    'GroupMembership' => 'classes/group_membership.inc',
+    'GroupMembershipUIController' => 'classes/group_membership.ui_controller.inc',
+    'GroupMembershipViewsController' => 'classes/group_membership.views_controller.inc',
+    'GroupRoleController' => 'classes/group_role.controller.inc',
+    'GroupRoleFeaturesController' => 'classes/group_role.features_controller.inc',
+    'GroupRole' => 'classes/group_role.inc',
+    'GroupRoleUIController' => 'classes/group_role.ui_controller.inc',
+    'GroupTypeController' => 'classes/group_type.controller.inc',
+    'GroupTypeFeaturesController' => 'classes/group_type.features_controller.inc',
+    'GroupType' => 'classes/group_type.inc',
+    'GroupTypeUIController' => 'classes/group_type.ui_controller.inc',
+    'group_handler_field_child_entity_count' => 'views/handlers/group_handler_field_child_entity_count.inc',
+    'group_handler_field_membership_role' => 'views/handlers/group_handler_field_membership_role.inc',
+    'group_handler_filter_membership_role' => 'views/handlers/group_handler_filter_membership_role.inc',
+    'group_handler_relationship_child_entity' => 'views/handlers/group_handler_relationship_child_entity.inc',
+    'group_handler_relationship_membership_role' => 'views/handlers/group_handler_relationship_membership_role.inc',
+    'group_handler_relationship_parent_group' => 'views/handlers/group_handler_relationship_parent_group.inc',
+  );
 }

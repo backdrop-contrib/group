@@ -31,7 +31,10 @@ function theme_ggroup_inheritance_table($variables) {
     foreach (array_keys($targets) as $target) {
       // Title content for both the label as the checkbox itself.
       $message = '@source will receive @target';
-      $replace = array('@source' => $label, '@target' => $targets[$target]);
+      $replace = array(
+        '@source' => $label,
+        '@target' => $targets[$target],
+      );
       $title = t($message, $replace);
 
       $element[$source][$target]['#title'] = $title;
@@ -39,7 +42,7 @@ function theme_ggroup_inheritance_table($variables) {
       $element[$source][$target]['#attributes']['title'] = $title;
 
       $row[] = array(
-        'data' => drupal_render($element[$source][$target]),
+        'data' => backdrop_render($element[$source][$target]),
         'class' => array('checkbox'),
       );
     }
@@ -62,7 +65,7 @@ function theme_ggroup_inheritance_table($variables) {
     'header' => $header,
     'rows' => $rows,
   ));
-  $output .= drupal_render_children($element);
+  $output .= backdrop_render_children($element);
 
   return $output;
 }

@@ -50,7 +50,10 @@ class GroupType extends Entity {
   public function getRoles($special = TRUE, $reset = FALSE) {
     if (empty($this->entityCache) || $reset) {
       // We're about to fake two type specific roles: outsider and member.
-      $values = array('type' => $this->name, 'global' => 0);
+      $values = array(
+        'type' => $this->name,
+        'global' => 0,
+      );
 
       // Fake the anonymous role.
       $values['name'] = 'anonymous';
