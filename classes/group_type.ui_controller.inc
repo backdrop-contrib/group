@@ -47,7 +47,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
       'page arguments' => array('group_role_overview_form', 'group_role', 4),
       'access callback' => 'user_access',
       'access arguments' => array('configure group module'),
-      'file' => 'includes/entity.ui.inc',
+      'file' => 'entity.ui.inc',
       'type' => MENU_LOCAL_TASK,
       'weight' => 5,
     );

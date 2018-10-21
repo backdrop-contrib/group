@@ -20,7 +20,7 @@ class GroupUIController extends EntityDefaultUIController {
       'page callback' => 'backdrop_get_form',
       'page arguments' => array('group_overview_form', 'group'),
       'access arguments' => array('access group overview'),
-      'file' => 'includes/entity.ui.inc',
+      'file' => 'entity.ui.inc',
       'weight' => -9,
     );
 
