@@ -6,4 +6,6 @@ package = Group
 configure = admin/group/config/group
 
 dependencies[] = entity
+dependencies[] = entity_plus
+dependencies[] = entity_ui
 
