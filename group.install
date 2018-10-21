@@ -46,7 +46,7 @@ function group_uninstall() {
   config_clear('group.settings', 'group_admin_theme');
   config_clear('group.settings', 'group_pm_group_view_disabled');
 
-  // Bypass entity_load() as we cannot use it here.
+  // Bypass entity_load_multiple() as we cannot use it here.
   $types = db_select('group_type', 'gt')
     ->fields('gt', array('name'))
     ->execute()

@@ -79,10 +79,10 @@ function group_role_load($name) {
  * @return array
  *   An array of GroupRole entities, keyed by their machine names.
  *
- * @see entity_load()
+ * @see entity_load_multiple()
  */
 function group_role_load_multiple(array $rids = array(), $reset = FALSE) {
-  return entity_load('group_role', $rids, array(), $reset);
+  return entity_load_multiple('group_role', $rids, array(), $reset);
 }
 
 /**

@@ -15,10 +15,10 @@
  * @return array
  *   An array of Group entities, keyed by their group ids.
  *
- * @see entity_load()
+ * @see entity_load_multiple()
  */
 function group_load_multiple(array $gids = array(), $reset = FALSE) {
-  return entity_load('group', $gids, array(), $reset);
+  return entity_load_multiple('group', $gids, array(), $reset);
 }
 
 /**

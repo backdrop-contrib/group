@@ -10,6 +10,44 @@
 class GroupMembership extends Entity {
 
   /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
+    return isset($this->nid) ? $this->nid : NULL;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'group_membership';
+  }
+
+  /**
+   * Implements EntityInterface::bundle().
+   */
+  public function bundle() {
+    return $this->type;
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return $this->title;
+  }
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => 'node/' . $this->nid,
+      'options' => array(),
+    );
+  }
+
+  /**
    * Defines the entity label if the 'entity_class_label' callback is used.
    */
   protected function defaultLabel() {

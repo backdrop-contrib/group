@@ -624,11 +624,11 @@ function group_entity_property_info_alter(&$info) {
 }
 
 /**
- * Implements hook_entity_load().
+ * Implements hook_entity_load_multiple().
  *
  * Add the 'group' key to entity objects that can belong to a group.
  */
-function group_entity_load($entities, $type) {
+function group_entity_load_multiple($entities, $type) {
   $entity_info = entity_get_info($type);
 
   if (!empty($entity_info['group entity'])) {

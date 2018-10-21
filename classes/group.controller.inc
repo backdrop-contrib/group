@@ -7,7 +7,7 @@
 /**
  * Controller for group entities.
  */
-class GroupController extends EntityAPIController {
+class GroupController extends EntityPlusController {
 
   /**
    * Overridden to take care of adding the group creator.
@@ -21,12 +21,12 @@ class GroupController extends EntityAPIController {
    *   invoked, leaving room for buggy behavior should one try to load the
    *   newly created group's members in aforementioned hook.
    *
-   * To solve this without overriding EntityAPIController::save() and without
+   * To solve this without overriding EntityPlusController::save() and without
    * having to fiddle with either module or hook weight, we place the code here
    * because GroupController::invoke() is called right after the actual insert
    * and we are sure to have a group id already.
    *
-   * @see EntityAPIController::save()
+   * @see EntityPlusController::save()
    */
   public function invoke($hook, $group) {
     if ($hook == 'insert') {
@@ -46,7 +46,7 @@ class GroupController extends EntityAPIController {
       // without its field data available until the caches are cleared.
       //
       // For now, this is the approach we're taking seeing as the alternative is
-      // to copy over EntityAPIController::invoke() entirely, forcing us to keep
+      // to copy over EntityPlusController::invoke() entirely, forcing us to keep
       // track of the changes in that function until the world ends.
       cache_clear_all("field:group:$group->gid", 'cache_field');
     }
@@ -67,7 +67,7 @@ class GroupController extends EntityAPIController {
    * need to carefully monitor how this fares.
    *
    * @see group_entity_delete()
-   * @see EntityAPIController::delete()
+   * @see EntityPlusController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
     $mids = array();
@@ -128,7 +128,7 @@ class GroupController extends EntityAPIController {
   /**
    * Save a group.
    *
-   * @see EntityAPIController::save()
+   * @see EntityPlusController::save()
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $return = parent::save($entity, $transaction);
@@ -151,7 +151,7 @@ class GroupController extends EntityAPIController {
    * Create a group.
    *
    * We first set up the values that are specific to the group schema
-   * but then also run the EntityAPIController counterpart.
+   * but then also run the EntityPlusController counterpart.
    *
    * @param array $values
    *   An array of values to set, keyed by property name.

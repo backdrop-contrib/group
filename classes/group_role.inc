@@ -10,6 +10,44 @@
 class GroupRole extends Entity {
 
   /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
+    return isset($this->nid) ? $this->nid : NULL;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'group_role';
+  }
+
+  /**
+   * Implements EntityInterface::bundle().
+   */
+  public function bundle() {
+    return $this->type;
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return $this->title;
+  }
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => 'node/' . $this->nid,
+      'options' => array(),
+    );
+  }
+
+  /**
    * Invalidate the parent group type's GroupRole cache.
    *
    * GroupType entities keep an internal cache of associated GroupRole

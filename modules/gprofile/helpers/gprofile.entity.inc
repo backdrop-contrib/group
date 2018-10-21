@@ -15,10 +15,10 @@
  * @return array
  *   An array of GProfile entities, keyed by their profile ids.
  *
- * @see entity_load()
+ * @see entity_load_multiple()
  */
 function gprofile_load_multiple(array $pids = array(), $reset = FALSE) {
-  return entity_load('gprofile', $pids, array(), $reset);
+  return entity_load_multiple('gprofile', $pids, array(), $reset);
 }
 
 /**

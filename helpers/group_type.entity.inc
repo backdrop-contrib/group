@@ -60,10 +60,10 @@ function group_type_load($name) {
  * @return array
  *   An array of GroupType entities, keyed by their machine names.
  *
- * @see entity_load()
+ * @see entity_load_multiple()
  */
 function group_type_load_multiple(array $tids = array(), $reset = FALSE) {
-  return entity_load('group_type', $tids, array(), $reset);
+  return entity_load_multiple('group_type', $tids, array(), $reset);
 }
 
 /**

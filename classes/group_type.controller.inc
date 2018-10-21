@@ -7,12 +7,12 @@
 /**
  * Controller for group type entities.
  */
-class GroupTypeController extends EntityAPIControllerExportable {
+class GroupTypeController extends EntityPlusControllerExportable {
 
   /**
    * Delete a group type.
    *
-   * @see EntityAPIController::delete()
+   * @see EntityPlusController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
     $gids = array();
@@ -63,7 +63,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
   /**
    * Save a group type.
    *
-   * @see EntityAPIController::save()
+   * @see EntityPlusController::save()
    */
   public function save($group_type, DatabaseTransaction $transaction = NULL) {
     // When we are dealing with an imported Group Type, we need to take care
@@ -99,7 +99,7 @@ class GroupTypeController extends EntityAPIControllerExportable {
    * Create a group type.
    *
    * We first set up the values that are specific to the group type schema
-   * but then also run the EntityAPIControllerExportable counterpart.
+   * but then also run the EntityPlusControllerExportable counterpart.
    *
    * @param array $values
    *   An array of values to set, keyed by property name.

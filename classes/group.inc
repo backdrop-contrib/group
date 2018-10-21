@@ -10,6 +10,44 @@
 class Group extends Entity {
 
   /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
+    return isset($this->nid) ? $this->nid : NULL;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'group';
+  }
+
+  /**
+   * Implements EntityInterface::bundle().
+   */
+  public function bundle() {
+    return $this->type;
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return $this->title;
+  }
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => 'node/' . $this->nid,
+      'options' => array(),
+    );
+  }
+
+  /**
    * Cache of entities.
    *
    * @var array
@@ -151,7 +189,7 @@ class Group extends Entity {
       // Actually load the retrieved entities.
       foreach ($entities['full'] as $type => $bundles) {
         foreach ($bundles as $bundle => $ids) {
-          $entities['full'][$type][$bundle] = entity_load($type, $ids);
+          $entities['full'][$type][$bundle] = entity_load_multiple($type, $ids);
 
           // We run the entity_load() result through array_values() to prevent
           // people from making the false assumption that we still return the

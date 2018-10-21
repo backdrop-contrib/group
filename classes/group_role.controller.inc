@@ -7,12 +7,12 @@
 /**
  * Controller for group role entities.
  */
-class GroupRoleController extends EntityAPIControllerExportable {
+class GroupRoleController extends EntityPlusControllerExportable {
 
   /**
    * Delete a group role.
    *
-   * @see EntityAPIController::delete()
+   * @see EntityPlusController::delete()
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
     if (!empty($ids)) {
@@ -36,7 +36,7 @@ class GroupRoleController extends EntityAPIControllerExportable {
   /**
    * Save a group role.
    *
-   * @see EntityAPIController::save()
+   * @see EntityPlusController::save()
    */
   public function save($group_role, DatabaseTransaction $transaction = NULL) {
     $is_new = !empty($group_role->is_new);
@@ -81,7 +81,7 @@ class GroupRoleController extends EntityAPIControllerExportable {
    * Create a group role.
    *
    * We first set up the values that are specific to the group role schema
-   * but then also run the EntityAPIControllerExportable counterpart.
+   * but then also run the EntityPlusControllerExportable counterpart.
    *
    * @param array $values
    *   An array of values to set, keyed by property name.

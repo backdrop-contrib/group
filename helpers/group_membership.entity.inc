@@ -15,10 +15,10 @@
  * @return array
  *   An array of GroupMembership entities, keyed by their membership ids.
  *
- * @see entity_load()
+ * @see entity_load_multiple()
  */
 function group_membership_load_multiple(array $mids = array(), $reset = FALSE) {
-  return entity_load('group_membership', $mids, array(), $reset);
+  return entity_load_multiple('group_membership', $mids, array(), $reset);
 }
 
 /**
@@ -32,7 +32,7 @@ function group_membership_load_multiple(array $mids = array(), $reset = FALSE) {
  *   An array of GroupMembership entities, keyed by their membership ids.
  */
 function group_memberships(array $filters = array()) {
-  return entity_load('group_membership', FALSE, $filters, FALSE);
+  return entity_load_multiple('group_membership', FALSE, $filters, FALSE);
 }
 
 /**

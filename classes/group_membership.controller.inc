@@ -7,7 +7,7 @@
 /**
  * Controller for group membership entities.
  */
-class GroupMembershipController extends EntityAPIController {
+class GroupMembershipController extends EntityPlusController {
 
   /**
    * Add group roles to group memberships upon loading.
@@ -50,12 +50,12 @@ class GroupMembershipController extends EntityAPIController {
    *   the recently saved entity again (it gets removed from the cache upon
    *   being saved to the database).
    *
-   * To solve this without overriding EntityAPIController::save() and without
+   * To solve this without overriding EntityPlusController::save() and without
    * having to fiddle with either module or hook weight, we place the code here
    * because GroupMembershipController::invoke() is called right after the
    * actual insert or update and we are sure to have a membership id already.
    *
-   * @see EntityAPIController::save()
+   * @see EntityPlusController::save()
    * @see GroupMembershipController::save()
    */
   public function invoke($hook, $group_membership) {
@@ -147,7 +147,7 @@ class GroupMembershipController extends EntityAPIController {
    * Create a group membership.
    *
    * We first set up the values that are specific to the group schema
-   * but then also run the EntityAPIController counterpart.
+   * but then also run the EntityPlusController counterpart.
    *
    * @param array $values
    *   An array of values to set, keyed by property name.

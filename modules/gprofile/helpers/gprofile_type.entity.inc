@@ -60,10 +60,10 @@ function gprofile_type_load($name) {
  * @return array
  *   An array of GProfileType entities, keyed by their machine names.
  *
- * @see entity_load()
+ * @see entity_load_multiple()
  */
 function gprofile_type_load_multiple(array $tids = array(), $reset = FALSE) {
-  return entity_load('gprofile_type', $tids, array(), $reset);
+  return entity_load_multiple('gprofile_type', $tids, array(), $reset);
 }
 
 /**
