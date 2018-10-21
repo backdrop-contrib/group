@@ -174,7 +174,6 @@ class GroupRoleUIController extends EntityDefaultUIController {
     if (isset($result['group_role'])) {
       $group_roles = group_roles(array_keys($result['group_role']));
 
-    dpm($group_roles);
       foreach ($group_roles as $name => $group_role) {
         $row = $this->roleTableRow($name, $group_role);
         $rows[$name] = $row;
@@ -374,7 +373,6 @@ class GroupRoleUIController extends EntityDefaultUIController {
       }
     }
 
-    dpm($row);
     return $row;
   }
 }
