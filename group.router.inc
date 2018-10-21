@@ -84,7 +84,7 @@ function _group_add_access() {
  * @see GroupTypeUiController::hook_menu()
  */
 function group_type_add_role_access(GroupType $group_type) {
-  return user_access('configure group module') && !entity_has_status('group_type', $group_type, ENTITY_FIXED);
+  return user_access('configure group module') && !entity_plus_has_status('group_type', $group_type, ENTITY_FIXED);
 }
 
 /**

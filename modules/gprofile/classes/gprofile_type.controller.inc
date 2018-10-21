@@ -25,7 +25,7 @@ class GProfileTypeController extends EntityAPIControllerExportable {
       // default it came from is no longer available. In any other case, we
       // are dealing with a revert or a manual deletion which will only result
       // in the entity being rebuilt upon next cache clear.
-      $entity_in_code = entity_has_status('gprofile_type', $gprofile_type, ENTITY_IN_CODE);
+      $entity_in_code = entity_plus_has_status('gprofile_type', $gprofile_type, ENTITY_IN_CODE);
       $entity_rebuilt = !empty($gprofile_type->is_rebuild);
 
       // Set this on the group type so other modules can use it.

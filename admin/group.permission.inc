@@ -131,14 +131,14 @@ function group_permission_form($form, &$form_state, GroupType $group_type = NULL
   $all_disabled = TRUE;
 
   foreach ($group_roles as $rname => $group_role) {
-    $role_fixed = entity_has_status('group_role', $group_role, ENTITY_FIXED);
+    $role_fixed = entity_plus_has_status('group_role', $group_role, ENTITY_FIXED);
 
     // Check whether this role should be disabled. This is the case for either
     // fixed global roles, local roles that belong to a fixed group type or
     // global roles displayed on the group type permissions overview.
     $disabled = $group_role->global && ($type_page || $role_fixed);
     if (!empty($group_role->type) && $group_type = group_type_load($group_role->type)) {
-      $disabled = $disabled || entity_has_status('group_type', $group_type, ENTITY_FIXED);
+      $disabled = $disabled || entity_plus_has_status('group_type', $group_type, ENTITY_FIXED);
     }
 
     // Add this role's disabled status to the tracker.

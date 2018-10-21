@@ -8,7 +8,7 @@
  * Generates the group member profile type editing form.
  */
 function gprofile_type_form($form, &$form_state, GProfileType $gprofile_type, $op = 'edit') {
-  $locked = entity_has_status('gprofile_type', $gprofile_type, ENTITY_IN_CODE);
+  $locked = entity_plus_has_status('gprofile_type', $gprofile_type, ENTITY_IN_CODE);
 
   if ($op == 'clone') {
     $gprofile_type->label .= ' (cloned)';

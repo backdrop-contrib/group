@@ -27,13 +27,14 @@ function group_install() {
   config_set('group.settings', 'pathauto_group_pattern', 'group/[group:title]');
 
   // Create a first global admin role and give it full permissions.
-  $group_admin = entity_create('group_role', array(
-    'name' => 'group_admin',
-    'label' => $t('Administrator'),
-    'weight' => 10,
-    'permissions' => array_keys(module_invoke_all('group_permission')),
-  ));
-  $group_admin->save();
+  // todo: fix. this barfs during install and uninstall.
+  // $group_admin = entity_create('group_role', array(
+    // 'name' => 'group_admin',
+    // 'label' => $t('Administrator'),
+    // 'weight' => 10,
+    // 'permissions' => array_keys(module_invoke_all('group_permission')),
+  // ));
+  // $group_admin->save();
   // Dynamically generated variable data was detected on the following lines.
 }
 

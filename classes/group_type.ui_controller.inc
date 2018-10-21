@@ -116,7 +116,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
     foreach ($form_state['values']['weights'] as $name => $weight) {
       $group_type = group_type_load($name);
 
-      if (entity_has_status('group_type', $group_type, ENTITY_FIXED)) {
+      if (entity_plus_has_status('group_type', $group_type, ENTITY_FIXED)) {
         continue;
       }
 
@@ -244,7 +244,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
    */
   protected function typeTableRow($name, GroupType $group_type) {
     // Check if the group type is ENTITY_FIXED.
-    $type_fixed = entity_has_status('group_type', $group_type, ENTITY_FIXED);
+    $type_fixed = entity_plus_has_status('group_type', $group_type, ENTITY_FIXED);
 
     // Create the row container array.
     $row = array(
@@ -316,7 +316,7 @@ class GroupTypeUIController extends EntityDefaultUIController {
     // Add the delete/revert action.
     else {
       // Show revert action for overridden roles.
-      if (entity_has_status('group_type', $group_type, ENTITY_OVERRIDDEN)) {
+      if (entity_plus_has_status('group_type', $group_type, ENTITY_OVERRIDDEN)) {
         $what = t('revert');
         $path = "$this->path/manage/$name/revert";
       }

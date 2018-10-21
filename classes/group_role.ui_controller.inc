@@ -81,7 +81,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
       $this->global_ui = FALSE;
 
       // Whether the parent group type is fixed.
-      if (entity_has_status('group_type', $group_type, ENTITY_FIXED)) {
+      if (entity_plus_has_status('group_type', $group_type, ENTITY_FIXED)) {
         $this->type_fixed = TRUE;
       }
 
@@ -131,7 +131,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
     foreach ($form_state['values']['weights'] as $name => $weight) {
       $group_role = group_role_load($name);
 
-      if (entity_has_status('group_role', $group_role, ENTITY_FIXED)) {
+      if (entity_plus_has_status('group_role', $group_role, ENTITY_FIXED)) {
         continue;
       }
 
@@ -174,6 +174,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
     if (isset($result['group_role'])) {
       $group_roles = group_roles(array_keys($result['group_role']));
 
+    dpm($group_roles);
       foreach ($group_roles as $name => $group_role) {
         $row = $this->roleTableRow($name, $group_role);
         $rows[$name] = $row;
@@ -277,7 +278,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
    */
   protected function roleTableRow($name, GroupRole $group_role) {
     // Check if the group role is ENTITY_FIXED.
-    $role_fixed = entity_has_status('group_role', $group_role, ENTITY_FIXED);
+    $role_fixed = entity_plus_has_status('group_role', $group_role, ENTITY_FIXED);
 
     // Create the row container array.
     $row = array(
@@ -343,7 +344,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
 
       // Add the delete/revert action if available.
       if (in_array('delete', $ops)) {
-        $overridden = entity_has_status('group_role', $group_role, ENTITY_OVERRIDDEN);
+        $overridden = entity_plus_has_status('group_role', $group_role, ENTITY_OVERRIDDEN);
 
         // Don't show action for fixed or default roles.
         if ($role_fixed || $group_role->status == ENTITY_IN_CODE) {
@@ -373,6 +374,7 @@ class GroupRoleUIController extends EntityDefaultUIController {
       }
     }
 
+    dpm($row);
     return $row;
   }
 }

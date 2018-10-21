@@ -8,7 +8,7 @@
  * Generates the group type editing form.
  */
 function group_type_form($form, &$form_state, GroupType $group_type, $op = 'edit') {
-  $locked = entity_has_status('group_type', $group_type, ENTITY_IN_CODE);
+  $locked = entity_plus_has_status('group_type', $group_type, ENTITY_IN_CODE);
 
   if ($op == 'clone') {
     $group_type->label .= ' (cloned)';

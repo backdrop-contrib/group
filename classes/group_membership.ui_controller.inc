@@ -300,7 +300,7 @@ class GroupMembershipUIController extends EntityDefaultUIController {
       // Add the delete/revert action.
       else {
         // Show revert action for overridden roles.
-        if (entity_has_status('group_type', $profile, ENTITY_OVERRIDDEN)) {
+        if (entity_plus_has_status('group_type', $profile, ENTITY_OVERRIDDEN)) {
           $what = t('revert');
           $path = $profile['path'] . '/revert';
         }

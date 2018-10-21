@@ -21,7 +21,7 @@ function group_type_add_role_form(GroupType $group_type) {
  * Generates the group role editing form.
  */
 function group_role_form($form, &$form_state, GroupRole $group_role, $op = 'edit') {
-  $locked = entity_has_status('group_role', $group_role, ENTITY_IN_CODE);
+  $locked = entity_plus_has_status('group_role', $group_role, ENTITY_IN_CODE);
 
   if ($op == 'clone') {
     $group_role->label .= ' (cloned)';
